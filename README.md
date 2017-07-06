@@ -5,8 +5,8 @@
  
 ## Example
 
-An auxiliary `collapse()`, which merges series of adjacent elements is written 
-with JAYield as in the following example:
+An auxiliary `collapse()` method, which merges series of adjacent elements is written 
+with JAYield in the following way:
 
 ```java
 static <U> Traversable<U> collapse(Series<U> src) {
