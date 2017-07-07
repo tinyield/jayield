@@ -1,7 +1,10 @@
 # JAYield
 
- A minimalistic extensible lazy sequence implementation interoperable with Java
- `Stream`, which provides an idiomatic `yield` like generator.
+[![Build](https://sonarcloud.io/api/badges/gate?key=com.github.jayield%3Ajayield)](https://sonarcloud.io/dashboard?id=com.github.jayield%3Ajayield)
+[![Coverage](https://sonarcloud.io/api/badges/measure?key=com.github.jayield%3Ajayield&metric=coverage)](https://sonarcloud.io/component_measures/domain/Coverage?id=com.github.jayield%3Ajayield)
+
+A minimalistic extensible lazy sequence implementation interoperable with Java
+`Stream`, which provides an idiomatic `yield` like generator.
  
 ## Example
 
