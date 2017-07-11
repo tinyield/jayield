@@ -34,7 +34,7 @@
     <scm>
         <connection>scm:git:git@github.com:jayield/jayield.git</connection>
         <developerConnection>scm:git:git@github.com:jayield/jayield.git</developerConnection>
-        <url>git@github.com:jayield/jayield.git</url>
+        <url>https://github.com/jayield/jayield.git</url>
         <tag>HEAD</tag>
     </scm>
     <distributionManagement>
