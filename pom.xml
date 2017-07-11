@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.github.jayield</groupId>
     <artifactId>jayield</artifactId>
-    <version>1.0.0-SNAPSHOT</version>
+    <version>0.1.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>
         JAYield - Java library implementation of yield, providing an idiomatic
@@ -18,8 +18,9 @@
     <url>https://github.com/jayield/jayield</url>
     <licenses>
         <license>
-            <name>MIT license</name>
-            <url>https://opensource.org/licenses/MIT</url>
+            <name>Apache License, Version 2.0</name>
+            <url>https://www.apache.org/licenses/LICENSE-2.0</url>
+            <distribution>repo</distribution>
         </license>
     </licenses>
     <developers>

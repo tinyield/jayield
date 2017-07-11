@@ -46,3 +46,25 @@ IEnumerable <T> Collapse <T>( this IEnumerable <T> src) {
     }
 }
 ```
+
+
+## Installation
+
+In order to include it to your Maven project, simply add this dependency:
+
+```xml
+<dependency>
+    <groupId>com.github.jayield</groupId>
+    <artifactId>jayield</artifactId>
+    <version>0.1.0</version>
+</dependency>
+```
+
+You can also download the artifact directly from [Maven
+Central Repository](http://repo1.maven.org/maven2/com/github/jayield/jayield/)
+
+
+## License
+
+This project is licensed under [Apache License,
+version 2.0](https://www.apache.org/licenses/LICENSE-2.0)
