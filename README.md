@@ -2,6 +2,7 @@
 
 [![Build](https://sonarcloud.io/api/badges/gate?key=com.github.jayield%3Ajayield)](https://sonarcloud.io/dashboard?id=com.github.jayield%3Ajayield)
 [![Coverage](https://sonarcloud.io/api/badges/measure?key=com.github.jayield%3Ajayield&metric=coverage)](https://sonarcloud.io/component_measures/domain/Coverage?id=com.github.jayield%3Ajayield)
+[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.jayield/jayield/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.jayield/jayield)
 
 A minimalistic extensible lazy sequence implementation interoperable with Java
 `Stream`, which provides an idiomatic `yield` like generator.
