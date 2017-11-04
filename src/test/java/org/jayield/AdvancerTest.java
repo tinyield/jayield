@@ -18,11 +18,13 @@ package org.jayield;
 
 import org.testng.annotations.Test;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import static java.util.Arrays.asList;
+import static org.testng.Assert.*;
 
 /**
  * @author Miguel Gamboa
@@ -98,6 +100,34 @@ public class AdvancerTest {
         for (int i = 0; i < expected.length; i++) {
             assertEquals(sup.get().skip(i).findFirst().get(), expected[i]);
         }
+    }
+
+    @Test
+    public void testIndividuallyPeek() {
+        String [] expected = {"a", "x", "v", "d", "g", "j", "y", "r", "w", "e"};
+        String [] arrange =
+                {"a", "x", "v", "d","g", "x", "j", "x", "y","r", "y", "w", "y", "a", "e"};
+        Supplier<Series<String>> sup = () -> Series.of(arrange).distinct();
+        List<String> actual;
+        for (int i = 0; i < expected.length; i++) {
+            actual= new ArrayList<>();
+            assertEquals(sup.get().skip(i).peek(actual::add).findFirst().get(), expected[i]);
+            assertEquals(actual.get(0), expected[i]);
+        }
+    }
+
+    @Test
+    public void testIndividuallyTakeWhile() {
+        String [] arrange = {"a", "x", "v"};
+        List<String> actual= new ArrayList<>();
+        Series<String> series = Series.of(arrange);
+        long count = series.takeWhile(item -> actual.size() < 1)
+                .peek(actual::add)
+                .count();
+        assertEquals(count, 1);
+        assertEquals(actual.size(), 1);
+        assertFalse(actual.containsAll(asList("a", "x", "v")));
+        assertEquals(actual.get(0), "a");
     }
 
 }
