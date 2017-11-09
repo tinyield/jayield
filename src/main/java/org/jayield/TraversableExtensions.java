@@ -19,7 +19,11 @@ package org.jayield;
 import org.jayield.boxes.IntBox;
 
 import java.util.HashSet;
-import java.util.function.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.ToIntFunction;
+import java.util.function.UnaryOperator;
 
 /**
  * @author Miguel Gamboa

@@ -19,6 +19,7 @@ package org.jayield;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
@@ -104,24 +105,24 @@ public class AdvancerTest {
 
     @Test
     public void testIndividuallyPeek() {
-        String [] expected = {"a", "x", "v", "d", "g", "j", "y", "r", "w", "e"};
-        String [] arrange =
-                {"a", "x", "v", "d","g", "x", "j", "x", "y","r", "y", "w", "y", "a", "e"};
-        Supplier<Series<String>> sup = () -> Series.of(arrange).distinct();
-        List<String> actual;
-        for (int i = 0; i < expected.length; i++) {
-            actual= new ArrayList<>();
-            assertEquals(sup.get().skip(i).peek(actual::add).findFirst().get(), expected[i]);
-            assertEquals(actual.get(0), expected[i]);
-        }
+        Integer [] arrange = {1, 2, 3};
+        List<Integer> actual = new ArrayList<>();
+        int value = Series.of(arrange)
+                .peek(item -> actual.add(item * 2))
+                .findFirst()
+                .get();
+        assertEquals(value, 1);
+        assertEquals(actual.size(), 1);
+        assertEquals(actual.get(0).intValue(), 2);
     }
 
     @Test
-    public void testIndividuallyTakeWhile() {
+    public void testIndividuallyTakeWhileCount() {
         String [] arrange = {"a", "x", "v"};
+        List<String> helper = Arrays.asList(arrange);
         List<String> actual= new ArrayList<>();
         Series<String> series = Series.of(arrange);
-        long count = series.takeWhile(item -> actual.size() < 1)
+        long count = series.takeWhile(item -> helper.indexOf(item) % 2 == 0)
                 .peek(actual::add)
                 .count();
         assertEquals(count, 1);

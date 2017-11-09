@@ -19,13 +19,15 @@ package org.jayield;
 import org.jayield.boxes.BoolBox;
 import org.jayield.boxes.Box;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.*;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Predicate;
+import java.util.function.ToIntFunction;
+import java.util.function.UnaryOperator;
 
 /**
  * @author Miguel Gamboa

@@ -148,7 +148,7 @@ public class TraversableTest {
 
 
     @Test
-    public void testBulkPeek() {
+    public void testBulkPeekCount() {
         Integer[] arrange = {1, 2, 3};
         List<Integer> actual = new ArrayList<>();
         long count = Series.of(arrange)
