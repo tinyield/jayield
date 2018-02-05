@@ -19,12 +19,11 @@ package org.jayield;
 import org.jayield.boxes.BoolBox;
 import org.jayield.boxes.Box;
 
-import java.lang.reflect.Array;
 import java.util.ArrayList;
 import java.util.Comparator;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
@@ -169,5 +168,15 @@ public class Series<T> {
         Counter c = new Counter();
         this.traverse(c);
         return c.n;
+    }
+
+    public Series<T> peek(Consumer<T> action) {
+        Advancer<T> a = AdvancerExtensions.peek(this, action);
+        Traversable<T> t = TraversableExtensions.peek(this, action);
+        return new Series<>(t, a);
+    }
+
+    public Series<T> takeWhile(Predicate<T> predicate) {
+        return advanceWith(src -> AdvancerExtensions.takeWhile(this, predicate));
     }
 }

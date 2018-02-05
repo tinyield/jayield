@@ -18,9 +18,10 @@ package org.jayield;
 
 import org.testng.annotations.Test;
 
-import java.util.function.Function;
-import java.util.function.ToIntFunction;
+import java.util.ArrayList;
+import java.util.List;
 
+import static java.util.Arrays.asList;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertTrue;
 
@@ -143,5 +144,18 @@ public class TraversableTest {
                 .max(Integer::compare)
                 .get();
         assertEquals(13, actual);
+    }
+
+
+    @Test
+    public void testBulkPeekCount() {
+        Integer[] arrange = {1, 2, 3};
+        List<Integer> actual = new ArrayList<>();
+        long count = Series.of(arrange)
+                .peek(item -> actual.add(item * 2))
+                .count();
+        assertEquals(count, 3);
+        assertEquals(actual.size(), 3);
+        assertTrue(actual.containsAll(asList(2,4,6)));
     }
 }

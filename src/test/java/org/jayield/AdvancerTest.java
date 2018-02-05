@@ -18,11 +18,14 @@ package org.jayield;
 
 import org.testng.annotations.Test;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertTrue;
+import static java.util.Arrays.asList;
+import static org.testng.Assert.*;
 
 /**
  * @author Miguel Gamboa
@@ -98,6 +101,34 @@ public class AdvancerTest {
         for (int i = 0; i < expected.length; i++) {
             assertEquals(sup.get().skip(i).findFirst().get(), expected[i]);
         }
+    }
+
+    @Test
+    public void testIndividuallyPeek() {
+        Integer [] arrange = {1, 2, 3};
+        List<Integer> actual = new ArrayList<>();
+        int value = Series.of(arrange)
+                .peek(item -> actual.add(item * 2))
+                .findFirst()
+                .get();
+        assertEquals(value, 1);
+        assertEquals(actual.size(), 1);
+        assertEquals(actual.get(0).intValue(), 2);
+    }
+
+    @Test
+    public void testIndividuallyTakeWhileCount() {
+        String [] arrange = {"a", "x", "v"};
+        List<String> helper = Arrays.asList(arrange);
+        List<String> actual= new ArrayList<>();
+        Series<String> series = Series.of(arrange);
+        long count = series.takeWhile(item -> helper.indexOf(item) % 2 == 0)
+                .peek(actual::add)
+                .count();
+        assertEquals(count, 1);
+        assertEquals(actual.size(), 1);
+        assertFalse(actual.containsAll(asList("a", "x", "v")));
+        assertEquals(actual.get(0), "a");
     }
 
 }

@@ -19,6 +19,7 @@ package org.jayield;
 import org.jayield.boxes.IntBox;
 
 import java.util.HashSet;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
@@ -81,4 +82,10 @@ public class TraversableExtensions {
         };
     }
 
+    public static <T> Traversable<T> peek(Series<T> source, Consumer<T> action) {
+        return yield -> source.traverse(item -> {
+            action.accept(item);
+            yield.ret(item);
+        });
+    }
 }

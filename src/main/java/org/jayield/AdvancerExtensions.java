@@ -21,6 +21,7 @@ import org.jayield.boxes.Box;
 import org.jayield.boxes.IntBox;
 
 import java.util.HashSet;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
@@ -116,6 +117,30 @@ public class AdvancerExtensions {
                 }
             }));
             return found.isTrue();
+        };
+    }
+
+    public static <T>  Advancer<T> peek(Series<T> source, Consumer<T> action) {
+        return yield -> {
+            Yield<T> peek = item -> {
+                action.accept(item);
+                yield.ret(item);
+            };
+            return source.tryAdvance(peek);
+        };
+    }
+
+    public static <T>  Advancer<T> takeWhile(Series<T> source, Predicate<T> predicate) {
+        final BoolBox passed = new BoolBox();
+        return yield -> {
+            passed.reset();
+            Yield<T> takeWhile = item -> {
+                if(predicate.test(item)){
+                    passed.set();
+                    yield.ret(item);
+                }
+            };
+            return source.tryAdvance(takeWhile) && passed.isTrue();
         };
     }
 }
