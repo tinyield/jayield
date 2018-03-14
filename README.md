@@ -13,7 +13,7 @@ An auxiliary `collapse()` method, which merges series of adjacent elements is wr
 with JAYield in the following way:
 
 ```java
-static <U> Traversable<U> collapse(Series<U> src) {
+static <U> Traversable<U> collapse(Traversable<U> src) {
     return yield -> {
         final Object[] prev = {null};
         src.traverse(item -> {
@@ -28,9 +28,11 @@ This method can be chained in a query like this:
 
 ```java
 Integer[] arrange = {7, 7, 8, 9, 9, 11, 11, 7};
-Object[] actual = Series
+Object[] actual = Traversable
                     .of(arrange)
-                    .traverseWith(n -> collapse(n))
+                    .then(n -> collapse(n))
+                    .filter(n -> n%2 != 0)
+                    .map(Object::toString)
                     .toArray();
 ```
 
