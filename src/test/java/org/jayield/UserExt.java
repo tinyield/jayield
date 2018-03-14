@@ -21,7 +21,7 @@ package org.jayield;
  *         created on 06-07-2017
  */
 public class UserExt {
-    static <U> Traversable<U> collapse(Series<U> src) {
+    static <U> Traversable<U> collapse(Traversable<U> src) {
         return yield -> {
             final Object[] prev = {null};
             src.traverse(item -> {

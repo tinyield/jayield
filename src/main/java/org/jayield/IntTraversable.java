@@ -16,10 +16,36 @@
 
 package org.jayield;
 
+import org.jayield.boxes.IntBox;
+
+import java.util.OptionalInt;
+
 /**
  * @author Miguel Gamboa
  *         created on 03-07-2017
  */
-public interface IntTraversable {
+public interface IntTraversable extends Traversable<Integer> {
+
     void traverse(IntYield yield);
+
+    default public void traverse(Yield<Integer> yield) {
+        IntYield iy = yield::ret;
+        this.traverse(iy);
+    }
+
+    default public IntAdvancer intAdvancer() {
+        throw new UnsupportedOperationException();
+    }
+
+    default OptionalInt max(){
+        IntBox b = new IntBox();
+        IntYield iy =  e -> {
+            if(!b.isPresent()) b.turnPresent(e);
+            else if(e > b.getValue()) b.setValue(e);
+        };
+        this.traverse(iy);
+        return b.isPresent()
+                ? OptionalInt.of(b.getValue())
+                : OptionalInt.empty();
+    }
 }
