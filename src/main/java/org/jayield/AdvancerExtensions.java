@@ -32,7 +32,8 @@ import java.util.function.UnaryOperator;
  *         created on 06-07-2017
  */
 public class AdvancerExtensions {
-    static <T> Advancer<T> iterate(T seed, UnaryOperator<T> f) {
+
+    public static <T> Advancer<T> iterate(T seed, UnaryOperator<T> f) {
         Box<T> box = new Box<>(seed, f);
         return yield -> {
             yield.ret(box.getValue());
@@ -41,7 +42,7 @@ public class AdvancerExtensions {
         };
     }
 
-    static <T> Advancer<T> of(T...data) {
+    public static <T> Advancer<T> of(T...data) {
         IntBox index = new IntBox(-1);
         return yield -> {
             int i;
@@ -50,32 +51,32 @@ public class AdvancerExtensions {
         };
     }
 
-    static <T, R> Advancer<R> map(Series<T> source, Function<T, R> mapper) {
+    public static <T, R> Advancer<R> map(Advancer<T> source, Function<T, R> mapper) {
         return yield -> {
             return source.tryAdvance(item -> yield.ret(mapper.apply(item)));
         };
     }
 
-    static <T> IntAdvancer mapToInt(Series<T> source, ToIntFunction<T> mapper) {
+    public static <T> IntAdvancer mapToInt(Advancer<T> source, ToIntFunction<T> mapper) {
         return yield -> {
             return source.tryAdvance(item -> yield.ret(mapper.applyAsInt(item)));
         };
     }
 
-    static <T, R> Advancer<R> flatMap(
-            Series<T> source, Function<T, Series<R>> mapper)
+    public static <T, R> Advancer<R> flatMap(
+            Advancer<T> source, Function<T, Traversable<R>> mapper)
     {
-        final Box<Series<R>> curr = new Box<>(Series.<R>empty());
+        final Box<Advancer<R>> curr = new Box<>(Advancer.<R>empty());
         return yield -> {
             while (!curr.getValue().tryAdvance(yield)) {
-                if(!source.tryAdvance((t) -> curr.setValue(mapper.apply(t))))
+                if(!source.tryAdvance((t) -> curr.setValue(mapper.apply(t).advancer())))
                     return false;
             }
             return true;
         };
     }
 
-    static <T> Advancer<T> filter(Series<T> source, Predicate<T> p) {
+    public static <T> Advancer<T> filter(Advancer<T> source, Predicate<T> p) {
         return yield -> {
             BoolBox found = new BoolBox();
             while(found.isFalse()) {
@@ -91,7 +92,7 @@ public class AdvancerExtensions {
         };
     }
 
-    static <T> Advancer<T> skip(Series<T> source, int n) {
+    public static <T> Advancer<T> skip(Advancer<T> source, int n) {
         IntBox index = new IntBox(0);
         return yield -> {
             for (; index.getValue() < n; index.inc())
@@ -100,12 +101,12 @@ public class AdvancerExtensions {
         };
     }
 
-    static <T> Advancer<T> limit(Series source, int n) {
+    public static <T> Advancer<T> limit(Advancer<T> source, int n) {
         IntBox index = new IntBox(-1);
         return yield -> index.inc() < n ? source.tryAdvance(yield) : false;
     }
 
-    static <T> Advancer<T> distinct(Series<T> source) {
+    public static <T> Advancer<T> distinct(Advancer<T> source) {
         final HashSet<T> mem = new HashSet<>();
         final BoolBox found = new BoolBox();
         return yield -> {
@@ -120,7 +121,7 @@ public class AdvancerExtensions {
         };
     }
 
-    public static <T>  Advancer<T> peek(Series<T> source, Consumer<T> action) {
+    public static <T>  Advancer<T> peek(Advancer<T> source, Consumer<T> action) {
         return yield -> {
             Yield<T> peek = item -> {
                 action.accept(item);
@@ -130,7 +131,7 @@ public class AdvancerExtensions {
         };
     }
 
-    public static <T>  Advancer<T> takeWhile(Series<T> source, Predicate<T> predicate) {
+    public static <T>  Advancer<T> takeWhile(Advancer<T> source, Predicate<T> predicate) {
         final BoolBox passed = new BoolBox();
         return yield -> {
             passed.reset();

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Fernando Miguel Carvalho, mcarvalho@cc.isel.ipl.pt
+ * Copyright (c) 2018, Fernando Miguel Carvalho, mcarvalho@cc.isel.ipl.pt
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,14 +18,10 @@ package org.jayield;
 
 /**
  * @author Miguel Gamboa
- *         created on 03-07-2017
+ *         created on 06-02-2018
  */
-public interface IntAdvancer extends Advancer<Integer> {
-
-    boolean tryAdvance(IntYield yield);
-
-    default boolean tryAdvance(Yield<Integer> yield) {
-        IntYield iy = yield::ret;
-        return this.tryAdvance(iy);
+public class TraversableFinishError extends Error{
+    public TraversableFinishError() {
+        super("Auxiliary exception finishes traversal!", null, false, false);
     }
 }

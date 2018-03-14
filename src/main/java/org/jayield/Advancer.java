@@ -16,6 +16,9 @@
 
 package org.jayield;
 
+import java.util.Iterator;
+import java.util.function.Function;
+
 /**
  * Move elements individually.
  *
@@ -23,5 +26,20 @@ package org.jayield;
  *         created on 04-06-2017
  */
 public interface Advancer<T> {
+
+    static final Advancer EMPTY = yield -> false;
+
+    public static <U> Advancer<U> empty() {
+        return EMPTY;
+    }
+
     boolean tryAdvance(Yield<T> yield);
+
+    default <R> Advancer<R> then(Function<Advancer<T>, Advancer<R>> next) {
+        return next.apply(this);
+    }
+
+    default Iterator<T> iterator() {
+        return new AdvancerIterator<>(this);
+    }
 }
