@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Fernando Miguel Carvalho, mcarvalho@cc.isel.ipl.pt
+ * Copyright (c) 2018, Fernando Miguel Carvalho, mcarvalho@cc.isel.ipl.pt
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,20 +16,6 @@
 
 package org.jayield;
 
-import java.util.function.Consumer;
-
-/**
- * @author Miguel Gamboa
- *         created on 06-07-2017
- */
-public class UserExt {
-    static <U> Traverse<U> collapse(Traversable<U> src) {
-        return yield -> {
-            final Object[] prev = {null};
-            src.traverse(item -> {
-                if (prev[0] == null || !prev[0].equals(item))
-                    yield.ret((U) (prev[0] = item));
-            });
-        };
-    }
+public interface Traverse<T> {
+    void forEach(Yield<T> yield);
 }

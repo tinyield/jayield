@@ -42,19 +42,19 @@ import java.util.function.UnaryOperator;
  */
 public class Traversable<T> {
 
-    private final Consumer<Yield<T>> traverse;
+    private final Traverse<T> traverse;
 
-    public Traversable(Consumer<Yield<T>> traverse) {
+    public Traversable(Traverse<T> traverse) {
         this.traverse = traverse;
     }
 
     public final void traverse(Yield<T> yield) {
-        this.traverse.accept(yield);
+        this.traverse.forEach(yield);
     }
 
     public final void shortCircuit(Yield<T> yield) {
         try{
-            this.traverse.accept(yield);
+            this.traverse.forEach(yield);
         }catch(TraversableFinishError e){
             /* Proceed */
         }
@@ -158,7 +158,7 @@ public class Traversable<T> {
         });
     }
 
-    public final <R> Traversable<R> then(Function<Traversable<T>, Consumer<Yield<R>>> next) {
+    public final <R> Traversable<R> then(Function<Traversable<T>, Traverse<R>> next) {
         return new Traversable<>(next.apply(this));
     }
 
