@@ -18,20 +18,11 @@ package org.jayield;
 
 import org.jayield.boxes.BoolBox;
 import org.jayield.boxes.Box;
-import org.jayield.operations.TraversableDistinct;
-import org.jayield.operations.TraversableFilter;
-import org.jayield.operations.TraversableFlatMap;
-import org.jayield.operations.TraversableIterate;
-import org.jayield.operations.TraversableLimit;
-import org.jayield.operations.TraversableMap;
 import org.jayield.operations.TraversableMapToInt;
-import org.jayield.operations.TraversableOf;
-import org.jayield.operations.TraversablePeek;
-import org.jayield.operations.TraversableSkip;
-import org.jayield.operations.TraversableTakeWhile;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
@@ -49,80 +40,135 @@ import java.util.function.UnaryOperator;
  * @author Miguel Gamboa
  *         created on 04-06-2017
  */
-public interface Traversable<T> {
-    void traverse(Yield<T> yield);
+public class Traversable<T> {
 
-    default void shortCircuit(Yield<T> yield) {
+    private final Consumer<Yield<T>> traverse;
+
+    public Traversable(Consumer<Yield<T>> traverse) {
+        this.traverse = traverse;
+    }
+
+    public final void traverse(Yield<T> yield) {
+        this.traverse.accept(yield);
+    }
+
+    public final void shortCircuit(Yield<T> yield) {
         try{
-            this.traverse(yield);
+            this.traverse.accept(yield);
         }catch(TraversableFinishError e){
             /* Proceed */
         }
     }
 
-    default Advancer<T> advancer() {
+    public final Advancer<T> advancer() {
         throw new UnsupportedOperationException();
     }
 
-    default Iterator<T> iterator() {
+    public final Iterator<T> iterator() {
         return new AdvancerIterator<T>(this.advancer());
     }
 
     public static <U> Traversable<U> of(U...data) {
-        return new TraversableOf<>(data);
+        return new Traversable<>(yield -> {
+            for (int i = 0; i < data.length; i++) {
+                yield.ret(data[i]);
+            }
+        });
     }
 
     public static <U> Traversable<U> iterate(U seed, UnaryOperator<U> f) {
-        return new TraversableIterate<U>(seed, f);
+        return new Traversable<>(yield -> {
+            for(U i = seed; true; i = f.apply(i)){
+                yield.ret(i);
+            }
+        });
     }
 
-    default public <R> Traversable<R> map(Function<T, R> mapper) {
-        return new TraversableMap<T, R>(this, mapper);
+    public final <R> Traversable<R> map(Function<T, R> mapper) {
+        return new Traversable<>(yield ->
+                this.traverse(e ->
+                        yield.ret(mapper.apply(e)))
+        );
     }
 
-    default IntTraversable mapToInt(ToIntFunction<T> mapper) {
+    public final IntTraversable mapToInt(ToIntFunction<T> mapper) {
         return new TraversableMapToInt(this, mapper);
     }
 
-    default Traversable<T> filter(Predicate<T> p) {
-        return new TraversableFilter<T>(this, p);
+    public final Traversable<T> filter(Predicate<T> p) {
+        return new Traversable<>(yield ->
+                this.traverse(e -> {
+                    if (p.test(e))
+                        yield.ret(e);
+                })
+        );
     }
 
-    default Traversable<T> skip(int n){
-        return new TraversableSkip<T>(this, n);
+    public final Traversable<T> skip(int n){
+        return new Traversable<>(yield -> {
+                int[] count = {0};
+                this.traverse(item -> {
+                    if(count[0]++ >= n)
+                        yield.ret(item);
+                });
+        });
     }
 
-    default Traversable<T> limit(int n){
-        return new TraversableLimit<T>(this, n);
+    public final Traversable<T> limit(int n){
+        return new Traversable<>(yield -> {
+            int[] count = {0};
+            this.shortCircuit(item -> {
+                if(count[0]++ >= n) Yield.bye();
+                yield.ret(item);
+            });
+        });
     }
 
-    default Traversable<T> distinct(){
-        return new TraversableDistinct<T>(this);
+    public final Traversable<T> distinct(){
+        final HashSet<T> cache = new HashSet<>();
+        return new Traversable<>(yield ->
+                this.traverse(item -> {
+                    if(cache.add(item)) yield.ret(item);
+                })
+        );
     }
 
-    default <R> Traversable<R> flatMap(Function<T, Traversable<R>> mapper){
-        return new TraversableFlatMap<T, R>(this, mapper);
+    public final <R> Traversable<R> flatMap(Function<T, Traversable<R>> mapper){
+        return new Traversable<>(yield ->
+                this.traverse(item ->
+                        mapper.apply(item).traverse(yield))
+                );
     }
 
-    default Traversable<T> peek(Consumer<T> action) {
-        return new TraversablePeek<T>(this, action);
+    public final Traversable<T> peek(Consumer<T> action) {
+        return new Traversable<>(yield ->
+                this.traverse(item -> {
+                    action.accept(item);
+                    yield.ret(item);
+                })
+        );
     }
 
-    default Traversable<T> takeWhile(Predicate<T> predicate){
-        return new TraversableTakeWhile<T>(this, predicate);
+    public final Traversable<T> takeWhile(Predicate<T> predicate){
+        return new Traversable<>(yield -> {
+            this.shortCircuit(item -> {
+                if(!predicate.test(item)) Yield.bye();
+                yield.ret(item);
+            });
+        });
     }
 
-    default <R> Traversable<R> then(Function<Traversable<T>, Traversable<R>> next) {
-        return next.apply(this);
+    public final <R> Traversable<R> then(Function<Traversable<T>, Consumer<Yield<R>>> next) {
+        return new Traversable<>(next.apply(this));
     }
 
-    default Object[] toArray() {
+    public final Object[] toArray() {
         List<Object> data = new ArrayList<>();
         this.traverse(data::add);
         return data.toArray();
     }
 
-    default Optional<T> findFirst(){
+    public final Optional<T> findFirst(){
         Box<T> box = new Box<>();
         this.shortCircuit(item -> {
             box.turnPresent(item);
@@ -133,7 +179,7 @@ public interface Traversable<T> {
                 : Optional.empty();
     }
 
-    default Optional<T> max(Comparator<T> cmp){
+    public final Optional<T> max(Comparator<T> cmp){
         Box<T> b = new Box<>();
         this.traverse(e -> {
             if(!b.isPresent()) b.turnPresent(e);
@@ -142,7 +188,7 @@ public interface Traversable<T> {
         return b.isPresent() ? Optional.of(b.getValue()) : Optional.empty();
     }
 
-    default boolean anyMatch(Predicate<T> p) {
+    public final boolean anyMatch(Predicate<T> p) {
         BoolBox found = new BoolBox();
         shortCircuit(item -> {
             if(p.test(item)) {
@@ -153,7 +199,7 @@ public interface Traversable<T> {
         return found.isTrue();
     }
 
-    default long count() {
+    public final long count() {
         class Counter implements Yield<T> {
             long n = 0;
 
