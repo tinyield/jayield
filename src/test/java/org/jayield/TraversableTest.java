@@ -84,7 +84,7 @@ public class TraversableTest {
         boolean actual = nrs
                 .filter(n -> n%2 != 0)
                 .map(Object::toString)
-                .then(prev -> yield -> {
+                .then(prev -> (yield) -> {
                     final boolean[] isOdd = {false};
                     prev.traverse(item -> {
                         if(isOdd[0]) yield.ret(item);

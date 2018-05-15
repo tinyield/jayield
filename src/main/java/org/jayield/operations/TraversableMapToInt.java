@@ -16,12 +16,10 @@
 
 package org.jayield.operations;
 
-import org.jayield.AdvancerExtensions;
 import org.jayield.IntAdvancer;
 import org.jayield.IntTraversable;
 import org.jayield.IntYield;
 import org.jayield.Traversable;
-import org.jayield.Yield;
 
 import java.util.function.ToIntFunction;
 
@@ -42,11 +40,5 @@ public class TraversableMapToInt<T> implements IntTraversable {
     public void traverse(IntYield yield) {
         src.traverse(e -> yield.ret(mapper.applyAsInt(e)));
     }
-
-    @Override
-    public IntAdvancer intAdvancer() {
-        return AdvancerExtensions.mapToInt(src.advancer(), mapper);
-    }
-
 
 }

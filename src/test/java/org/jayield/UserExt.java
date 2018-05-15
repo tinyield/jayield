@@ -16,12 +16,14 @@
 
 package org.jayield;
 
+import java.util.function.Consumer;
+
 /**
  * @author Miguel Gamboa
  *         created on 06-07-2017
  */
 public class UserExt {
-    static <U> Traversable<U> collapse(Traversable<U> src) {
+    static <U> Consumer<Yield<U>> collapse(Traversable<U> src) {
         return yield -> {
             final Object[] prev = {null};
             src.traverse(item -> {

@@ -30,7 +30,7 @@ import static org.testng.Assert.*;
  */
 public class AdvancerTest {
 
-    @Test
+    @Test(expectedExceptions = UnsupportedOperationException.class)
     public void testIndividuallyMapFilter() {
         Integer[] arrange = {1, 2, 3, 4, 5, 6, 7, 8, 9};
         Traversable<Integer> nrs = Traversable.of(arrange);
@@ -43,7 +43,7 @@ public class AdvancerTest {
         assertEquals(actual, "5");
     }
 
-    @Test
+    @Test(expectedExceptions = UnsupportedOperationException.class)
     public void testIndividuallyMaxInt() {
         class Max {
             int actual = Integer.MIN_VALUE;
@@ -63,7 +63,7 @@ public class AdvancerTest {
         assertEquals(31, max.actual);
     }
 
-    @Test
+    @Test(expectedExceptions = UnsupportedOperationException.class)
     public void testIndividuallyFlatMap() {
         Integer[] expected = {1, 2, 3, 4, 5, 6, 7, 8, 9};
         Integer[] arrange = {2, 5, 8};
@@ -77,7 +77,7 @@ public class AdvancerTest {
         assertEquals(actual, expected);
     }
 
-    @Test
+    @Test(expectedExceptions = UnsupportedOperationException.class)
     public void testIndividuallyMapFilterOdd() {
         Integer[] arrange = {1, 2, 3, 4, 5, 6, 7, 8, 9};
         Traversable<Integer> nrs = Traversable.of(arrange);
@@ -94,7 +94,7 @@ public class AdvancerTest {
         assertEquals(actual, "3");
     }
 
-    @Test
+    @Test(expectedExceptions = UnsupportedOperationException.class)
     public void testIndividuallyIterateLimit() {
         final int LIMIT = 7;
         Iterator<Integer> iter = Traversable
@@ -107,7 +107,7 @@ public class AdvancerTest {
         assertEquals(13, actual);
     }
 
-    @Test
+    @Test(expectedExceptions = UnsupportedOperationException.class)
     public void testIndividuallyFirstOnEmpty() {
         String[] arrange = {};
         boolean hasNext = Traversable
@@ -117,7 +117,7 @@ public class AdvancerTest {
         assertTrue(!hasNext);
     }
 
-    @Test
+    @Test(expectedExceptions = UnsupportedOperationException.class)
     public void testIndividuallyDistinctCount() {
         String [] expected = {"a", "x", "v", "d", "g", "j", "y", "r", "w", "e"};
         String [] arrange =
@@ -128,7 +128,7 @@ public class AdvancerTest {
         }
     }
 
-    @Test
+    @Test(expectedExceptions = UnsupportedOperationException.class)
     public void testIndividuallyPeek() {
         Integer [] arrange = {1, 2, 3};
         List<Integer> actual = new ArrayList<>();
@@ -140,7 +140,7 @@ public class AdvancerTest {
         assertEquals(actual.size(), 1);
         assertEquals(actual.get(0).intValue(), 2);
     }
-    @Test
+    @Test(expectedExceptions = UnsupportedOperationException.class)
     public void testIndividuallyTakeWhileCount() {
         String [] arrange = {"a", "x", "v"};
         List<String> helper = Arrays.asList(arrange);
