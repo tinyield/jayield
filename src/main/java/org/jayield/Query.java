@@ -33,28 +33,35 @@ import java.util.function.ToIntFunction;
 import java.util.function.UnaryOperator;
 
 /**
- * Traverse all elements sequentially in bulk
+ * Traverser all elements sequentially in bulk
  * in the current thread, until all elements have
  * been processed or throws an exception.
  *
  * @author Miguel Gamboa
  *         created on 04-06-2017
  */
-public class Traversable<T> {
+public class Query<T> {
 
-    private final Traverse<T> traverse;
+    private final Traverser<T> traverser;
 
-    public Traversable(Traverse<T> traverse) {
-        this.traverse = traverse;
+    public Query(Traverser<T> traverser) {
+        this.traverser = traverser;
     }
 
-    public final void traverse(Yield<T> yield) {
-        this.traverse.forEach(yield);
+    public final void traverse(Yield<? super T> yield) {
+        this.traverser.traverse(yield);
+    }
+
+    /**
+     * Returns a traverser for the elements of this query.
+     */
+    public Traverser<T> getTraverser() {
+        return traverser;
     }
 
     public final void shortCircuit(Yield<T> yield) {
         try{
-            this.traverse.forEach(yield);
+            this.traverser.traverse(yield);
         }catch(TraversableFinishError e){
             /* Proceed */
         }
@@ -68,35 +75,35 @@ public class Traversable<T> {
         return new AdvancerIterator<T>(this.advancer());
     }
 
-    public static <U> Traversable<U> of(U...data) {
-        return new Traversable<>(yield -> {
+    public static <U> Query<U> of(U...data) {
+        return new Query<>(yield -> {
             for (int i = 0; i < data.length; i++) {
                 yield.ret(data[i]);
             }
         });
     }
 
-    public static <U> Traversable<U> iterate(U seed, UnaryOperator<U> f) {
-        return new Traversable<>(yield -> {
+    public static <U> Query<U> iterate(U seed, UnaryOperator<U> f) {
+        return new Query<>(yield -> {
             for(U i = seed; true; i = f.apply(i)){
                 yield.ret(i);
             }
         });
     }
 
-    public final <R> Traversable<R> map(Function<T, R> mapper) {
-        return new Traversable<>(yield ->
+    public final <R> Query<R> map(Function<? super T,? extends R> mapper) {
+        return new Query<>(yield ->
                 this.traverse(e ->
                         yield.ret(mapper.apply(e)))
         );
     }
 
-    public final IntTraversable mapToInt(ToIntFunction<T> mapper) {
+    public final IntTraversable mapToInt(ToIntFunction<? super T> mapper) {
         return new TraversableMapToInt(this, mapper);
     }
 
-    public final Traversable<T> filter(Predicate<T> p) {
-        return new Traversable<>(yield ->
+    public final Query<T> filter(Predicate<? super T> p) {
+        return new Query<>(yield ->
                 this.traverse(e -> {
                     if (p.test(e))
                         yield.ret(e);
@@ -104,8 +111,8 @@ public class Traversable<T> {
         );
     }
 
-    public final Traversable<T> skip(int n){
-        return new Traversable<>(yield -> {
+    public final Query<T> skip(int n){
+        return new Query<>(yield -> {
                 int[] count = {0};
                 this.traverse(item -> {
                     if(count[0]++ >= n)
@@ -114,8 +121,8 @@ public class Traversable<T> {
         });
     }
 
-    public final Traversable<T> limit(int n){
-        return new Traversable<>(yield -> {
+    public final Query<T> limit(int n){
+        return new Query<>(yield -> {
             int[] count = {0};
             this.shortCircuit(item -> {
                 if(count[0]++ >= n) Yield.bye();
@@ -124,24 +131,24 @@ public class Traversable<T> {
         });
     }
 
-    public final Traversable<T> distinct(){
+    public final Query<T> distinct(){
         final HashSet<T> cache = new HashSet<>();
-        return new Traversable<>(yield ->
+        return new Query<>(yield ->
                 this.traverse(item -> {
                     if(cache.add(item)) yield.ret(item);
                 })
         );
     }
 
-    public final <R> Traversable<R> flatMap(Function<T, Traversable<R>> mapper){
-        return new Traversable<>(yield ->
+    public final <R> Query<R> flatMap(Function<? super T,? extends Query<? extends R>> mapper){
+        return new Query<>(yield ->
                 this.traverse(item ->
                         mapper.apply(item).traverse(yield))
                 );
     }
 
-    public final Traversable<T> peek(Consumer<T> action) {
-        return new Traversable<>(yield ->
+    public final Query<T> peek(Consumer<? super T> action) {
+        return new Query<>(yield ->
                 this.traverse(item -> {
                     action.accept(item);
                     yield.ret(item);
@@ -149,8 +156,8 @@ public class Traversable<T> {
         );
     }
 
-    public final Traversable<T> takeWhile(Predicate<T> predicate){
-        return new Traversable<>(yield -> {
+    public final Query<T> takeWhile(Predicate<? super T> predicate){
+        return new Query<>(yield -> {
             this.shortCircuit(item -> {
                 if(!predicate.test(item)) Yield.bye();
                 yield.ret(item);
@@ -158,8 +165,8 @@ public class Traversable<T> {
         });
     }
 
-    public final <R> Traversable<R> then(Function<Traversable<T>, Traverse<R>> next) {
-        return new Traversable<>(next.apply(this));
+    public final <R> Query<R> then(Function<Query<T>, Traverser<R>> next) {
+        return new Query<>(next.apply(this));
     }
 
     public final Object[] toArray() {
@@ -179,7 +186,7 @@ public class Traversable<T> {
                 : Optional.empty();
     }
 
-    public final Optional<T> max(Comparator<T> cmp){
+    public final Optional<T> max(Comparator<? super T> cmp){
         Box<T> b = new Box<>();
         this.traverse(e -> {
             if(!b.isPresent()) b.turnPresent(e);
@@ -188,7 +195,7 @@ public class Traversable<T> {
         return b.isPresent() ? Optional.of(b.getValue()) : Optional.empty();
     }
 
-    public final boolean anyMatch(Predicate<T> p) {
+    public final boolean anyMatch(Predicate<? super T> p) {
         BoolBox found = new BoolBox();
         shortCircuit(item -> {
             if(p.test(item)) {

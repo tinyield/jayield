@@ -33,7 +33,7 @@ public class AdvancerTest {
     @Test(expectedExceptions = UnsupportedOperationException.class)
     public void testIndividuallyMapFilter() {
         Integer[] arrange = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-        Traversable<Integer> nrs = Traversable.of(arrange);
+        Query<Integer> nrs = Query.of(arrange);
         String actual = nrs
                 .filter(n -> n%2 != 0)
                 .map(Object::toString)
@@ -53,7 +53,7 @@ public class AdvancerTest {
             }
         }
         Integer[] arrange = {7, 7, 8, 31, 9, 9, 11, 11, 7, 23, 31, 23};
-        IntAdvancer adv = Traversable
+        IntAdvancer adv = Query
                 .of(arrange)
                 .mapToInt(n -> n)
                 .intAdvancer();
@@ -67,9 +67,9 @@ public class AdvancerTest {
     public void testIndividuallyFlatMap() {
         Integer[] expected = {1, 2, 3, 4, 5, 6, 7, 8, 9};
         Integer[] arrange = {2, 5, 8};
-        Advancer<Integer> adv = Traversable
+        Advancer<Integer> adv = Query
                 .of(arrange)
-                .flatMap(nr -> Traversable.of(nr - 1, nr, nr + 1))
+                .flatMap(nr -> Query.of(nr - 1, nr, nr + 1))
                 .advancer();
         List<Integer> res = new ArrayList<>();
         while(adv.tryAdvance(res::add)){ }
@@ -80,7 +80,7 @@ public class AdvancerTest {
     @Test(expectedExceptions = UnsupportedOperationException.class)
     public void testIndividuallyMapFilterOdd() {
         Integer[] arrange = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-        Traversable<Integer> nrs = Traversable.of(arrange);
+        Query<Integer> nrs = Query.of(arrange);
         String actual = nrs
                 .filter(n -> n%2 != 0)
                 .map(Object::toString)
@@ -97,7 +97,7 @@ public class AdvancerTest {
     @Test(expectedExceptions = UnsupportedOperationException.class)
     public void testIndividuallyIterateLimit() {
         final int LIMIT = 7;
-        Iterator<Integer> iter = Traversable
+        Iterator<Integer> iter = Query
                 .iterate(1, n -> n + 2)
                 .limit(LIMIT )
                 .advancer()
@@ -110,7 +110,7 @@ public class AdvancerTest {
     @Test(expectedExceptions = UnsupportedOperationException.class)
     public void testIndividuallyFirstOnEmpty() {
         String[] arrange = {};
-        boolean hasNext = Traversable
+        boolean hasNext = Query
                 .of(arrange)
                 .iterator()
                 .hasNext();
@@ -122,7 +122,7 @@ public class AdvancerTest {
         String [] expected = {"a", "x", "v", "d", "g", "j", "y", "r", "w", "e"};
         String [] arrange =
                 {"a", "x", "v", "d","g", "x", "j", "x", "y","r", "y", "w", "y", "a", "e"};
-        Supplier<Traversable<String>> sup = () -> Traversable.of(arrange).distinct();
+        Supplier<Query<String>> sup = () -> Query.of(arrange).distinct();
         for (int i = 0; i < expected.length; i++) {
             assertEquals(sup.get().skip(i).iterator().next(), expected[i]);
         }
@@ -132,7 +132,7 @@ public class AdvancerTest {
     public void testIndividuallyPeek() {
         Integer [] arrange = {1, 2, 3};
         List<Integer> actual = new ArrayList<>();
-        int value = Traversable.of(arrange)
+        int value = Query.of(arrange)
                 .peek(item -> actual.add(item * 2))
                 .iterator()
                 .next();
@@ -145,7 +145,7 @@ public class AdvancerTest {
         String [] arrange = {"a", "x", "v"};
         List<String> helper = Arrays.asList(arrange);
         List<String> actual= new ArrayList<>();
-        Traversable<String> series = Traversable.of(arrange);
+        Query<String> series = Query.of(arrange);
         Advancer<String> adv = series
                 .takeWhile(item -> helper.indexOf(item) % 2 == 0)
                 .peek(actual::add)

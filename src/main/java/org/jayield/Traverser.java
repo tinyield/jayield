@@ -16,6 +16,13 @@
 
 package org.jayield;
 
-public interface Traverse<T> {
-    void forEach(Yield<T> yield);
+import java.io.Serializable;
+
+public interface Traverser<T> extends Serializable{
+    /**
+     * Yields elements sequentially in the current thread,
+     * until all elements have been processed or an
+     * exception is thrown.
+     */
+    void traverse(Yield<? super T> yield);
 }
