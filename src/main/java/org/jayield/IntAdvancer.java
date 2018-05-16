@@ -20,12 +20,8 @@ package org.jayield;
  * @author Miguel Gamboa
  *         created on 03-07-2017
  */
-public interface IntAdvancer extends Advancer<Integer> {
+public interface IntAdvancer {
 
     boolean tryAdvance(IntYield yield);
 
-    default boolean tryAdvance(Yield<Integer> yield) {
-        IntYield iy = yield::ret;
-        return this.tryAdvance(iy);
-    }
 }

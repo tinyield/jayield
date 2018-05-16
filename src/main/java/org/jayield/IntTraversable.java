@@ -24,14 +24,9 @@ import java.util.OptionalInt;
  * @author Miguel Gamboa
  *         created on 03-07-2017
  */
-public interface IntTraversable extends Traversable<Integer> {
+public interface IntTraversable {
 
     void traverse(IntYield yield);
-
-    default public void traverse(Yield<Integer> yield) {
-        IntYield iy = yield::ret;
-        this.traverse(iy);
-    }
 
     default public IntAdvancer intAdvancer() {
         throw new UnsupportedOperationException();

@@ -16,12 +16,9 @@
 
 package org.jayield.operations;
 
-import org.jayield.AdvancerExtensions;
-import org.jayield.IntAdvancer;
 import org.jayield.IntTraversable;
 import org.jayield.IntYield;
-import org.jayield.Traversable;
-import org.jayield.Yield;
+import org.jayield.Query;
 
 import java.util.function.ToIntFunction;
 
@@ -30,10 +27,10 @@ import java.util.function.ToIntFunction;
  *         created on 06-02-2018
  */
 public class TraversableMapToInt<T> implements IntTraversable {
-    private final Traversable<T> src;
+    private final Query<T> src;
     private final ToIntFunction<T> mapper;
 
-    public TraversableMapToInt(Traversable<T> src, ToIntFunction<T> mapper) {
+    public TraversableMapToInt(Query<T> src, ToIntFunction<T> mapper) {
         this.src = src;
         this.mapper = mapper;
     }
@@ -42,11 +39,5 @@ public class TraversableMapToInt<T> implements IntTraversable {
     public void traverse(IntYield yield) {
         src.traverse(e -> yield.ret(mapper.applyAsInt(e)));
     }
-
-    @Override
-    public IntAdvancer intAdvancer() {
-        return AdvancerExtensions.mapToInt(src.advancer(), mapper);
-    }
-
 
 }

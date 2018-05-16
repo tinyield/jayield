@@ -14,33 +14,15 @@
  * limitations under the License.
  */
 
-package org.jayield.operations;
+package org.jayield;
 
-import org.jayield.Advancer;
-import org.jayield.AdvancerExtensions;
-import org.jayield.Traversable;
-import org.jayield.Yield;
+import java.io.Serializable;
 
-/**
- * @author Miguel Gamboa
- *         created on 06-02-2018
- */
-public class TraversableOf<T> implements Traversable<T>{
-    private final T[] data;
-
-    public TraversableOf(T[] data) {
-        this.data = data;
-    }
-
-    @Override
-    public void traverse(Yield<T> yield) {
-        for (int i = 0; i < data.length; i++) {
-            yield.ret(data[i]);
-        }
-    }
-
-    @Override
-    public Advancer<T> advancer() {
-        return AdvancerExtensions.of(data);
-    }
+public interface Traverser<T> extends Serializable{
+    /**
+     * Yields elements sequentially in the current thread,
+     * until all elements have been processed or an
+     * exception is thrown.
+     */
+    void traverse(Yield<? super T> yield);
 }
