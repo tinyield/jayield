@@ -28,15 +28,5 @@ public interface IntTraverser {
 
     void traverse(IntYield yield);
 
-    default OptionalInt max(){
-        IntBox b = new IntBox();
-        IntYield iy =  e -> {
-            if(!b.isPresent()) b.turnPresent(e);
-            else if(e > b.getValue()) b.setValue(e);
-        };
-        this.traverse(iy);
-        return b.isPresent()
-                ? OptionalInt.of(b.getValue())
-                : OptionalInt.empty();
-    }
+
 }

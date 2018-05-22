@@ -18,7 +18,6 @@ package org.jayield;
 
 import org.jayield.boxes.BoolBox;
 import org.jayield.boxes.Box;
-import org.jayield.operations.TraversableMapToInt;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -114,8 +113,9 @@ public class Query<T> {
         );
     }
 
-    public final IntTraverser mapToInt(ToIntFunction<? super T> mapper) {
-        return new TraversableMapToInt(this, mapper);
+    public final IntQuery mapToInt(ToIntFunction<? super T> mapper) {
+        return new IntQuery(yield ->
+                this.traverse(e -> yield.ret(mapper.applyAsInt(e))));
     }
 
     /**
