@@ -26,6 +26,9 @@ public interface Yield<T> {
 
     static final TraversableFinishError finishTraversal = new TraversableFinishError();
 
+    /**
+     * Auxiliary function for traversal short circuit.
+     */
     static public void bye() {
         throw finishTraversal;
     }

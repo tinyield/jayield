@@ -16,30 +16,27 @@
 
 package org.jayield;
 
-import java.util.Iterator;
-import java.util.function.Function;
+import org.jayield.boxes.IntBox;
+
+import java.util.OptionalInt;
 
 /**
- * Move elements individually.
- *
  * @author Miguel Gamboa
- *         created on 04-06-2017
+ *         created on 03-07-2017
  */
-public interface Advancer<T> {
+public interface IntTraverser {
 
-    static final Advancer EMPTY = yield -> false;
+    void traverse(IntYield yield);
 
-    public static <U> Advancer<U> empty() {
-        return EMPTY;
-    }
-
-    boolean tryAdvance(Yield<T> yield);
-
-    default <R> Advancer<R> then(Function<Advancer<T>, Advancer<R>> next) {
-        return next.apply(this);
-    }
-
-    default Iterator<T> iterator() {
-        return new AdvancerIterator<>(this);
+    default OptionalInt max(){
+        IntBox b = new IntBox();
+        IntYield iy =  e -> {
+            if(!b.isPresent()) b.turnPresent(e);
+            else if(e > b.getValue()) b.setValue(e);
+        };
+        this.traverse(iy);
+        return b.isPresent()
+                ? OptionalInt.of(b.getValue())
+                : OptionalInt.empty();
     }
 }

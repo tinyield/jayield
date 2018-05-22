@@ -16,7 +16,7 @@
 
 package org.jayield.operations;
 
-import org.jayield.IntTraversable;
+import org.jayield.IntTraverser;
 import org.jayield.IntYield;
 import org.jayield.Query;
 
@@ -26,7 +26,7 @@ import java.util.function.ToIntFunction;
  * @author Miguel Gamboa
  *         created on 06-02-2018
  */
-public class TraversableMapToInt<T> implements IntTraversable {
+public class TraversableMapToInt<T> implements IntTraverser {
     private final Query<T> src;
     private final ToIntFunction<T> mapper;
 
