@@ -1,7 +1,7 @@
 # JAYield
 
-[![Build](https://sonarcloud.io/api/badges/gate?key=com.github.jayield%3Ajayield)](https://sonarcloud.io/dashboard?id=com.github.jayield%3Ajayield)
-[![Coverage](https://sonarcloud.io/api/badges/measure?key=com.github.jayield%3Ajayield&metric=coverage)](https://sonarcloud.io/component_measures/domain/Coverage?id=com.github.jayield%3Ajayield)
+[![Build Status](https://sonarcloud.io/api/project_badges/measure?project=com.github.jayield%3Ajayield&metric=alert_status)](https://sonarcloud.io/dashboard?id=com.github.jayield%3Ajayield)
+[![Coverage Status](https://sonarcloud.io/api/project_badges/measure?project=com.github.jayield%3Ajayield&metric=coverage)](https://sonarcloud.io/component_measures?id=com.github.jayield%3Ajayield&metric=Coverage)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.jayield/jayield/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.jayield/jayield)
 
 A minimalistic extensible lazy sequence implementation interoperable with Java
@@ -13,7 +13,7 @@ An auxiliary `collapse()` method, which merges series of adjacent elements is wr
 with JAYield in the following way:
 
 ```java
-static <U> Traversable<U> collapse(Series<U> src) {
+static <U> Traverser<U> collapse(Query<U> src) {
     return yield -> {
         final Object[] prev = {null};
         src.traverse(item -> {
@@ -28,9 +28,11 @@ This method can be chained in a query like this:
 
 ```java
 Integer[] arrange = {7, 7, 8, 9, 9, 11, 11, 7};
-Object[] actual = Series
+Object[] actual = Query
                     .of(arrange)
-                    .traverseWith(n -> collapse(n))
+                    .then(n -> collapse(n))
+                    .filter(n -> n%2 != 0)
+                    .map(Object::toString)
                     .toArray();
 ```
 

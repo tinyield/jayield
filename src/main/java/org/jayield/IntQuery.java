@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Fernando Miguel Carvalho, mcarvalho@cc.isel.ipl.pt
+ * Copyright (c) 2018, Fernando Miguel Carvalho, mcarvalho@cc.isel.ipl.pt
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -18,29 +18,43 @@ package org.jayield;
 
 import org.jayield.boxes.IntBox;
 
-import java.util.Comparator;
-import java.util.Optional;
 import java.util.OptionalInt;
 
 /**
- * @author Miguel Gamboa
- *         created on 03-07-2017
+ * A sequence of primitive int-valued elements supporting sequential
+ * operations. This is the int primitive specialization of Query.
  */
-public class IntSeries {
-    private final IntTraversable bulk;
-    private final IntAdvancer advancer;
+public class IntQuery {
 
-    public IntSeries(IntTraversable bulk, IntAdvancer advancer) {
-        this.bulk = bulk;
-        this.advancer = advancer;
+    private final IntTraverser traverser;
+
+    public IntQuery(IntTraverser  traverser) {
+        this.traverser = traverser;
+    }
+
+    /**
+     * Yields elements sequentially in the current thread,
+     * until all elements have been processed or an
+     * exception is thrown.
+     */
+    public final void traverse(IntYield yield) {
+        this.traverser.traverse(yield);
+    }
+
+    /**
+     * Returns a traverser for the elements of this query.
+     */
+    public IntTraverser getTraverser() {
+        return traverser;
     }
 
     public OptionalInt max(){
         IntBox b = new IntBox();
-        this.bulk.traverse(e -> {
+        IntYield iy =  e -> {
             if(!b.isPresent()) b.turnPresent(e);
             else if(e > b.getValue()) b.setValue(e);
-        });
+        };
+        this.traverse(iy);
         return b.isPresent()
                 ? OptionalInt.of(b.getValue())
                 : OptionalInt.empty();

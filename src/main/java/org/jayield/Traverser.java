@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Fernando Miguel Carvalho, mcarvalho@cc.isel.ipl.pt
+ * Copyright (c) 2018, Fernando Miguel Carvalho, mcarvalho@cc.isel.ipl.pt
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,10 +16,13 @@
 
 package org.jayield;
 
-/**
- * @author Miguel Gamboa
- *         created on 03-07-2017
- */
-public interface IntTraversable {
-    void traverse(IntYield yield);
+import java.io.Serializable;
+
+public interface Traverser<T> extends Serializable{
+    /**
+     * Yields elements sequentially in the current thread,
+     * until all elements have been processed or an
+     * exception is thrown.
+     */
+    void traverse(Yield<? super T> yield);
 }

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017, Fernando Miguel Carvalho, mcarvalho@cc.isel.ipl.pt
+ * Copyright (c) 2018, Fernando Miguel Carvalho, mcarvalho@cc.isel.ipl.pt
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -17,11 +17,11 @@
 package org.jayield;
 
 /**
- * Move elements individually.
- *
  * @author Miguel Gamboa
- *         created on 04-06-2017
+ *         created on 06-02-2018
  */
-public interface Advancer<T> {
-    boolean tryAdvance(Yield<T> yield);
+public class TraversableFinishError extends Error{
+    public TraversableFinishError() {
+        super("Auxiliary exception finishes traversal!", null, false, false);
+    }
 }

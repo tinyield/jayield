@@ -21,6 +21,7 @@ package org.jayield.boxes;
  *         created on 06-07-2017
  */
 public class BoolBox {
+    private boolean hasValue = false;
     private boolean value;
 
     public boolean isTrue() {
@@ -33,9 +34,20 @@ public class BoolBox {
 
     public void set() {
         value = true;
+        hasValue = true;
+    }
+
+    public void set(boolean res) {
+        value = res;
+        hasValue = true;
     }
 
     public void reset() {
         value = false;
+        hasValue = false;
+    }
+
+    public boolean isPresent() {
+        return hasValue;
     }
 }

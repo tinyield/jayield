@@ -16,14 +16,17 @@
 
 package org.jayield;
 
+import org.jayield.boxes.IntBox;
+
+import java.util.OptionalInt;
+
 /**
- * Traverse all elements sequentially in bulk
- * in the current thread, until all elements have
- * been processed or throws an exception.
- *
  * @author Miguel Gamboa
- *         created on 04-06-2017
+ *         created on 03-07-2017
  */
-public interface Traversable<T> {
-    void traverse(Yield<T> yield);
+public interface IntTraverser {
+
+    void traverse(IntYield yield);
+
+
 }
