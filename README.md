@@ -1,7 +1,7 @@
 # JAYield
 
-[![Build](https://sonarcloud.io/api/badges/gate?key=com.github.jayield%3Ajayield)](https://sonarcloud.io/dashboard?id=com.github.jayield%3Ajayield)
-[![Coverage](https://sonarcloud.io/api/badges/measure?key=com.github.jayield%3Ajayield&metric=coverage)](https://sonarcloud.io/component_measures/domain/Coverage?id=com.github.jayield%3Ajayield)
+[![Build Status](https://sonarcloud.io/api/project_badges/measure?project=com.github.jayield%3Ajayield&metric=alert_status)](https://sonarcloud.io/dashboard?id=com.github.jayield%3Ajayield)
+[![Coverage Status](https://sonarcloud.io/api/project_badges/measure?project=com.github.jayield%3Ajayield&metric=coverage)](https://sonarcloud.io/component_measures?id=com.github.jayield%3Ajayield&metric=Coverage)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.jayield/jayield/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.jayield/jayield)
 
 A minimalistic extensible lazy sequence implementation interoperable with Java
