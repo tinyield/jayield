@@ -20,9 +20,12 @@ import org.testng.annotations.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
+import static org.jayield.Query.fromStream;
 import static org.jayield.UserExt.collapse;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -33,6 +36,30 @@ import static org.testng.Assert.assertTrue;
  *         created on 03-06-2017
  */
 public class QueryTest {
+
+    @Test
+    public void testBulkFromAndToStream() {
+        Integer[] src = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+        Iterator<Integer> expected = Stream.of(src).iterator();
+        Query<Integer> nrs = fromStream(Stream.of(1, 2, 3, 4, 5, 6, 7, 8, 9));
+        nrs
+            .toStream()
+            .forEach(actual -> assertEquals(actual, expected.next()));
+        assertFalse(expected.hasNext());
+    }
+
+
+    @Test
+    public void testBulkZip() {
+        String[] expected = {"a1", "b2", "c3", "d4", "e5", "f6", "g7"};
+        Query<Character> cs = Query.of('a', 'b', 'c', 'd', 'e', 'f', 'g');
+        Query<Integer> nrs = Query.of(1, 2, 3, 4, 5, 6, 7, 8, 9);
+        Object[] actual = cs
+                .zip(nrs, (c,n) -> "" + c + n)
+                .toArray();
+        assertEquals(actual, expected);
+    }
+
 
     @Test
     public void testBulkMapFilter() {

@@ -18,7 +18,7 @@ package org.jayield;
 
 import java.io.Serializable;
 
-public interface Traverser<T> extends Serializable{
+public interface Traverser<T> {
     /**
      * Yields elements sequentially in the current thread,
      * until all elements have been processed or an

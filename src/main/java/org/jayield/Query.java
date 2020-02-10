@@ -22,13 +22,18 @@ import org.jayield.boxes.Box;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Spliterator;
+import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.ToIntFunction;
 import java.util.function.UnaryOperator;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
 
 /**
  * A sequence of elements supporting sequential operations.
@@ -87,6 +92,23 @@ public class Query<T> {
         });
     }
 
+
+    /**
+     * Returns a sequential ordered query with elements
+     * from the provided List data.
+     */
+    public static <U> Query<U> fromList(List<U> data) {
+        return new Query<>(yield -> data.forEach(yield::ret));
+    }
+
+    /**
+     * Returns a sequential ordered query with elements
+     * from the provided stream data.
+     */
+    public static <U> Query<U> fromStream(Stream<U> data) {
+        return new Query<>(yield -> data.forEach(yield::ret));
+    }
+
     /**
      * Returns an infinite sequential ordered {@code Query} produced by iterative
      * application of a function {@code f} to an initial element {@code seed},
@@ -111,6 +133,20 @@ public class Query<T> {
                 this.traverse(e ->
                         yield.ret(mapper.apply(e)))
         );
+    }
+
+    /**
+     * Applies a specified function to the corresponding elements of two
+     * sequences, producing a sequence of the results.
+     */
+    public final <U, R> Query<R> zip(Query<U> other, BiFunction<? super T, ? super U, ? extends R> zipper) {
+        return new Query<>(yield -> {
+            Iterator<U> otherIter = other.toList().iterator();
+            this.traverse(e -> {
+                if (!otherIter.hasNext()) return;
+                yield.ret(zipper.apply(e, otherIter.next()));
+            });
+        });
     }
 
     public final IntQuery mapToInt(ToIntFunction<? super T> mapper) {
@@ -222,12 +258,49 @@ public class Query<T> {
     }
 
     /**
+     * Returns a list containing the elements of this query.
+     */
+    public final List<T> toList() {
+        List<T> data = new ArrayList<>();
+        this.traverse(data::add);
+        return data;
+    }
+
+    /**
      * Returns an array containing the elements of this query.
      */
     public final Object[] toArray() {
-        List<Object> data = new ArrayList<>();
-        this.traverse(data::add);
-        return data.toArray();
+        return this.toList().toArray();
+    }
+
+    public final Stream<T> toStream() {
+        Spliterator<T> iter = new Spliterator<>() {
+            @Override
+            public boolean tryAdvance(Consumer<? super T> action) {
+                throw new UnsupportedOperationException("Disallowed operation for a bulk traversal Query!");
+            }
+
+            @Override
+            public void forEachRemaining(Consumer<? super T> action) {
+                traverser.traverse(action::accept);
+            }
+
+            @Override
+            public Spliterator<T> trySplit() {
+                return null;
+            }
+
+            @Override
+            public long estimateSize() {
+                return Long.MAX_VALUE;
+            }
+
+            @Override
+            public int characteristics() {
+                return Spliterator.ORDERED;
+            }
+        };
+        return StreamSupport.stream(iter, false);
     }
 
     /**
