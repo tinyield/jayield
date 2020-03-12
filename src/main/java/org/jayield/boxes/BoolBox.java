@@ -36,18 +36,4 @@ public class BoolBox {
         value = true;
         hasValue = true;
     }
-
-    public void set(boolean res) {
-        value = res;
-        hasValue = true;
-    }
-
-    public void reset() {
-        value = false;
-        hasValue = false;
-    }
-
-    public boolean isPresent() {
-        return hasValue;
-    }
 }

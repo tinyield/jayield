@@ -24,15 +24,15 @@ package org.jayield;
  */
 public interface Yield<T> {
 
-    static final TraversableFinishError finishTraversal = new TraversableFinishError();
+    TraversableFinishError finishTraversal = new TraversableFinishError();
 
     /**
      * Auxiliary function for traversal short circuit.
      */
-    static public void bye() {
+    static void bye() {
         throw finishTraversal;
     }
 
-    public void ret(T item);
+    void ret(T item);
 
 }
