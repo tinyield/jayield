@@ -34,18 +34,6 @@ public class AdvancerDistinct<T> implements Advancer<T> {
     }
 
     @Override
-    public boolean tryAdvance(Yield<? super T> yield) {
-        final BoolBox found = new BoolBox();
-        while(found.isFalse() && upstream.tryAdvance(item -> {
-            if(mem.add(item)) {
-                yield.ret(item);
-                found.set();
-            }
-        }));
-        return found.isTrue();
-    }
-
-    @Override
     public boolean hasNext() {
         if(finished) return false; // It has finished thus return false.
         if(moved) return true;     // It has not finished and has already moved forward, thus there is next.

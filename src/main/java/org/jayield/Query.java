@@ -29,6 +29,7 @@ import org.jayield.advs.AdvancerSkip;
 import org.jayield.advs.AdvancerStream;
 import org.jayield.advs.AdvancerTakeWhile;
 import org.jayield.advs.AdvancerThen;
+import org.jayield.advs.AdvancerZip;
 import org.jayield.boxes.BoolBox;
 import org.jayield.boxes.Box;
 
@@ -70,14 +71,6 @@ public class Query<T> {
     public final void traverse(Yield<? super T> yield) {
         this.adv.traverse(yield);
     }
-    /**
-     * If a remaining element exists, performs the given action
-     * on it, returning true; else returns false.
-     */
-    public final boolean tryAdvance(Yield<? super T> yield) {
-        return this.adv.tryAdvance(yield);
-    }
-
     /**
      * Returns {@code true} if the iteration has more elements.
      * (In other words, returns {@code true} if {@link #next} would
@@ -154,31 +147,7 @@ public class Query<T> {
      * sequences, producing a sequence of the results.
      */
     public final <U, R> Query<R> zip(Query<U> other, BiFunction<? super T, ? super U, ? extends R> zipper) {
-        return new Query<>(new Advancer<R>() {
-            @Override
-            public boolean tryAdvance(Yield<? super R> yield) {
-                if (!other.hasNext()) return false;
-                return adv.tryAdvance(e -> yield.ret(zipper.apply(e, other.next())));
-            }
-
-            @Override
-            public boolean hasNext() {
-                return adv.hasNext() && other.hasNext();
-            }
-
-            @Override
-            public R next() {
-                return zipper.apply(adv.next(), other.next());
-            }
-
-            @Override
-            public void traverse(Yield<? super R> yield) {
-                adv.traverse(e -> {
-                    if (!other.hasNext()) return;
-                    yield.ret(zipper.apply(e, other.next()));
-                });
-            }
-        });
+        return new Query<>(new AdvancerZip<>(this.adv, other.adv, zipper));
     }
 
     /**
@@ -277,7 +246,9 @@ public class Query<T> {
         Spliterator<T> iter = new Spliterator<>() {
             @Override
             public boolean tryAdvance(Consumer<? super T> action) {
-                return adv.tryAdvance(action::accept);
+                if(!adv.hasNext()) return false;
+                action.accept(adv.next());
+                return true;
             }
 
             @Override
@@ -364,5 +335,4 @@ public class Query<T> {
         this.traverse(c);
         return c.n;
     }
-
 }

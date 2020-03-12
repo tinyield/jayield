@@ -19,38 +19,34 @@ package org.jayield.advs;
 import org.jayield.Advancer;
 import org.jayield.Yield;
 
-public class AdvancerSkip<T> implements Advancer<T> {
-    private final Advancer<T> upstream;
-    private final int n;
-    int index;
+import java.util.function.BiFunction;
 
-    public AdvancerSkip(Advancer<T> adv, int n) {
-        this.upstream = adv;
-        this.n = n;
-        index = 0;
+public class AdvancerZip<T, U, R> implements Advancer<R> {
+    private final Advancer<T> upstream;
+    private final Advancer<U> other;
+    private final BiFunction<? super T, ? super U, ? extends R> zipper;
+
+    public AdvancerZip(Advancer<T> upstream, Advancer<U> other, BiFunction<? super T, ? super U, ? extends R> zipper) {
+        this.upstream = upstream;
+        this.other = other;
+        this.zipper = zipper;
     }
 
     @Override
     public boolean hasNext() {
-        for (; upstream.hasNext() && index < n; index++) upstream.next();
-        return upstream.hasNext();
+        return upstream.hasNext() && other.hasNext();
     }
 
     @Override
-    public T next() {
-        if(!hasNext()) throw new IndexOutOfBoundsException("No such elements on iteration!");
-        return upstream.next();
+    public R next() {
+        return zipper.apply(upstream.next(), other.next());
     }
-    /**
-     * Continues from the point where tryAdvance or next left the
-     * internal iteration.
-     * @param yield
-     */
+
     @Override
-    public void traverse(Yield<? super T> yield) {
-        upstream.traverse(item -> {
-            if(index++ >= n)
-                yield.ret(item);
+    public void traverse(Yield<? super R> yield) {
+        upstream.traverse(e -> {
+            if (!other.hasNext()) return;
+            yield.ret(zipper.apply(e, other.next()));
         });
     }
 }

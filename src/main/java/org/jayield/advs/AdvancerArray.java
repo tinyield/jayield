@@ -29,13 +29,6 @@ public class AdvancerArray<U> implements Advancer<U> {
     }
 
     @Override
-    public boolean tryAdvance(Yield<? super U> yield) {
-        if(!hasNext()) return false;
-        yield.ret(next());
-        return true;
-    }
-
-    @Override
     public U next() {
         return data[current++];
     }

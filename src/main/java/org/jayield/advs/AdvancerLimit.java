@@ -32,13 +32,6 @@ public class AdvancerLimit<T> implements Advancer<T> {
     }
 
     @Override
-    public boolean tryAdvance(Yield<? super T> yield) {
-        if(count >= n) return false;
-        count++;
-        return upstream.tryAdvance(yield);
-    }
-
-    @Override
     public boolean hasNext() {
         return count < n && upstream.hasNext();
     }

@@ -23,7 +23,6 @@ import java.util.Iterator;
  * Jayield uses traverse method as its first choice to
  * implement Query operations.
  * This is a special kind of traversal that disallows individually access.
- * !!!! Create an object that wraps this to provide an EagerAdvancer.
  */
 public interface Traverser<T> {
     /**

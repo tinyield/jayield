@@ -39,13 +39,6 @@ public class AdvancerStream<U> implements Advancer<U> {
     }
 
     @Override
-    public boolean tryAdvance(Yield<? super U> yield) {
-        if(!current().hasNext()) return false;
-        yield.ret(current.next());
-        return true;
-    }
-
-    @Override
     public U next() {
         return current().next();
     }

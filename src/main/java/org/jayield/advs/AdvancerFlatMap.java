@@ -40,15 +40,6 @@ public class AdvancerFlatMap<T, R> implements Advancer<R> {
     }
 
     @Override
-    public boolean tryAdvance(Yield<? super R> yield) {
-        while (!curr.tryAdvance(yield)) {
-            if(!upstream.tryAdvance(t -> curr = mapper.apply(t)))
-                return false;
-        }
-        return true;
-    }
-
-    @Override
     public boolean hasNext() {
         if(finished) return false; // It has finished thus return false.
         if(moved) return true;     // It has not finished and has already moved forward, thus there is next.

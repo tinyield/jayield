@@ -23,21 +23,10 @@ import java.util.Iterator;
  */
 public interface Advancer<T> extends Iterator<T>, Traverser<T> {
     /**
-     * If a remaining element exists, performs the given action
-     * on it, returning true; else returns false.
-     */
-    boolean tryAdvance(Yield<? super T> yield);
-
-    /**
      * An Advancer object without elements.
      */
     static <R> Advancer<R> empty() {
         return new Advancer<R>() {
-            @Override
-            public boolean tryAdvance(Yield<? super R> yield) {
-                return false;
-            }
-
             @Override
             public boolean hasNext() {
                 return false;

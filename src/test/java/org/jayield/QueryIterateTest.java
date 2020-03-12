@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Spliterator;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
@@ -43,13 +44,22 @@ import static org.testng.Assert.assertTrue;
 public class QueryIterateTest {
 
     @Test
-    public void testFromAndToStream() {
+    public void testFromStream() {
         Integer[] src = {1, 2, 3, 4, 5, 6, 7, 8, 9};
         Iterator<Integer> expected = Stream.of(src).iterator();
         Query<Integer> nrs = fromStream(Stream.of(1, 2, 3, 4, 5, 6, 7, 8, 9));
         while(nrs.hasNext()) {
             assertEquals(nrs.next(), expected.next());
         }
+        assertFalse(expected.hasNext());
+    }
+    @Test
+    public void testFromAndToStream() {
+        Integer[] src = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+        Iterator<Integer> expected = Stream.of(src).iterator();
+        Query<Integer> nrs = fromStream(Stream.of(1, 2, 3, 4, 5, 6, 7, 8, 9));
+        Spliterator<Integer> actual = nrs.toStream().spliterator();
+        while(actual.tryAdvance(curr -> assertEquals(curr, expected.next()))) {}
         assertFalse(expected.hasNext());
     }
 

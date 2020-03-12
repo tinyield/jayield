@@ -31,14 +31,6 @@ public class AdvancerPeek<T> implements Advancer<T> {
     }
 
     @Override
-    public boolean tryAdvance(Yield<? super T> yield) {
-        return upstream.tryAdvance(item -> {
-            action.accept(item);
-            yield.ret(item);
-        });
-    }
-
-    @Override
     public boolean hasNext() {
         return upstream.hasNext();
     }

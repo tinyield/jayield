@@ -42,11 +42,6 @@ public class AdvancerMap<T, R> implements Advancer<R> {
     }
 
     @Override
-    public boolean tryAdvance(Yield<? super R> yield) {
-        return upstream.tryAdvance(e -> yield.ret(mapper.apply(e)));
-    }
-
-    @Override
     public void traverse(Yield<? super R> yield) {
         upstream.traverse(e -> yield.ret(mapper.apply(e)));
     }

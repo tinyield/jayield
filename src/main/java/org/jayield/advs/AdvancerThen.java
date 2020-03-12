@@ -45,13 +45,6 @@ public class AdvancerThen<T, R> implements Advancer<R> {
     }
 
     @Override
-    public boolean tryAdvance(Yield<? super R> yield) {
-        if(!curr().hasNext()) return false;
-        yield.ret(curr().next());
-        return true;
-    }
-
-    @Override
     public boolean hasNext() {
         return curr().hasNext();
     }

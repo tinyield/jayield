@@ -38,21 +38,6 @@ public class AdvancerFilter<T> implements Advancer<T> {
     }
 
     @Override
-    public boolean tryAdvance(Yield<? super T> yield) {
-        BoolBox found = new BoolBox();
-        while(found.isFalse()) {
-            boolean hasNext = upstream.tryAdvance(item -> {
-                if(p.test(item)) {
-                    yield.ret(item);
-                    found.set();
-                }
-            });
-            if(!hasNext) break;
-        }
-        return found.isTrue();
-    }
-
-    @Override
     public boolean hasNext() {
         if(finished) return false; // It has finished thus return false.
         if(moved) return true;     // It has not finished and has already moved forward, thus there is next.

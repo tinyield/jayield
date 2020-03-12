@@ -28,10 +28,6 @@ public class BoolBox {
         return value;
     }
 
-    public boolean isFalse() {
-        return !value;
-    }
-
     public void set() {
         value = true;
         hasValue = true;

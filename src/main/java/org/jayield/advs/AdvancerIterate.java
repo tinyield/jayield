@@ -33,12 +33,6 @@ public class AdvancerIterate<U> implements Advancer<U> {
     }
 
     @Override
-    public boolean tryAdvance(Yield<? super U> yield) {
-        yield.ret(next());
-        return true;
-    }
-
-    @Override
     public boolean hasNext() {
         return true;
     }

@@ -35,15 +35,6 @@ public class AdvancerTakeWhile<T> implements Advancer<T> {
     }
 
     @Override
-    public boolean tryAdvance(Yield<? super T> yield) {
-        upstream.tryAdvance(item -> {
-            if(!predicate.test(item)) finished = true;
-            else yield.ret(item);
-        });
-        return !finished;
-    }
-
-    @Override
     public boolean hasNext() {
         if(finished) return false; // It has finished thus return false.
         if(moved) return true;     // It has not finished and has already moved forward, thus there is next.
