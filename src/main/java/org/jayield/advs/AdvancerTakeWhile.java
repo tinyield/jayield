@@ -16,46 +16,31 @@
 
 package org.jayield.advs;
 
-import org.jayield.Advancer;
 import org.jayield.Query;
 import org.jayield.Yield;
 
 import java.util.function.Predicate;
 
-public class AdvancerTakeWhile<T> implements Advancer<T> {
+public class AdvancerTakeWhile<T> extends AbstractAdvancer<T> {
     private final Query<T> upstream;
     private final Predicate<? super T> predicate;
-    boolean moved = false;
-    boolean finished = false;
-    T curr = null;
 
     public AdvancerTakeWhile(Query<T> upstream, Predicate<? super T> predicate) {
         this.upstream = upstream;
         this.predicate = predicate;
     }
 
-    @Override
-    public boolean hasNext() {
-        if(finished) return false; // It has finished thus return false.
-        if(moved) return true;     // It has not finished and has already moved forward, thus there is next.
-        finished = !move();        // If tryAdvance returns true then it has not finished yet.
-        return !finished;
-    }
-
-    @Override
-    public T next() {
-        if(!hasNext()) throw new IndexOutOfBoundsException("No more elements available on iteration!");
-        moved = false;
-        return curr;
-    }
     /**
      * Returns true if it moves successfully. Otherwise returns false
      * signaling it has finished.
      */
     public boolean move() {
-        moved = true;
-        if(upstream.hasNext() && predicate.test(curr = upstream.next()))
-            return true;
+        if(upstream.hasNext()) {
+            curr = upstream.next();
+            if(predicate.test(curr)) {
+                return true;
+            }
+        }
         return false;
     }
 

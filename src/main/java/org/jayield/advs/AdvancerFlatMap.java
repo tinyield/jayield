@@ -22,36 +22,15 @@ import org.jayield.Yield;
 
 import java.util.function.Function;
 
-public class AdvancerFlatMap<T, R> implements Advancer<R> {
+public class AdvancerFlatMap<T, R> extends AbstractAdvancer<R> {
     private final Query<T> upstream;
     private final Function<? super T, ? extends Query<? extends R>> mapper;
-    Query<? extends R> curr;
-    boolean moved;
-    boolean finished;
-    R item;
+    Query<? extends R> src;
 
     public AdvancerFlatMap(Query query, Function<? super T, ? extends Query<? extends R>> mapper) {
         this.upstream = query;
         this.mapper = mapper;
-        curr = new Query<>(Advancer.empty());
-        moved = false;
-        finished = false;
-        item = null;
-    }
-
-    @Override
-    public boolean hasNext() {
-        if(finished) return false; // It has finished thus return false.
-        if(moved) return true;     // It has not finished and has already moved forward, thus there is next.
-        finished = !move();        // If tryAdvance returns true then it has not finished yet.
-        return !finished;
-    }
-
-    @Override
-    public R next() {
-        if(!hasNext()) throw new IndexOutOfBoundsException("No more elements available on iteration!");
-        moved = false;
-        return item;
+        src = new Query<>(Advancer.empty());
     }
 
     /**
@@ -59,19 +38,18 @@ public class AdvancerFlatMap<T, R> implements Advancer<R> {
      * signaling it has finished.
      */
     public boolean move() {
-        moved = true;
-        while(!curr.hasNext()) {
+        while(!src.hasNext()) {
             if(!upstream.hasNext()) return false;
-            curr = mapper.apply(upstream.next());
+            src = mapper.apply(upstream.next());
         }
-        item = curr.next();
+        curr = src.next();
         return true;
     }
 
     @Override
     public void traverse(Yield<? super R> yield) {
-        upstream.traverse(item ->
-                mapper.apply(item).traverse(yield));
+        upstream.traverse(elem ->
+                mapper.apply(elem).traverse(yield));
 
     }
 }

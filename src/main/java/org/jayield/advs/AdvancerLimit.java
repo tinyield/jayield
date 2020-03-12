@@ -20,6 +20,8 @@ import org.jayield.Advancer;
 import org.jayield.Query;
 import org.jayield.Yield;
 
+import java.util.NoSuchElementException;
+
 public class AdvancerLimit<T> implements Advancer<T> {
     private final Query<T> upstream;
     private final int n;
@@ -38,7 +40,7 @@ public class AdvancerLimit<T> implements Advancer<T> {
 
     @Override
     public T next() {
-        if(count >= n) throw new IndexOutOfBoundsException("Nor more elements available!");
+        if(count >= n) throw new NoSuchElementException("Nor more elements available!");
         count++;
         return upstream.next();
     }

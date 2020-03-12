@@ -41,7 +41,8 @@ public class AdvancerThen<T, R> implements Advancer<R> {
         ArrayList<R> mem = new ArrayList<>();
         next.apply(upstream).traverse(mem::add);
         inMem = true;
-        return curr = mem.iterator();
+        curr = mem.iterator();
+        return curr;
     }
 
     @Override

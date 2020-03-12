@@ -19,15 +19,14 @@ package org.jayield.advs;
 import org.jayield.Advancer;
 import org.jayield.Yield;
 
+import java.util.NoSuchElementException;
 import java.util.function.UnaryOperator;
 
 public class AdvancerIterate<U> implements Advancer<U> {
-    private final U seed;
     private final UnaryOperator<U> f;
     private U prev;
 
     public AdvancerIterate(U seed, UnaryOperator<U> f) {
-        this.seed = seed;
         this.f = f;
         this.prev = seed;
     }
@@ -39,6 +38,7 @@ public class AdvancerIterate<U> implements Advancer<U> {
 
     @Override
     public U next() {
+        if(!hasNext()) throw new NoSuchElementException("No more elements available on iteration!");
         U curr = prev;
         prev = f.apply(prev);
         return curr;

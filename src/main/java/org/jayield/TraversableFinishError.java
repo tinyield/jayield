@@ -21,7 +21,10 @@ package org.jayield;
  *         created on 06-02-2018
  */
 public class TraversableFinishError extends Error{
-    public TraversableFinishError() {
+
+    public static final TraversableFinishError finishTraversal = new TraversableFinishError();
+
+    private TraversableFinishError() {
         super("Auxiliary exception finishes traversal!", null, false, false);
     }
 }

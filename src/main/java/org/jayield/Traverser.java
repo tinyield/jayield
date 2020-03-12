@@ -16,8 +16,6 @@
 
 package org.jayield;
 
-import java.util.Iterator;
-
 /**
  * Bulk traversal.
  * Jayield uses traverse method as its first choice to

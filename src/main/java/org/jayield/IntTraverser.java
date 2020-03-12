@@ -16,10 +16,6 @@
 
 package org.jayield;
 
-import org.jayield.boxes.IntBox;
-
-import java.util.OptionalInt;
-
 /**
  * @author Miguel Gamboa
  *         created on 03-07-2017

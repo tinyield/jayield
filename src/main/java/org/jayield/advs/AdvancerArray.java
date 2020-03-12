@@ -19,6 +19,8 @@ package org.jayield.advs;
 import org.jayield.Advancer;
 import org.jayield.Yield;
 
+import java.util.NoSuchElementException;
+
 public class AdvancerArray<U> implements Advancer<U> {
     private final U[] data;
     private int current;
@@ -30,6 +32,7 @@ public class AdvancerArray<U> implements Advancer<U> {
 
     @Override
     public U next() {
+        if(!hasNext()) throw new NoSuchElementException("No more elements available on iteration!");
         return data[current++];
     }
 

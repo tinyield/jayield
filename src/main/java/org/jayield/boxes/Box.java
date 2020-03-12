@@ -16,8 +16,6 @@
 
 package org.jayield.boxes;
 
-import java.util.function.UnaryOperator;
-
 /**
  * @author Miguel Gamboa
  *         created on 06-07-2017
@@ -36,7 +34,8 @@ public class Box<T> {
     }
 
     public T setValue(T value) {
-        return this.value = value;
+        this.value = value;
+        return value;
     }
 
     public void turnPresent(T e) {

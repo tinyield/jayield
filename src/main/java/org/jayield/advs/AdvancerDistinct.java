@@ -18,34 +18,15 @@ package org.jayield.advs;
 
 import org.jayield.Advancer;
 import org.jayield.Yield;
-import org.jayield.boxes.BoolBox;
 
 import java.util.HashSet;
 
-public class AdvancerDistinct<T> implements Advancer<T> {
+public class AdvancerDistinct<T> extends AbstractAdvancer<T> {
     private final Advancer<T> upstream;
     final HashSet<T> mem = new HashSet<>();
-    boolean moved = false;
-    boolean finished = false;
-    T curr = null;
 
     public AdvancerDistinct(Advancer<T> adv) {
         this.upstream = adv;
-    }
-
-    @Override
-    public boolean hasNext() {
-        if(finished) return false; // It has finished thus return false.
-        if(moved) return true;     // It has not finished and has already moved forward, thus there is next.
-        finished = !move();        // If tryAdvance returns true then it has not finished yet.
-        return !finished;
-    }
-
-    @Override
-    public T next() {
-        if(!hasNext()) throw new IndexOutOfBoundsException("No more elements available on iteration!");
-        moved = false;
-        return curr;
     }
 
     /**
@@ -53,9 +34,9 @@ public class AdvancerDistinct<T> implements Advancer<T> {
      * signaling it has finished.
      */
     public boolean move() {
-        moved = true;
         while(upstream.hasNext()) {
-            if(mem.add(curr = upstream.next()))
+            curr = upstream.next();
+            if(mem.add(curr))
                 return true;
         }
         return false;
