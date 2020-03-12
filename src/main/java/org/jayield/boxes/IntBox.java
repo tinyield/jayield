@@ -28,9 +28,6 @@ public class IntBox {
         this(Integer.MIN_VALUE, false);
     }
 
-    public IntBox(int value) {
-        this(value, true);
-    }
 
     public IntBox(int value, boolean isPresent) {
         this.value = value;
@@ -43,10 +40,6 @@ public class IntBox {
 
     public void setValue(int value) {
         this.value = value;
-    }
-
-    public final int inc() {
-        return ++value;
     }
 
     public boolean isPresent() {

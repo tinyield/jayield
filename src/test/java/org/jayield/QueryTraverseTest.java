@@ -32,10 +32,15 @@ import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
 
 /**
+ * These tests aim to evaluate only the execution of traverse()
+ * along the entire pipeline.
+ * Each operation should forward the computation through the traverse()
+ * method of the upstream.
+ *
  * @author Miguel Gamboa
  *         created on 03-06-2017
  */
-public class QueryTest {
+public class QueryTraverseTest {
 
     @Test
     public void testBulkFromAndToStream() {
