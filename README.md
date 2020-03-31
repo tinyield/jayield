@@ -6,23 +6,44 @@
 
 A minimalistic extensible lazy sequence implementation interoperable with Java
 `Stream`, which provides an idiomatic `yield` like generator.
+
+Notice how it looks a JAYield custom `collapse()` method that merges series of adjacent elements.
+It has a similar shape to that one written in any language providing the `yield` operator
+such as C\#.
+
+<table class="table">
+    <tr class="row">
+        <td>
  
-## Example
-
-An auxiliary `collapse()` method, which merges series of adjacent elements is written 
-with JAYield in the following way:
-
 ```java
-static <U> Traverser<U> collapse(Query<U> src) {
-    return yield -> {
-        final Object[] prev = {null};
-        src.traverse(item -> {
-            if (prev[0] == null || !prev[0].equals(item))
-                yield.ret((U) (prev[0] = item));
-        });
-    };
+private static Object prev = null;
+static <U> Traverser<U>  collapse(Query<U> src) {
+  return yield -> {
+    src.traverse(item -> {
+      if (prev == null || !prev.equals(item))
+      yield.ret((U) (prev = item));
+    });
+  };
 }
 ```
+
+</td>
+<td>
+
+```csharp
+IEnumerable <T> Collapse <T>( this IEnumerable <T> src) {
+  IEnumerator <T> iter = src. GetEnumerator ();
+  T prev = null;
+  while(iter.MoveNext ()) {
+    if(prev == null || !prev.Equals(iter.Current ))
+    yield return prev = iter.Current;
+  }
+}
+```
+
+</td>
+</tr>
+</table>
 
 This method can be chained in a query like this:
 
@@ -30,24 +51,10 @@ This method can be chained in a query like this:
 Integer[] arrange = {7, 7, 8, 9, 9, 11, 11, 7};
 Object[] actual = Query
                     .of(arrange)
-                    .then(n -> collapse(n))
+                    .then(src -> collapse(src))
                     .filter(n -> n%2 != 0)
                     .map(Object::toString)
                     .toArray();
-```
-
-This is close to C\# idiom where you write an equivalent `Collapse` extension 
-method as:
-
-```csharp
-IEnumerable <T> Collapse <T>( this IEnumerable <T> src) {
-    IEnumerator <T> iter = src. GetEnumerator ();
-    T prev = null;
-    while(iter.MoveNext ()) {
-        if(prev == null || !prev.Equals(iter.Current ))
-        yield return prev = iter.Current;
-    }
-}
 ```
 
 

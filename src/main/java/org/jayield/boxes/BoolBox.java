@@ -23,11 +23,20 @@ package org.jayield.boxes;
 public class BoolBox {
     private boolean value;
 
+    public BoolBox(boolean value) {
+        this.value = value;
+    }
+
+    public BoolBox() {
+    }
+
     public boolean isTrue() {
         return value;
     }
-
     public void set() {
         value = true;
+    }
+    public void set(boolean val) {
+        value = val;
     }
 }

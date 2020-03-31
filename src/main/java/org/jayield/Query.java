@@ -318,6 +318,22 @@ public class Query<T> {
         });
         return found.isTrue();
     }
+    /**
+     * Returns whether all elements of this stream match the provided
+     * predicate. May not evaluate the predicate on all elements if not
+     * necessary for determining the result. If the stream is empty then
+     * {@code true} is returned and the predicate is not evaluated.
+     */
+    public final boolean allMatch(Predicate<? super T> p) {
+        BoolBox succeed = new BoolBox(true);
+        shortCircuit(item -> {
+            if(!p.test(item)) {
+                succeed.set(false);
+                Yield.bye();
+            }
+        });
+        return succeed.isTrue();
+    }
 
     /**
      * Returns the count of elements in this query.

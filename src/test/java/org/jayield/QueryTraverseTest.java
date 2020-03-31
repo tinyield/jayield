@@ -25,6 +25,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
+import static org.jayield.Query.*;
 import static org.jayield.Query.fromStream;
 import static org.jayield.UserExt.collapse;
 import static org.testng.Assert.assertEquals;
@@ -57,8 +58,8 @@ public class QueryTraverseTest {
     @Test
     public void testBulkZip() {
         String[] expected = {"a1", "b2", "c3", "d4", "e5", "f6", "g7"};
-        Query<Character> cs = Query.of('a', 'b', 'c', 'd', 'e', 'f', 'g');
-        Query<Integer> nrs = Query.of(1, 2, 3, 4, 5, 6, 7, 8, 9);
+        Query<Character> cs = of('a', 'b', 'c', 'd', 'e', 'f', 'g');
+        Query<Integer> nrs = of(1, 2, 3, 4, 5, 6, 7, 8, 9);
         Object[] actual = cs
                 .zip(nrs, (c,n) -> "" + c + n)
                 .toArray();
@@ -70,7 +71,7 @@ public class QueryTraverseTest {
     public void testBulkMapFilter() {
         String[] expected = {"5", "7", "9"};
         Integer[] arrange = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-        Query<Integer> nrs = Query.of(arrange);
+        Query<Integer> nrs = of(arrange);
         Object[] actual = nrs
                 .filter(n -> n%2 != 0)
                 .map(Object::toString)
@@ -83,7 +84,7 @@ public class QueryTraverseTest {
     public void testBulkMapFilterOdd() {
         String[] expected = {"3", "7"};
         Integer[] arrange = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-        Query<Integer> nrs = Query.of(arrange);
+        Query<Integer> nrs = of(arrange);
         Object[] actual = nrs
                 .filter(n -> n%2 != 0)
                 .map(Object::toString)
@@ -102,8 +103,7 @@ public class QueryTraverseTest {
     public void testBulkMapCollapse() {
         Integer[] expected= {7, 8, 9, 11, 7};
         Integer[] arrange = {7, 7, 8, 9, 9, 11, 11, 7};
-        Object[] actual = Query
-                .of(arrange)
+        Object[] actual = of(arrange)
                 .then(n -> collapse(n))
                 .toArray();
         assertEquals(actual, expected);
@@ -113,7 +113,7 @@ public class QueryTraverseTest {
     public void testBulkMapFilterOddAndAnyMatch() {
         String[] expected = {"3", "7"};
         Integer[] arrange = {1, 2, 3, 4, 5, 6, 7, 8, 9};
-        Query<Integer> nrs = Query.of(arrange);
+        Query<Integer> nrs = of(arrange);
         boolean actual = nrs
                 .filter(n -> n%2 != 0)
                 .map(Object::toString)
@@ -128,14 +128,26 @@ public class QueryTraverseTest {
                         n.equals("7"));
         assertTrue(actual);
     }
-
+    @Test
+    public void testAllMatchForAllElements() {
+        Integer[] arrange = {2, 4, 6, 8, 10, 12};
+        boolean actual = of(arrange).allMatch(nr -> nr % 2 == 0);
+        assertEquals(true, actual);
+    }
+    @Test
+    public void testAllMatchFailOnIntruder() {
+        Integer[] arrange = {2, 4, 6, 7, 10, 12};
+        int[] count = {0};
+        boolean actual = of(arrange).peek(__ -> count[0]++).allMatch(nr -> nr % 2 == 0);
+        assertEquals(false, actual);
+        assertEquals(4, count[0]);
+    }
     @Test
     public void testBulkFlatMap() {
         Integer[] expected = {1, 2, 3, 4, 5, 6, 7, 8, 9};
         Integer[] arrange = {2, 5, 8};
-        Object[] actual = Query
-                .of(arrange)
-                .flatMap(nr -> Query.of(nr - 1, nr, nr + 1))
+        Object[] actual = of(arrange)
+                .flatMap(nr -> of(nr - 1, nr, nr + 1))
                 .toArray();
         assertEquals(actual, expected);
     }
@@ -143,9 +155,8 @@ public class QueryTraverseTest {
     @Test
     public void testShortCircuitFlatMap() {
         Integer[] arrange = {2, 5, 8};
-        int actual = Query
-                .of(arrange)
-                .flatMap(nr -> Query.of(nr - 1, nr, nr + 1))
+        int actual = of(arrange)
+                .flatMap(nr -> of(nr - 1, nr, nr + 1))
                 .findFirst()
                 .get();
         assertEquals(1, actual);
@@ -156,8 +167,7 @@ public class QueryTraverseTest {
     public void testBulkDistinctCount() {
         String [] arrange =
                 {"a", "x", "v", "d","g", "x", "j", "x", "y","r", "y", "w", "y", "a", "e"};
-        long total = Query
-                .of(arrange)
+        long total = of(arrange)
                 .distinct()
                 .count();
         assertEquals(10, total);
@@ -166,8 +176,7 @@ public class QueryTraverseTest {
     @Test
     public void testBulkMax() {
         String [] arrange = {"a", "x", "v", "d","g","j","y","r","w","a","e"};
-        String actual = Query
-                .of(arrange)
+        String actual = of(arrange)
                 .max(String.CASE_INSENSITIVE_ORDER)
                 .get();
         assertEquals("y", actual);
@@ -176,8 +185,7 @@ public class QueryTraverseTest {
     @Test
     public void testBulkMaxInt() {
         Integer[] arrange = {7, 7, 8, 31, 9, 9, 11, 11, 7, 23, 31, 23};
-        int actual = Query
-                .of(arrange)
+        int actual = of(arrange)
                 .mapToInt(n -> n)
                 .max()
                 .getAsInt();
@@ -186,8 +194,7 @@ public class QueryTraverseTest {
 
     @Test
     public void testBulkIterateLimitMax() {
-        int actual = Query
-                .iterate(1, n -> n + 2)
+        int actual = iterate(1, n -> n + 2)
                 .limit(7)
                 .max(Integer::compare)
                 .get();
@@ -199,7 +206,7 @@ public class QueryTraverseTest {
     public void testBulkPeekCount() {
         Integer[] arrange = {1, 2, 3};
         List<Integer> actual = new ArrayList<>();
-        long count = Query.of(arrange)
+        long count = of(arrange)
                 .peek(item -> actual.add(item * 2))
                 .count();
         assertEquals(count, 3);
@@ -212,7 +219,7 @@ public class QueryTraverseTest {
         String [] arrange = {"a", "x", "v"};
         List<String> helper = Arrays.asList(arrange);
         List<String> actual= new ArrayList<>();
-        Query<String> series = Query.of(arrange);
+        Query<String> series = of(arrange);
         long count = series.takeWhile(item -> helper.indexOf(item) % 2 == 0)
                 .peek(actual::add)
                 .count();
