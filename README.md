@@ -12,7 +12,7 @@ Simply put, the JAYield `Query` provides similar operations to Java `Stream`, or
 [jOOλ][18] `Seq`, or [StreamEx][16], or [Vavr][19] Stream. 
 Yet, `Query` has lower per-element access cost and offers an optimized fast-path traversal, which presents better sequential processing performance in some benchmarks, such as [sequences-benchmarks][20] and [jayield-jmh][21].
 
-The core API of `Query` provides well-known query method that allow the
+The core API of `Query` provides well-known query methods that allow the
 composition of pipelines, such as `iterate-filter-map-limit-forEach`:
 
 ```java
@@ -60,7 +60,7 @@ IEnumerable <T> Collapse <T>(this IEnumerable <T> src) {
 </tr>
 </table>
 
-This method can be chained in a query like this:
+These methods can be chained in queries, such as:
 
 <table class="table">
     <tr class="row">
@@ -97,10 +97,10 @@ new int[]{7, 7, 8, 9, 9, 8, 11, 11, 9, 7}
 `Advancer` is the core iterator of `Query` that provides both individually and
 bulk traversal, trough `java.util.Iterator` and `Traverser` interfaces.
 `Traverser` is the primary choice for traversing the `Query` elements and 
-supports all its methods including terminal, intermediate and short-circuting
+supports all its methods including _terminal_, _intermediate_ and _short-circuting_
 operations.
 To that end, the traversal's consumer provides one method to return an element
-(`ret()`) and other to finish the iteration (`bye`).
+(`ret`) and other to finish the iteration (`bye`).
 
 <img src="assets/Query-uml.png" width="600px">
 
