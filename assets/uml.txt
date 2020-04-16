@@ -1,0 +1,2 @@
+[Query]<>->[Advancer]-^[java.util.Iterator]
+[Advancer]-^[Traverser|traverse(Yield)]uses -.->[Yield|ret(T); bye()]
