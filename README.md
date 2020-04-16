@@ -5,10 +5,11 @@
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.jayield/jayield/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.jayield/jayield)
 
 A minimalistic extensible lazy sequence implementation interoperable with Java
-`Stream` (`toStream()` and `fromStream()`), which provides an idiomatic `yield` like generator
-with no support for parallelization.
+`Stream` (`toStream` and `fromStream`), which provides an idiomatic `yield` like generator
+without support for parallelization.
 
-Simply put, the JAYield `Query` provides similar operations to Java `Stream`, or [jOOλ][18] `Seq`, [StreamEx][16], or [Vavr][19] Stream. 
+Simply put, the JAYield `Query` provides similar operations to Java `Stream`, or
+[jOOλ][18] `Seq`, or [StreamEx][16], or [Vavr][19] Stream. 
 Yet, `Query` has lower per-element access cost and offers an optimized fast-path traversal, which presents better sequential processing performance in some benchmarks, such as [sequences-benchmarks][20] and [jayield-jmh][21].
 
 The core API of `Query` provides well-known query method that allow the
@@ -28,7 +29,7 @@ such as C\#.
 <table class="table">
     <tr class="row">
         <td>
- 
+
 ```java
 private Object prev = null;
 <U> Traverser<U>  collapse(Query<U> src) {
@@ -64,7 +65,7 @@ This method can be chained in a query like this:
 <table class="table">
     <tr class="row">
         <td>
- 
+
 ```java
 Query
     .of(7, 7, 8, 9, 9, 8, 11, 11, 9, 7)
@@ -74,6 +75,7 @@ Query
     .traverse(out::println);
 
 ```
+
 </td>
 <td>
 
@@ -89,6 +91,18 @@ new int[]{7, 7, 8, 9, 9, 8, 11, 11, 9, 7}
 </td>
 </tr>
 </table>
+
+## Internals Overview
+
+`Advancer` is the core iterator of `Query` that provides both individually and
+bulk traversal, trough `java.util.Iterator` and `Traverser` interfaces.
+`Traverser` is the primary choice for traversing the `Query` elements and 
+supports all its methods including terminal, intermediate and short-circuting
+operations.
+To that end, the traversal's consumer provides one method to return an element
+(`ret()`) and other to finish the iteration (`bye`).
+
+<img src="assets/Query-uml.png" width="600px">
 
 ## Installation
 
