@@ -4,23 +4,28 @@
 [![Coverage Status](https://sonarcloud.io/api/project_badges/measure?project=com.github.jayield%3Ajayield&metric=coverage)](https://sonarcloud.io/component_measures?id=com.github.jayield%3Ajayield&metric=Coverage)
 [![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.jayield/jayield/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.jayield/jayield)
 
-A minimalistic extensible lazy sequence implementation interoperable with Java
-`Stream` (`toStream` and `fromStream`), which provides an idiomatic `yield` like generator
-without support for parallelization.
+_Minimalistic_, _extensible_, _non-parallel_ and _lazy_ sequence implementation interoperable with Java
+`Stream` (`toStream` and `fromStream`), which provides an idiomatic `yield` like _generator_.
 
-Simply put, the JAYield `Query` provides similar operations to Java `Stream`, or
+JAYield `Query` provides similar operations to Java `Stream`, or
 [jOOλ][18] `Seq`, or [StreamEx][16], or [Vavr][19] Stream. 
-Yet, `Query` has lower per-element access cost and offers an optimized fast-path traversal, which presents better sequential processing performance in some benchmarks, such as [sequences-benchmarks][20] and [jayield-jmh][21].
+Yet, `Query` is **extensible** and its methods can be [chained
+fluently](#extensibility-and-chaining) with new operations in a pipeline.
+Furthermore, `Query` has lower per-element access cost and offers an optimized
+fast-path traversal, which presents better sequential processing performance in
+some benchmarks, such as [sequences-benchmarks][20] and [jayield-jmh][21].
 
-The core API of `Query` provides well-known query methods that allow the
-composition of pipelines, such as `iterate-filter-map-limit-forEach`:
+The core API of `Query` provides well-known query methods that can be 
+composed fluently (_pipeline_), e.g.:
 
 ```java
+// pipeline: iterate-filter-map-limit-forEach
+//
 Query.iterate('a', prev -> (char) ++prev).filter(n -> n%2 != 0).map(Object::toString).limit(10).forEach(out::println);
 ```
 
-But `Query` has also the advantage of being extensible with new operations that can be
-fluently interleaved in a pipeline.
+
+## Extensibility and chaining
 
 Notice how it looks a JAYield custom `collapse()` method that merges series of adjacent elements.
 It has a similar shape to that one written in any language providing the `yield` operator
@@ -47,10 +52,10 @@ private Object prev = null;
 
 ```csharp
 IEnumerable <T> Collapse <T>(this IEnumerable <T> src) {
-  IEnumerator <T> iter = src. GetEnumerator ();
+  IEnumerator <T> iter = src.GetEnumerator();
   T prev = null;
   while(iter.MoveNext ()) {
-    if(prev == null || !prev.Equals(iter.Current ))
+    if(prev == null || !prev.Equals(iter.Current))
     yield return prev = iter.Current;
   }
 }
@@ -99,8 +104,8 @@ bulk traversal, trough `java.util.Iterator` and `Traverser` interfaces.
 `Traverser` is the primary choice for traversing the `Query` elements and 
 supports all its methods including _terminal_, _intermediate_ and _short-circuting_
 operations.
-To that end, the traversal's consumer provides one method to return an element
-(`ret`) and other to finish the iteration (`bye`).
+To that end, the traversal's consumer - `Yield` - provides one method to return
+an element (`ret`) and other to finish the iteration (`bye`).
 
 <img src="assets/Query-uml.png" width="600px">
 
