@@ -90,7 +90,7 @@ new int[]{7, 7, 8, 9, 9, 8, 11, 11, 9, 7}
     .Where(n => n%2 != 0)
     .Select(n => n.ToString())
     .ToList()
-    .ForEach(Console.WriteLine
+    .ForEach(Console.WriteLine);
 ```
 
 </td>
