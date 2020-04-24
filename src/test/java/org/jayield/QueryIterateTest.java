@@ -16,7 +16,12 @@
 
 package org.jayield;
 
-import org.testng.annotations.Test;
+import static java.util.Arrays.asList;
+import static org.jayield.Query.fromStream;
+import static org.jayield.UserExt.collapse;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -25,12 +30,7 @@ import java.util.List;
 import java.util.Spliterator;
 import java.util.stream.Stream;
 
-import static java.util.Arrays.asList;
-import static org.jayield.Query.fromStream;
-import static org.jayield.UserExt.collapse;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import org.testng.annotations.Test;
 
 /**
  * These tests aim to evaluate only the execution of hasNext() and next()
@@ -165,5 +165,17 @@ public class QueryIterateTest {
         assertEquals(actual.size(), 1);
         assertFalse(actual.containsAll(asList("a", "x", "v")));
         assertEquals(actual.get(0), "a");
+    }
+
+    @Test
+    public void testGenerateLimitLast() {
+        int[] n = new int[]{1};
+        int expected = 9;
+        Query<Integer> pipe = Query
+                .generate(() -> 2 + n[0]++)
+                .limit(7);
+        int actual = 0;
+        while(pipe.hasNext()) { actual = pipe.next(); }
+        assertEquals(actual, expected);
     }
 }
