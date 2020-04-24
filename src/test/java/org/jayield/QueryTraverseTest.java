@@ -238,6 +238,29 @@ public class QueryTraverseTest {
         assertEquals(actual.get(0), "a");
     }
 
+
+    @Test
+    public void testReduce() {
+        String[] input = {"a", "b", "c"};
+        String expected = "abc";
+        String actual = of(input).reduce((p, c) -> p + c).orElseThrow();
+        assertEquals(actual, expected);
+    }
+
+    @Test
+    public void testReduceOnEmpty() {
+        String[] input = {};
+        assertTrue(of(input).reduce((p, c) -> p + c).isEmpty());
+    }
+
+    @Test
+    public void testReduceOnEmptyWithIdentity() {
+        String[] input = {};
+        String expected = "a";
+        String actual = of(input).reduce(expected, (p, c) -> p + c);
+        assertEquals(actual, expected);
+    }
+
     @Test
     public void testNoneMatchFail() {
         boolean actual = Query.generate(() -> 1).noneMatch(integer -> integer == 1);

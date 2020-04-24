@@ -340,6 +340,28 @@ public class Query<T> {
         return c.n;
     }
 
+    /**
+     * Returns an optional with the resulting reduction of the elements of this query,
+     * if a reduction can be mate, using the provided accumulator.
+     */
+    public Optional<T> reduce(BinaryOperator<T> accumulator) {
+        if (this.hasNext()) {
+            return Optional.ofNullable(this.reduce(this.next(), accumulator));
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Returns the result of the reduction of the elements of this query,
+     * using the provided identity value and accumulator.
+     */
+    public T reduce(T identity, BinaryOperator<T> accumulator) {
+        Box<T> result = new Box<>();
+        result.setValue(identity);
+        this.traverse(elem -> result.setValue(accumulator.apply(result.getValue(), elem)));
+        return result.getValue();
+    }
 
     /**
      * Returns an array containing the elements of this query.
