@@ -238,6 +238,14 @@ public class QueryTraverseTest {
         assertEquals(actual.get(0), "a");
     }
 
+    @Test
+    public void testForEach() {
+        Integer[] input = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+        Iterator<Integer> expected = Stream.of(input).iterator();
+        Query<Integer> nrs = fromStream(Stream.of(1, 2, 3, 4, 5, 6, 7, 8, 9));
+        nrs.forEach(actual -> assertEquals(actual, expected.next()));
+        assertFalse(expected.hasNext());
+    }
 
     @Test
     public void testReduce() {

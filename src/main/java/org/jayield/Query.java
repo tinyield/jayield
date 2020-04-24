@@ -364,6 +364,14 @@ public class Query<T> {
     }
 
     /**
+     * Yields elements sequentially in the current thread,
+     * until all elements have been processed or an
+     * exception is thrown.
+     */
+    public final void forEach(Yield<? super T> yield) {
+        this.traverse(yield);
+    }
+    /**
      * Returns an array containing the elements of this query.
      */
     public final <U> U[] toArray(IntFunction<U[]> generator) {
