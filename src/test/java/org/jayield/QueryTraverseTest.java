@@ -315,4 +315,14 @@ public class QueryTraverseTest {
                 .findAny();
         assertFalse(actual.isPresent());
     }
+
+    @Test
+    public void testBulkMin() {
+        String [] arrange = {"a", "x", "v", "d","g","j","y","r","w","a","e"};
+        String expected = "a";
+        String actual = of(arrange)
+                .min(String.CASE_INSENSITIVE_ORDER)
+                .orElseThrow();
+        assertEquals(actual, expected);
+    }
 }

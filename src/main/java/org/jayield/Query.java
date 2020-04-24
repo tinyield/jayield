@@ -402,6 +402,15 @@ public class Query<T> {
     public final Optional<T> findAny(){
         return this.findFirst();
     }
+
+    /**
+     * Returns the minimum element of this query according to the provided
+     * {@code Comparator}.  This is a special case of a reduction.
+     */
+    public final Optional<T> min(Comparator<? super T> cmp) {
+        return this.max((a, b) -> cmp.compare(a, b) * -1);
+    }
+
     /**
      * Returns whether no elements of this query match the provided
      * predicate. May not evaluate the predicate on all elements if not
