@@ -253,6 +253,15 @@ public class QueryTraverseTest {
         long actual = of(input).toSet().size();
         assertEquals(actual, 10);
     }
+
+    @Test
+    public void testJoin() {
+        String[] input = {"a", "b", "c"};
+        String expected = "abc";
+        String actual = of(input).join();
+        assertEquals(actual, expected);
+    }
+
     @Test
     public void testReduce() {
         String[] input = {"a", "b", "c"};

@@ -389,6 +389,12 @@ public class Query<T> {
     }
 
     /**
+     * Returns the concatenation of the input elements into a String, in encounter order.
+     */
+    public final String join() {
+        return this.map(String::valueOf).reduce("", (p, c) -> p + c);
+    }
+    /**
      * Returns whether no elements of this query match the provided
      * predicate. May not evaluate the predicate on all elements if not
      * necessary for determining the result. If the query is empty then
