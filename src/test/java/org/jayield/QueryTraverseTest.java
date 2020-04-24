@@ -295,4 +295,24 @@ public class QueryTraverseTest {
         String[] input = {"a", "b", "c"};
         assertTrue(of(input).noneMatch("d"::equals));
     }
+
+    @Test
+    public void testFindAnySuccess() {
+        int[] i = new int[]{0};
+        Integer expected = 11;
+        Integer actual = Query.generate(() -> i[0]++)
+                              .filter(integer -> integer > 10)
+                              .findAny()
+                              .orElseThrow();
+        assertEquals(actual, expected);
+    }
+
+    @Test
+    public void testFindAnyFailure() {
+        String[] input = {"a", "b", "c"};
+        Optional<String> actual = of(input)
+                .filter("d"::equals)
+                .findAny();
+        assertFalse(actual.isPresent());
+    }
 }

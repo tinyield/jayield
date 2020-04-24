@@ -394,6 +394,14 @@ public class Query<T> {
     public final String join() {
         return this.map(String::valueOf).reduce("", (p, c) -> p + c);
     }
+
+    /**
+     * Returns an {@link Optional} describing any element of this query,
+     * or an empty {@code Optional} if this query is empty.
+     */
+    public final Optional<T> findAny(){
+        return this.findFirst();
+    }
     /**
      * Returns whether no elements of this query match the provided
      * predicate. May not evaluate the predicate on all elements if not
