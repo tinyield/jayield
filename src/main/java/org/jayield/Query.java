@@ -371,6 +371,16 @@ public class Query<T> {
     public final void forEach(Yield<? super T> yield) {
         this.traverse(yield);
     }
+
+    /**
+     * Returns a {@link Set} containing the elements of this query.
+     */
+    public final Set<T> toSet() {
+        Set<T> data = new HashSet<>();
+        this.traverse(data::add);
+        return data;
+    }
+
     /**
      * Returns an array containing the elements of this query.
      */

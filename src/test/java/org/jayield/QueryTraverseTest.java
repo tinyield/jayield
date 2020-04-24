@@ -248,6 +248,12 @@ public class QueryTraverseTest {
     }
 
     @Test
+    public void testToSet() {
+        String[] input = {"a", "x", "v", "d", "g", "x", "j", "x", "y", "r", "y", "w", "y", "a", "e"};
+        long actual = of(input).toSet().size();
+        assertEquals(actual, 10);
+    }
+    @Test
     public void testReduce() {
         String[] input = {"a", "b", "c"};
         String expected = "abc";
