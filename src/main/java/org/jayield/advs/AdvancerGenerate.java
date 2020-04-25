@@ -16,6 +16,7 @@
 
 package org.jayield.advs;
 
+import java.util.NoSuchElementException;
 import java.util.function.Supplier;
 
 import org.jayield.Advancer;
@@ -35,12 +36,13 @@ public class AdvancerGenerate<U> implements Advancer<U> {
 
     @Override
     public U next() {
+        if(!hasNext()) throw new NoSuchElementException("No more elements available on iteration!");
         return s.get();
     }
 
     @Override
     public void traverse(Yield<? super U> yield) {
-        while (true) {
+        while (hasNext()) {
             yield.ret(s.get());
         }
     }
