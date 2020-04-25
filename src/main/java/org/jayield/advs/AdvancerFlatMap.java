@@ -16,18 +16,18 @@
 
 package org.jayield.advs;
 
+import java.util.function.Function;
+
 import org.jayield.Advancer;
 import org.jayield.Query;
 import org.jayield.Yield;
-
-import java.util.function.Function;
 
 public class AdvancerFlatMap<T, R> extends AbstractAdvancer<R> {
     private final Query<T> upstream;
     private final Function<? super T, ? extends Query<? extends R>> mapper;
     Query<? extends R> src;
 
-    public AdvancerFlatMap(Query query, Function<? super T, ? extends Query<? extends R>> mapper) {
+    public AdvancerFlatMap(Query<T> query, Function<? super T, ? extends Query<? extends R>> mapper) {
         this.upstream = query;
         this.mapper = mapper;
         src = new Query<>(Advancer.empty());

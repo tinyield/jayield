@@ -16,9 +16,7 @@
 
 package org.jayield.advs;
 
-import java.util.NoSuchElementException;
 import java.util.function.Supplier;
-import java.util.function.UnaryOperator;
 
 import org.jayield.Advancer;
 import org.jayield.Yield;
@@ -40,14 +38,9 @@ public class AdvancerGenerate<U> implements Advancer<U> {
         return s.get();
     }
 
-    /**
-     * Continues from the point where tryAdvance or next left the
-     * internal iteration.
-     * @param yield
-     */
     @Override
     public void traverse(Yield<? super U> yield) {
-        while(true){
+        while (true) {
             yield.ret(s.get());
         }
     }

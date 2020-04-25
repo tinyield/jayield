@@ -18,13 +18,18 @@ package org.jayield;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.Spliterator;
 import java.util.Spliterators.AbstractSpliterator;
+import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
+import java.util.function.BinaryOperator;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.IntFunction;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.function.ToIntFunction;
@@ -392,7 +397,9 @@ public class Query<T> {
      * Returns the concatenation of the input elements into a String, in encounter order.
      */
     public final String join() {
-        return this.map(String::valueOf).reduce("", (p, c) -> p + c);
+        return this.map(String::valueOf)
+                   .collect(StringBuilder::new, StringBuilder::append)
+                   .toString();
     }
 
     /**
@@ -427,6 +434,17 @@ public class Query<T> {
      */
     public static <U> Query<U> generate(Supplier<U> s) {
         return new Query<>(new AdvancerGenerate<>(s));
+    }
+
+    /**
+     * Performs a mutable reduction operation on the elements of this {@code Query}.
+     * A mutable reduction is one in which the reduced value is a mutable result container, such as an ArrayList,
+     * and elements are incorporated by updating the state of the result rather than by replacing the result.
+     */
+    public <R> R collect(Supplier<R> supplier, BiConsumer<R, ? super T> accumulator) {
+        R result = supplier.get();
+        this.traverse(elem -> accumulator.accept(result, elem));
+        return result;
     }
 
 }
