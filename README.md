@@ -36,14 +36,16 @@ such as C\#.
         <td>
 
 ```java
-private Object prev = null;
-<U> Traverser<U>  collapse(Query<U> src) {
-  return yield -> {
-    src.traverse(item -> {
-      if (prev == null || !prev.equals(item))
-      yield.ret((U) (prev = item));
-    });
-  };
+class Queries {
+  private Object prev = null;
+  <U> Traverser<U>  collapse(Query<U> src) {
+    return yield -> {
+      src.traverse(item -> {
+        if (prev == null || !prev.equals(item))
+        yield.ret((U) (prev = item));
+      });
+    };
+  }
 }
 ```
 
@@ -51,12 +53,14 @@ private Object prev = null;
 <td>
 
 ```csharp
-IEnumerable <T> Collapse <T>(this IEnumerable <T> src) {
-  IEnumerator <T> iter = src.GetEnumerator();
-  T prev = null;
-  while(iter.MoveNext ()) {
-    if(prev == null || !prev.Equals(iter.Current))
-    yield return prev = iter.Current;
+static class Extensions {
+  static IEnumerable <T> Collapse <T>(this IEnumerable <T> src) {
+    IEnumerator <T> iter = src.GetEnumerator();
+    T prev = null;
+    while(iter.MoveNext ()) {
+      if(prev == null || !prev.Equals(iter.Current))
+      yield return prev = iter.Current;
+    }
   }
 }
 ```
@@ -74,7 +78,7 @@ These methods can be chained in queries, such as:
 ```java
 Query
     .of(7, 7, 8, 9, 9, 8, 11, 11, 9, 7)
-    .then(this::collapse)
+    .then(new Queries()::collapse)
     .filter(n -> n%2 != 0)
     .map(Object::toString)
     .traverse(out::println);

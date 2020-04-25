@@ -16,21 +16,23 @@
 
 package org.jayield;
 
-import org.testng.annotations.Test;
+import static java.util.Arrays.asList;
+import static org.jayield.Query.fromStream;
+import static org.jayield.Query.iterate;
+import static org.jayield.Query.of;
+import static org.jayield.UserExt.collapse;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
-import static java.util.Arrays.asList;
-import static org.jayield.Query.*;
-import static org.jayield.Query.fromStream;
-import static org.jayield.UserExt.collapse;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import org.testng.annotations.Test;
 
 /**
  * These tests aim to evaluate only the execution of traverse()
@@ -162,6 +164,13 @@ public class QueryTraverseTest {
         assertEquals(1, actual);
     }
 
+    @Test
+    public void testShortCircuitOnEmptySequence() {
+        Integer[] arrange = {};
+        Optional<Integer> actual = of(arrange)
+                .findFirst();
+        assertTrue(actual.isEmpty());
+    }
 
     @Test
     public void testBulkDistinctCount() {
@@ -227,5 +236,93 @@ public class QueryTraverseTest {
         assertEquals(actual.size(), 1);
         assertFalse(actual.containsAll(asList("a", "x", "v")));
         assertEquals(actual.get(0), "a");
+    }
+
+    @Test
+    public void testForEach() {
+        Integer[] input = {1, 2, 3, 4, 5, 6, 7, 8, 9};
+        Iterator<Integer> expected = Stream.of(input).iterator();
+        Query<Integer> nrs = fromStream(Stream.of(1, 2, 3, 4, 5, 6, 7, 8, 9));
+        nrs.forEach(actual -> assertEquals(actual, expected.next()));
+        assertFalse(expected.hasNext());
+    }
+
+    @Test
+    public void testToSet() {
+        String[] input = {"a", "x", "v", "d", "g", "x", "j", "x", "y", "r", "y", "w", "y", "a", "e"};
+        long actual = of(input).toSet().size();
+        assertEquals(actual, 10);
+    }
+
+    @Test
+    public void testJoin() {
+        String[] input = {"a", "b", "c"};
+        String expected = "abc";
+        String actual = of(input).join();
+        assertEquals(actual, expected);
+    }
+
+    @Test
+    public void testReduce() {
+        String[] input = {"a", "b", "c"};
+        String expected = "abc";
+        String actual = of(input).reduce((p, c) -> p + c).orElseThrow();
+        assertEquals(actual, expected);
+    }
+
+    @Test
+    public void testReduceOnEmpty() {
+        String[] input = {};
+        assertTrue(of(input).reduce((p, c) -> p + c).isEmpty());
+    }
+
+    @Test
+    public void testReduceOnEmptyWithIdentity() {
+        String[] input = {};
+        String expected = "a";
+        String actual = of(input).reduce(expected, (p, c) -> p + c);
+        assertEquals(actual, expected);
+    }
+
+    @Test
+    public void testNoneMatchFail() {
+        boolean actual = Query.generate(() -> 1).noneMatch(integer -> integer == 1);
+        assertFalse(actual);
+    }
+
+    @Test
+    public void testNoneMatchSuccess() {
+        String[] input = {"a", "b", "c"};
+        assertTrue(of(input).noneMatch("d"::equals));
+    }
+
+    @Test
+    public void testFindAnySuccess() {
+        int[] i = new int[]{0};
+        Integer expected = 11;
+        Integer actual = Query.generate(() -> i[0]++)
+                              .filter(integer -> integer > 10)
+                              .findAny()
+                              .orElseThrow();
+        assertEquals(actual, expected);
+    }
+
+    @Test
+    public void testFindAnyFailure() {
+        String[] input = {"a", "b", "c"};
+        Optional<String> actual = of(input)
+                .filter("d"::equals)
+                .findAny();
+        assertFalse(actual.isPresent());
+    }
+
+    @Test
+    public void testBulkMin() {
+        String [] arrange = {"a", "x", "v", "d","g","j","y","r","w","a","e"};
+        String expected = "a";
+        String actual = of(arrange)
+                .min(String.CASE_INSENSITIVE_ORDER)
+                .orElseThrow();
+        assertEquals(actual, expected);
     }
 }

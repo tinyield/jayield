@@ -16,10 +16,32 @@
 
 package org.jayield;
 
+import java.util.ArrayList;
+import java.util.Comparator;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Optional;
+import java.util.Set;
+import java.util.Spliterator;
+import java.util.Spliterators.AbstractSpliterator;
+import java.util.function.BiConsumer;
+import java.util.function.BiFunction;
+import java.util.function.BinaryOperator;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.IntFunction;
+import java.util.function.Predicate;
+import java.util.function.Supplier;
+import java.util.function.ToIntFunction;
+import java.util.function.UnaryOperator;
+import java.util.stream.Stream;
+import java.util.stream.StreamSupport;
+
 import org.jayield.advs.AdvancerArray;
 import org.jayield.advs.AdvancerDistinct;
 import org.jayield.advs.AdvancerFilter;
 import org.jayield.advs.AdvancerFlatMap;
+import org.jayield.advs.AdvancerGenerate;
 import org.jayield.advs.AdvancerIterate;
 import org.jayield.advs.AdvancerLimit;
 import org.jayield.advs.AdvancerList;
@@ -32,20 +54,6 @@ import org.jayield.advs.AdvancerThen;
 import org.jayield.advs.AdvancerZip;
 import org.jayield.boxes.BoolBox;
 import org.jayield.boxes.Box;
-
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.Optional;
-import java.util.Spliterator;
-import java.util.function.BiFunction;
-import java.util.function.Consumer;
-import java.util.function.Function;
-import java.util.function.Predicate;
-import java.util.function.ToIntFunction;
-import java.util.function.UnaryOperator;
-import java.util.stream.Stream;
-import java.util.stream.StreamSupport;
 
 /**
  * A sequence of elements supporting sequential operations.
@@ -239,11 +247,11 @@ public class Query<T> {
      * Returns an array containing the elements of this query.
      */
     public final Object[] toArray() {
-        return this.toList().toArray();
+        return this.toArray(Object[]::new);
     }
 
     public final Stream<T> toStream() {
-        Spliterator<T> iter = new Spliterator<>() {
+        Spliterator<T> iter = new AbstractSpliterator<T>(Long.MAX_VALUE, Spliterator.ORDERED) {
             @Override
             public boolean tryAdvance(Consumer<? super T> action) {
                 if(!adv.hasNext()) return false;
@@ -254,21 +262,6 @@ public class Query<T> {
             @Override
             public void forEachRemaining(Consumer<? super T> action) {
                 adv.traverse(action::accept);
-            }
-
-            @Override
-            public Spliterator<T> trySplit() {
-                return null;
-            }
-
-            @Override
-            public long estimateSize() {
-                return Long.MAX_VALUE;
-            }
-
-            @Override
-            public int characteristics() {
-                return Spliterator.ORDERED;
             }
         };
         return StreamSupport.stream(iter, false);
@@ -319,9 +312,9 @@ public class Query<T> {
         return found.isTrue();
     }
     /**
-     * Returns whether all elements of this stream match the provided
+     * Returns whether all elements of this query match the provided
      * predicate. May not evaluate the predicate on all elements if not
-     * necessary for determining the result. If the stream is empty then
+     * necessary for determining the result. If the query is empty then
      * {@code true} is returned and the predicate is not evaluated.
      */
     public final boolean allMatch(Predicate<? super T> p) {
@@ -351,4 +344,107 @@ public class Query<T> {
         this.traverse(c);
         return c.n;
     }
+
+    /**
+     * Returns an optional with the resulting reduction of the elements of this query,
+     * if a reduction can be mate, using the provided accumulator.
+     */
+    public Optional<T> reduce(BinaryOperator<T> accumulator) {
+        if (this.hasNext()) {
+            return Optional.ofNullable(this.reduce(this.next(), accumulator));
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    /**
+     * Returns the result of the reduction of the elements of this query,
+     * using the provided identity value and accumulator.
+     */
+    public T reduce(T identity, BinaryOperator<T> accumulator) {
+        Box<T> result = new Box<>();
+        result.setValue(identity);
+        this.traverse(elem -> result.setValue(accumulator.apply(result.getValue(), elem)));
+        return result.getValue();
+    }
+
+    /**
+     * Yields elements sequentially in the current thread,
+     * until all elements have been processed or an
+     * exception is thrown.
+     */
+    public final void forEach(Yield<? super T> yield) {
+        this.traverse(yield);
+    }
+
+    /**
+     * Returns a {@link Set} containing the elements of this query.
+     */
+    public final Set<T> toSet() {
+        Set<T> data = new HashSet<>();
+        this.traverse(data::add);
+        return data;
+    }
+
+    /**
+     * Returns an array containing the elements of this query.
+     */
+    public final <U> U[] toArray(IntFunction<U[]> generator) {
+        return this.toList().toArray(generator);
+    }
+
+    /**
+     * Returns the concatenation of the input elements into a String, in encounter order.
+     */
+    public final String join() {
+        return this.map(String::valueOf)
+                   .collect(StringBuilder::new, StringBuilder::append)
+                   .toString();
+    }
+
+    /**
+     * Returns an {@link Optional} describing any element of this query,
+     * or an empty {@code Optional} if this query is empty.
+     */
+    public final Optional<T> findAny(){
+        return this.findFirst();
+    }
+
+    /**
+     * Returns the minimum element of this query according to the provided
+     * {@code Comparator}.  This is a special case of a reduction.
+     */
+    public final Optional<T> min(Comparator<? super T> cmp) {
+        return this.max((a, b) -> cmp.compare(a, b) * -1);
+    }
+
+    /**
+     * Returns whether no elements of this query match the provided
+     * predicate. May not evaluate the predicate on all elements if not
+     * necessary for determining the result. If the query is empty then
+     * {@code true} is returned and the predicate is not evaluated.
+     */
+    public final boolean noneMatch(Predicate<? super T> p) {
+        return !this.anyMatch(p);
+    }
+
+    /**
+     * Returns an infinite sequential unordered {@code Query}
+     * where each element is generated by the provided Supplier.
+     */
+    public static <U> Query<U> generate(Supplier<U> s) {
+        return new Query<>(new AdvancerGenerate<>(s));
+    }
+
+    /**
+     * Performs a mutable reduction operation on the elements of this {@code Query}.
+     * A mutable reduction is one in which the reduced value is a mutable result container, such as an ArrayList,
+     * and elements are incorporated by updating the state of the result rather than by replacing the result.
+     */
+    public <R> R collect(Supplier<R> supplier, BiConsumer<R, ? super T> accumulator) {
+        R result = supplier.get();
+        this.traverse(elem -> accumulator.accept(result, elem));
+        return result;
+    }
+
 }
