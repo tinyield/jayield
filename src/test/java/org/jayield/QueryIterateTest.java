@@ -189,4 +189,14 @@ public class QueryIterateTest {
         while(pipe.hasNext()) { actual.add(pipe.next()); }
         assertEquals(actual.toArray(String[]::new), expected);
     }
+
+    @Test
+    public void testSorted() {
+        String[] input = new String[]{"b", "d", "a", "c"};
+        String[] expected = new String[]{"a", "b", "c", "d"};
+        Query<String> pipe = Query.of(input).sorted(String::compareTo);
+        List<String> actual = new ArrayList<>();
+        while(pipe.hasNext()) { actual.add(pipe.next()); }
+        assertEquals(actual.toArray(String[]::new), expected);
+    }
 }

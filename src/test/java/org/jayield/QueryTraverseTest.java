@@ -334,4 +334,12 @@ public class QueryTraverseTest {
         String[] actual = of(input1).concat(of(input2)).toArray(String[]::new);
         assertEquals(actual, expected);
     }
+
+    @Test
+    public void testSorted() {
+        String[] input = new String[]{"b", "d", "a", "c"};
+        String[] expected = new String[]{"a", "b", "c", "d"};
+        String[] actual = Query.of(input).sorted(String::compareTo).toArray(String[]::new);
+        assertEquals(actual, expected);
+    }
 }
