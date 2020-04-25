@@ -199,4 +199,15 @@ public class QueryIterateTest {
         while(pipe.hasNext()) { actual.add(pipe.next()); }
         assertEquals(actual.toArray(String[]::new), expected);
     }
+
+    @Test
+    public void testDropWhile() {
+        String delimiter = "c";
+        String[] input = new String[]{"a", "b", delimiter, "d", "e"};
+        String[] expected = new String[]{delimiter, "d", "e"};
+        Query<String> pipe = Query.of(input).dropWhile(s -> !delimiter.equals(s));
+        List<String> actual = new ArrayList<>();
+        while(pipe.hasNext()) { actual.add(pipe.next()); }
+        assertEquals(actual.toArray(String[]::new), expected);
+    }
 }

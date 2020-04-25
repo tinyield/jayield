@@ -339,7 +339,20 @@ public class QueryTraverseTest {
     public void testSorted() {
         String[] input = new String[]{"b", "d", "a", "c"};
         String[] expected = new String[]{"a", "b", "c", "d"};
-        String[] actual = Query.of(input).sorted(String::compareTo).toArray(String[]::new);
+        String[] actual = Query.of(input)
+                               .sorted(String::compareTo)
+                               .toArray(String[]::new);
+        assertEquals(actual, expected);
+    }
+
+    @Test
+    public void testDropWhile() {
+        String delimiter = "c";
+        String[] input = new String[]{"a", "b", delimiter, "d", "e"};
+        String[] expected = new String[]{delimiter, "d", "e"};
+        String[] actual = Query.of(input)
+                               .dropWhile(s -> !delimiter.equals(s))
+                               .toArray(String[]::new);
         assertEquals(actual, expected);
     }
 }

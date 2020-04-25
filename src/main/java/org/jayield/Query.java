@@ -41,6 +41,7 @@ import java.util.stream.StreamSupport;
 import org.jayield.advs.AdvancerArray;
 import org.jayield.advs.AdvancerConcat;
 import org.jayield.advs.AdvancerDistinct;
+import org.jayield.advs.AdvancerDropWhile;
 import org.jayield.advs.AdvancerFilter;
 import org.jayield.advs.AdvancerFlatMap;
 import org.jayield.advs.AdvancerGenerate;
@@ -464,11 +465,18 @@ public class Query<T> {
      *
      * This is a stateful intermediate operation.
      */
-
     public final Query<T> sorted(Comparator<T> comparator) {
         T[] state = (T[]) this.toArray();
         Arrays.sort(state, comparator);
         return new Query<>(new AdvancerArray<>(state));
+    }
+
+    /**
+     * Returns a {@code Query} consisting of the remaining elements of this query
+     * after discarding the first sequence of elements that match the given Predicate.
+     */
+    public final Query<T> dropWhile(Predicate<T> predicate) {
+        return new Query<>(new AdvancerDropWhile<>(this, predicate));
     }
 
 }
