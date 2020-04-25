@@ -178,4 +178,15 @@ public class QueryIterateTest {
         while(pipe.hasNext()) { actual = pipe.next(); }
         assertEquals(actual, expected);
     }
+
+    @Test
+    public void testConcat() {
+        String[] input1 = new String[]{"a", "b"};
+        String[] input2 = new String[]{"c", "d"};
+        String[] expected = new String[]{"a", "b", "c", "d"};
+        Query<String> pipe = Query.of(input1).concat(Query.of(input2));
+        List<String> actual = new ArrayList<>();
+        while(pipe.hasNext()) { actual.add(pipe.next()); }
+        assertEquals(actual.toArray(String[]::new), expected);
+    }
 }

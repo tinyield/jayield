@@ -38,6 +38,7 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import org.jayield.advs.AdvancerArray;
+import org.jayield.advs.AdvancerConcat;
 import org.jayield.advs.AdvancerDistinct;
 import org.jayield.advs.AdvancerFilter;
 import org.jayield.advs.AdvancerFlatMap;
@@ -445,6 +446,15 @@ public class Query<T> {
         R result = supplier.get();
         this.traverse(elem -> accumulator.accept(result, elem));
         return result;
+    }
+
+    /**
+     * Creates a concatenated {@code Query} in which the elements are
+     * all the elements of this {@code Query} followed by all the
+     * elements of the other {@code Query}.
+     */
+    public final Query<T> concat(Query<T> other) {
+        return new Query<>(new AdvancerConcat<>(this, other));
     }
 
 }

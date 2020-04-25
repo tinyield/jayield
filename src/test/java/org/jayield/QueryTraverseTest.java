@@ -325,4 +325,13 @@ public class QueryTraverseTest {
                 .orElseThrow();
         assertEquals(actual, expected);
     }
+
+    @Test
+    public void testConcat() {
+        String[] input1 = new String[]{"a", "b"};
+        String[] input2 = new String[]{"c", "d"};
+        String[] expected = new String[]{"a", "b", "c", "d"};
+        String[] actual = of(input1).concat(of(input2)).toArray(String[]::new);
+        assertEquals(actual, expected);
+    }
 }
