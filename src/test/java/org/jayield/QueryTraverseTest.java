@@ -22,6 +22,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
@@ -162,6 +163,13 @@ public class QueryTraverseTest {
         assertEquals(1, actual);
     }
 
+    @Test
+    public void testShortCircuitOnEmptySequence() {
+        Integer[] arrange = {};
+        Optional<Integer> actual = of(arrange)
+                .findFirst();
+        assertTrue(actual.isEmpty());
+    }
 
     @Test
     public void testBulkDistinctCount() {

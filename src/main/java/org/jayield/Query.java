@@ -38,6 +38,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 import java.util.Spliterator;
+import java.util.Spliterators.AbstractSpliterator;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -243,7 +244,7 @@ public class Query<T> {
     }
 
     public final Stream<T> toStream() {
-        Spliterator<T> iter = new Spliterator<>() {
+        Spliterator<T> iter = new AbstractSpliterator<T>(Long.MAX_VALUE, Spliterator.ORDERED) {
             @Override
             public boolean tryAdvance(Consumer<? super T> action) {
                 if(!adv.hasNext()) return false;
@@ -254,21 +255,6 @@ public class Query<T> {
             @Override
             public void forEachRemaining(Consumer<? super T> action) {
                 adv.traverse(action::accept);
-            }
-
-            @Override
-            public Spliterator<T> trySplit() {
-                return null;
-            }
-
-            @Override
-            public long estimateSize() {
-                return Long.MAX_VALUE;
-            }
-
-            @Override
-            public int characteristics() {
-                return Spliterator.ORDERED;
             }
         };
         return StreamSupport.stream(iter, false);
