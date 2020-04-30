@@ -37,12 +37,12 @@ such as C\#.
 
 ```java
 class Queries {
-  private Object prev = null;
+  private U prev = null;
   <U> Traverser<U>  collapse(Query<U> src) {
     return yield -> {
       src.traverse(item -> {
         if (prev == null || !prev.equals(item))
-        yield.ret((U) (prev = item));
+        yield.ret(prev = item);
       });
     };
   }
