@@ -16,10 +16,10 @@
 
 package org.jayield.advs;
 
+import java.util.function.BiFunction;
+
 import org.jayield.Advancer;
 import org.jayield.Yield;
-
-import java.util.function.BiFunction;
 
 public class AdvancerZip<T, U, R> implements Advancer<R> {
     private final Advancer<T> upstream;

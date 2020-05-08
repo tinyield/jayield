@@ -16,14 +16,14 @@
 
 package org.jayield.advs;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.function.Function;
+
 import org.jayield.Advancer;
 import org.jayield.Query;
 import org.jayield.Traverser;
 import org.jayield.Yield;
-
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.function.Function;
 
 public class AdvancerThen<T, R> implements Advancer<R> {
     private Query<T> upstream;

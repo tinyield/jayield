@@ -16,10 +16,10 @@
 
 package org.jayield.advs;
 
+import java.util.NoSuchElementException;
+
 import org.jayield.Advancer;
 import org.jayield.Yield;
-
-import java.util.NoSuchElementException;
 
 public class AdvancerArray<U> implements Advancer<U> {
     private final U[] data;

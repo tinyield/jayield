@@ -16,9 +16,9 @@
 
 package org.jayield.advs;
 
-import org.jayield.Advancer;
-
 import java.util.NoSuchElementException;
+
+import org.jayield.Advancer;
 
 public abstract class AbstractAdvancer<T> implements Advancer<T> {
     boolean moved;
@@ -45,9 +45,15 @@ public abstract class AbstractAdvancer<T> implements Advancer<T> {
 
     @Override
     public final T next() {
-        if(!hasNext()) throw new NoSuchElementException("No more elements available on iteration!");
-        moved = false;
+        if (!hasNext()) {
+            throw new NoSuchElementException("No more elements available on iteration!");
+        }
+        prepareIteration();
         return curr;
+    }
+
+    protected void prepareIteration() {
+        moved = false;
     }
 
 }

@@ -17,19 +17,19 @@
 package org.jayield;
 
 import static java.util.Arrays.asList;
-import static org.jayield.Query.fromStream;
+import static org.jayield.Query.of;
 import static org.jayield.UserExt.collapse;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertTrue;
+import static org.testng.internal.junit.ArrayAsserts.assertArrayEquals;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Spliterator;
-import java.util.stream.Stream;
 
+import org.jayield.primitives.intgr.IntQuery;
+import org.testng.AssertJUnit;
 import org.testng.annotations.Test;
 
 /**
@@ -177,5 +177,53 @@ public class QueryIterateTest {
         int actual = 0;
         while(pipe.hasNext()) { actual = pipe.next(); }
         assertEquals(actual, expected);
+    }
+
+    @Test
+    public void testConcat() {
+        String[] input1 = new String[]{"a", "b"};
+        String[] input2 = new String[]{"c", "d"};
+        String[] expected = new String[]{"a", "b", "c", "d"};
+        Query<String> pipe = Query.of(input1).concat(Query.of(input2));
+        List<String> actual = new ArrayList<>();
+        while(pipe.hasNext()) { actual.add(pipe.next()); }
+        assertEquals(actual.toArray(String[]::new), expected);
+    }
+
+    @Test
+    public void testSorted() {
+        String[] input = new String[]{"b", "d", "a", "c"};
+        String[] expected = new String[]{"a", "b", "c", "d"};
+        Query<String> pipe = Query.of(input).sorted(String::compareTo);
+        List<String> actual = new ArrayList<>();
+        while(pipe.hasNext()) { actual.add(pipe.next()); }
+        assertEquals(actual.toArray(String[]::new), expected);
+    }
+
+    @Test
+    public void testDropWhile() {
+        String delimiter = "c";
+        String[] input = new String[]{"a", "b", delimiter, "d", "e"};
+        String[] expected = new String[]{delimiter, "d", "e"};
+        Query<String> pipe = Query.of(input).dropWhile(s -> !delimiter.equals(s));
+        List<String> actual = new ArrayList<>();
+        while(pipe.hasNext()) { actual.add(pipe.next()); }
+        assertEquals(actual.toArray(String[]::new), expected);
+    }
+
+    @Test
+    public void testMapToInt() {
+        int[] expected = {1, 2, 3};
+        String[] arrange = {"1", "2", "3"};
+        int[] actual = new int[expected.length];
+        IntQuery pipe = of(arrange)
+                .mapToInt(Integer::valueOf);
+        int index = 0;
+        while (pipe.hasNext()) {
+            AssertJUnit.assertTrue(index < expected.length);
+            actual[index++] = pipe.next();
+        }
+        AssertJUnit.assertEquals(expected.length, index);
+        assertArrayEquals(expected, actual);
     }
 }

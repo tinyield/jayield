@@ -16,21 +16,15 @@
 
 package org.jayield;
 
-import org.testng.annotations.Test;
+import static org.jayield.Query.fromStream;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Iterator;
-import java.util.List;
 import java.util.Spliterator;
 import java.util.stream.Stream;
 
-import static java.util.Arrays.asList;
-import static org.jayield.Query.fromStream;
-import static org.jayield.UserExt.collapse;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import org.testng.annotations.Test;
 
 /**
  * @author Miguel Gamboa

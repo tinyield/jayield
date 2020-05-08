@@ -16,11 +16,11 @@
 
 package org.jayield.advs;
 
-import org.jayield.Advancer;
-import org.jayield.Yield;
-
 import java.util.Iterator;
 import java.util.List;
+
+import org.jayield.Advancer;
+import org.jayield.Yield;
 
 public class AdvancerList<U> implements Advancer<U> {
     private final List<U> data;

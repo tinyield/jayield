@@ -17,6 +17,7 @@
 package org.jayield;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
@@ -38,7 +39,9 @@ import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
 import org.jayield.advs.AdvancerArray;
+import org.jayield.advs.AdvancerConcat;
 import org.jayield.advs.AdvancerDistinct;
+import org.jayield.advs.AdvancerDropWhile;
 import org.jayield.advs.AdvancerFilter;
 import org.jayield.advs.AdvancerFlatMap;
 import org.jayield.advs.AdvancerGenerate;
@@ -54,6 +57,8 @@ import org.jayield.advs.AdvancerThen;
 import org.jayield.advs.AdvancerZip;
 import org.jayield.boxes.BoolBox;
 import org.jayield.boxes.Box;
+import org.jayield.primitives.intgr.IntAdvancer;
+import org.jayield.primitives.intgr.IntQuery;
 
 /**
  * A sequence of elements supporting sequential operations.
@@ -159,11 +164,14 @@ public class Query<T> {
     }
 
     /**
-     * !!!! Deprecated !!!! Refactor it according to generic Advancer.
+     * Returns a {@link IntQuery} with the elements of this {@code Query} mapped by
+     * a {@link ToIntFunction}
+     *
+     * @param mapper
+     *         ToIntFunction used to map elements of this {@code Query} to int
      */
     public final IntQuery mapToInt(ToIntFunction<? super T> mapper) {
-        return new IntQuery(yield ->
-                this.traverse(e -> yield.ret(mapper.applyAsInt(e))));
+        return new IntQuery(IntAdvancer.from(adv, mapper));
     }
 
     /**
@@ -347,7 +355,7 @@ public class Query<T> {
 
     /**
      * Returns an optional with the resulting reduction of the elements of this query,
-     * if a reduction can be mate, using the provided accumulator.
+     * if a reduction can be made, using the provided accumulator.
      */
     public Optional<T> reduce(BinaryOperator<T> accumulator) {
         if (this.hasNext()) {
@@ -445,6 +453,35 @@ public class Query<T> {
         R result = supplier.get();
         this.traverse(elem -> accumulator.accept(result, elem));
         return result;
+    }
+
+    /**
+     * Creates a concatenated {@code Query} in which the elements are
+     * all the elements of this {@code Query} followed by all the
+     * elements of the other {@code Query}.
+     */
+    public final Query<T> concat(Query<T> other) {
+        return new Query<>(new AdvancerConcat<>(this, other));
+    }
+
+    /**
+     * Returns a {@code Query} consisting of the elements of this {@code Query},
+     * sorted according to the provided Comparator.
+     *
+     * This is a stateful intermediate operation.
+     */
+    public final Query<T> sorted(Comparator<T> comparator) {
+        T[] state = (T[]) this.toArray();
+        Arrays.sort(state, comparator);
+        return new Query<>(new AdvancerArray<>(state));
+    }
+
+    /**
+     * Returns a {@code Query} consisting of the remaining elements of this query
+     * after discarding the first sequence of elements that match the given Predicate.
+     */
+    public final Query<T> dropWhile(Predicate<T> predicate) {
+        return new Query<>(new AdvancerDropWhile<>(this, predicate));
     }
 
 }
