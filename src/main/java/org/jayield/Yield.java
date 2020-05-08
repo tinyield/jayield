@@ -22,6 +22,7 @@ package org.jayield;
  * @author Miguel Gamboa
  *         created on 03-06-2017
  */
+@FunctionalInterface
 public interface Yield<T> {
     /**
      * Auxiliary function for traversal short circuit.

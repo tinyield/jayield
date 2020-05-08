@@ -14,14 +14,36 @@
  * limitations under the License.
  */
 
-package org.jayield;
+package org.jayield.boxes;
 
-/**
- * Equivalent to {@code IntConsumer} with a yield semantics.
- *
- * @author Miguel Gamboa
- *         created on 03-06-2017
- */
-public interface IntYield {
-    void ret(int item);
+public class LongBox {
+    private long value;
+    private boolean isPresent;
+
+    public LongBox() {
+        this(Long.MIN_VALUE, false);
+    }
+
+
+    public LongBox(long value, boolean isPresent) {
+        this.value = value;
+        this.isPresent = isPresent;
+    }
+
+    public long getValue() {
+        return value;
+    }
+
+    public void setValue(long value) {
+        this.value = value;
+    }
+
+    public boolean isPresent() {
+        return isPresent;
+    }
+
+    public void turnPresent(long value) {
+        this.value = value;
+        isPresent = true;
+    }
 }

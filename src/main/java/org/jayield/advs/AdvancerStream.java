@@ -16,11 +16,11 @@
 
 package org.jayield.advs;
 
-import org.jayield.Advancer;
-import org.jayield.Yield;
-
 import java.util.Iterator;
 import java.util.stream.Stream;
+
+import org.jayield.Advancer;
+import org.jayield.Yield;
 
 public class AdvancerStream<U> implements Advancer<U> {
     private final Stream<U> upstream;

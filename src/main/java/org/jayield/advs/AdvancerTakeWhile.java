@@ -16,10 +16,10 @@
 
 package org.jayield.advs;
 
+import java.util.function.Predicate;
+
 import org.jayield.Query;
 import org.jayield.Yield;
-
-import java.util.function.Predicate;
 
 public class AdvancerTakeWhile<T> extends AbstractAdvancer<T> {
     private final Query<T> upstream;

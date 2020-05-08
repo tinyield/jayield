@@ -16,11 +16,11 @@
 
 package org.jayield.advs;
 
-import org.jayield.Advancer;
-import org.jayield.Yield;
-
 import java.util.NoSuchElementException;
 import java.util.function.UnaryOperator;
+
+import org.jayield.Advancer;
+import org.jayield.Yield;
 
 public class AdvancerIterate<U> implements Advancer<U> {
     private final UnaryOperator<U> f;

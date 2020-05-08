@@ -14,15 +14,24 @@
  * limitations under the License.
  */
 
-package org.jayield;
+package org.jayield.primitives.lng;
+
+import org.jayield.boxes.LongBox;
 
 /**
  * @author Miguel Gamboa
- *         created on 03-07-2017
+ * created on 03-06-2017
  */
-public interface IntTraverser {
-
-    void traverse(IntYield yield);
-
-
+public class UserExt {
+    static LongTraverser collapse(LongQuery src) {
+        return yield -> {
+            LongBox box = new LongBox();
+            src.traverse(item -> {
+                if (!box.isPresent() || box.getValue() != item) {
+                    box.turnPresent(item);
+                    yield.ret(item);
+                }
+            });
+        };
+    }
 }

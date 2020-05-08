@@ -16,10 +16,10 @@
 
 package org.jayield.advs;
 
+import java.util.function.Function;
+
 import org.jayield.Advancer;
 import org.jayield.Yield;
-
-import java.util.function.Function;
 
 public class AdvancerMap<T, R> implements Advancer<R> {
 

@@ -16,10 +16,10 @@
 
 package org.jayield.advs;
 
+import java.util.function.Consumer;
+
 import org.jayield.Advancer;
 import org.jayield.Yield;
-
-import java.util.function.Consumer;
 
 public class AdvancerPeek<T> implements Advancer<T> {
     private final Advancer<T> upstream;

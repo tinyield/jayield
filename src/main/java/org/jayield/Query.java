@@ -57,6 +57,8 @@ import org.jayield.advs.AdvancerThen;
 import org.jayield.advs.AdvancerZip;
 import org.jayield.boxes.BoolBox;
 import org.jayield.boxes.Box;
+import org.jayield.primitives.intgr.IntAdvancer;
+import org.jayield.primitives.intgr.IntQuery;
 
 /**
  * A sequence of elements supporting sequential operations.
@@ -162,11 +164,14 @@ public class Query<T> {
     }
 
     /**
-     * !!!! Deprecated !!!! Refactor it according to generic Advancer.
+     * Returns a {@link IntQuery} with the elements of this {@code Query} mapped by
+     * a {@link ToIntFunction}
+     *
+     * @param mapper
+     *         ToIntFunction used to map elements of this {@code Query} to int
      */
     public final IntQuery mapToInt(ToIntFunction<? super T> mapper) {
-        return new IntQuery(yield ->
-                this.traverse(e -> yield.ret(mapper.applyAsInt(e))));
+        return new IntQuery(IntAdvancer.from(adv, mapper));
     }
 
     /**
@@ -350,7 +355,7 @@ public class Query<T> {
 
     /**
      * Returns an optional with the resulting reduction of the elements of this query,
-     * if a reduction can be mate, using the provided accumulator.
+     * if a reduction can be made, using the provided accumulator.
      */
     public Optional<T> reduce(BinaryOperator<T> accumulator) {
         if (this.hasNext()) {

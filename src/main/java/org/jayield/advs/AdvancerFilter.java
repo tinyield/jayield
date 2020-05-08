@@ -16,10 +16,10 @@
 
 package org.jayield.advs;
 
+import java.util.function.Predicate;
+
 import org.jayield.Advancer;
 import org.jayield.Yield;
-
-import java.util.function.Predicate;
 
 public class AdvancerFilter<T> extends AbstractAdvancer<T> {
     private final Advancer<T> upstream;
