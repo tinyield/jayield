@@ -121,7 +121,7 @@ In order to include it to your Maven project, simply add this dependency:
 <dependency>
     <groupId>com.github.jayield</groupId>
     <artifactId>jayield</artifactId>
-    <version>1.0.4</version>
+    <version>1.2.0</version>
 </dependency>
 ```
 
