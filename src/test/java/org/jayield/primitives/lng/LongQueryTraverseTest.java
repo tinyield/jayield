@@ -30,6 +30,7 @@ import java.util.PrimitiveIterator;
 import java.util.stream.LongStream;
 
 import org.jayield.boxes.IntBox;
+import org.jayield.primitives.intgr.IntQuery;
 import org.testng.annotations.Test;
 
 /**
@@ -138,7 +139,7 @@ public class LongQueryTraverseTest {
     }
 
     @Test
-    public void testAllMatchFailOnLongruder() {
+    public void testAllMatchFailOnIntruder() {
         long[] arrange = {2, 4, 6, 7, 10, 12};
         long[] count = {0};
         int expectedCount = 4;
@@ -196,6 +197,18 @@ public class LongQueryTraverseTest {
                 .max()
                 .orElseThrow();
         assertEquals(actual, expected);
+    }
+
+    @Test
+    public void testBulkMaxOnEmpty() {
+        long[] arrange = {};
+        assertFalse(of(arrange).max().isPresent());
+    }
+
+    @Test
+    public void testBulkMinOnEmpty() {
+        long[] arrange = {};
+        assertFalse(of(arrange).min().isPresent());
     }
 
     @Test

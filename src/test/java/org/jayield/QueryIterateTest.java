@@ -28,7 +28,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import org.jayield.primitives.dbl.DoubleQuery;
 import org.jayield.primitives.intgr.IntQuery;
+import org.jayield.primitives.lng.LongQuery;
 import org.testng.AssertJUnit;
 import org.testng.annotations.Test;
 
@@ -225,5 +227,37 @@ public class QueryIterateTest {
         }
         AssertJUnit.assertEquals(expected.length, index);
         assertArrayEquals(expected, actual);
+    }
+
+    @Test
+    public void testMapToLong() {
+        long[] expected = {1, 2, 3};
+        String[] arrange = {"1", "2", "3"};
+        long[] actual = new long[expected.length];
+        LongQuery pipe = of(arrange)
+                .mapToLong(Long::valueOf);
+        int index = 0;
+        while (pipe.hasNext()) {
+            AssertJUnit.assertTrue(index < expected.length);
+            actual[index++] = pipe.next();
+        }
+        AssertJUnit.assertEquals(expected.length, index);
+        assertArrayEquals(expected, actual);
+    }
+
+    @Test
+    public void testMapToDouble() {
+        double[] expected = {1, 2, 3};
+        String[] arrange = {"1", "2", "3"};
+        double[] actual = new double[expected.length];
+        DoubleQuery pipe = of(arrange)
+                .mapToDouble(Double::valueOf);
+        int index = 0;
+        while (pipe.hasNext()) {
+            AssertJUnit.assertTrue(index < expected.length);
+            actual[index++] = pipe.next();
+        }
+        AssertJUnit.assertEquals(expected.length, index);
+        assertArrayEquals(expected, actual, 0);
     }
 }

@@ -199,6 +199,18 @@ public class DoubleQueryTraverseTest {
     }
 
     @Test
+    public void testBulkMaxOnEmpty() {
+        double[] arrange = {};
+        assertFalse(of(arrange).max().isPresent());
+    }
+
+    @Test
+    public void testBulkMinOnEmpty() {
+        double[] arrange = {};
+        assertFalse(of(arrange).min().isPresent());
+    }
+
+    @Test
     public void testBulkIterateLimitMax() {
         double expected = 13;
         double actual = iterate(1, n -> n + 2)

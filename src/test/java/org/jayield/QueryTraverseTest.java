@@ -193,12 +193,35 @@ public class QueryTraverseTest {
 
     @Test
     public void testBulkMaxInt() {
-        Integer[] arrange = {7, 7, 8, 31, 9, 9, 11, 11, 7, 23, 31, 23};
+        int expected = 31;
+        Integer[] arrange = {7, 7, 8, expected, 9, 9, 11, 11, 7, 23, expected, 23};
         int actual = of(arrange)
                 .mapToInt(n -> n)
                 .max()
-                .getAsInt();
-        assertEquals(31, actual);
+                .orElseThrow();
+        assertEquals(actual, expected);
+    }
+
+    @Test
+    public void testBulkMaxLong() {
+        int expected = 31;
+        Integer[] arrange = {7, 7, 8, expected, 9, 9, 11, 11, 7, 23, expected, 23};
+        long actual = of(arrange)
+                .mapToLong(n -> n)
+                .max()
+                .orElseThrow();
+        assertEquals(actual, expected);
+    }
+
+    @Test
+    public void testBulkMaxDouble() {
+        double expected = 31.0;
+        Double[] arrange = {7D, 7D, 8D, expected, 9D, 9D, 11D, 11D, 7D, 23D, expected, 23D};
+        double actual = of(arrange)
+                .mapToDouble(n -> n)
+                .max()
+                .orElseThrow();
+        assertEquals(actual, expected);
     }
 
     @Test
