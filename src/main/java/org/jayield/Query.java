@@ -33,7 +33,9 @@ import java.util.function.Function;
 import java.util.function.IntFunction;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import java.util.function.ToDoubleFunction;
 import java.util.function.ToIntFunction;
+import java.util.function.ToLongFunction;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
@@ -57,8 +59,12 @@ import org.jayield.advs.AdvancerThen;
 import org.jayield.advs.AdvancerZip;
 import org.jayield.boxes.BoolBox;
 import org.jayield.boxes.Box;
+import org.jayield.primitives.dbl.DoubleAdvancer;
+import org.jayield.primitives.dbl.DoubleQuery;
 import org.jayield.primitives.intgr.IntAdvancer;
 import org.jayield.primitives.intgr.IntQuery;
+import org.jayield.primitives.lng.LongAdvancer;
+import org.jayield.primitives.lng.LongQuery;
 
 /**
  * A sequence of elements supporting sequential operations.
@@ -172,6 +178,28 @@ public class Query<T> {
      */
     public final IntQuery mapToInt(ToIntFunction<? super T> mapper) {
         return new IntQuery(IntAdvancer.from(adv, mapper));
+    }
+
+    /**
+     * Returns a {@link LongQuery} with the elements of this {@code Query} mapped by
+     * a {@link ToLongFunction}
+     *
+     * @param mapper
+     *         ToLongFunction used to map elements of this {@code Query} to long
+     */
+    public final LongQuery mapToLong(ToLongFunction<? super T> mapper) {
+        return new LongQuery(LongAdvancer.from(adv, mapper));
+    }
+
+    /**
+     * Returns a {@link DoubleQuery} with the elements of this {@code Query} mapped by
+     * a {@link ToDoubleFunction}
+     *
+     * @param mapper
+     *         ToLongFunction used to map elements of this {@code Query} to double
+     */
+    public final DoubleQuery mapToDouble(ToDoubleFunction<? super T> mapper) {
+        return new DoubleQuery(DoubleAdvancer.from(adv, mapper));
     }
 
     /**

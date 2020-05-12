@@ -30,6 +30,7 @@ import java.util.PrimitiveIterator;
 import java.util.stream.IntStream;
 
 import org.jayield.boxes.IntBox;
+import org.jayield.primitives.dbl.DoubleQuery;
 import org.testng.annotations.Test;
 
 /**
@@ -196,6 +197,19 @@ public class IntQueryTraverseTest {
                 .max()
                 .orElseThrow();
         assertEquals(actual, expected);
+    }
+
+
+    @Test
+    public void testBulkMaxOnEmpty() {
+        int[] arrange = {};
+        assertFalse(of(arrange).max().isPresent());
+    }
+
+    @Test
+    public void testBulkMinOnEmpty() {
+        int[] arrange = {};
+        assertFalse(of(arrange).min().isPresent());
     }
 
     @Test
