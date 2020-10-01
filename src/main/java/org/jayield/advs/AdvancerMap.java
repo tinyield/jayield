@@ -16,33 +16,30 @@
 
 package org.jayield.advs;
 
-import java.util.function.Function;
-
 import org.jayield.Advancer;
+import org.jayield.Query;
+import org.jayield.Traverser;
 import org.jayield.Yield;
 
-public class AdvancerMap<T, R> implements Advancer<R> {
+import java.util.function.Function;
 
-    private final Advancer<T> upstream;
+public class AdvancerMap<T, R> implements Advancer<R>, Traverser<R> {
+
+    private final Query<T> upstream;
     private final Function<? super T, ? extends R> mapper;
 
-    public AdvancerMap(Advancer<T> adv, Function<? super T, ? extends R> mapper) {
+    public AdvancerMap(Query<T> adv, Function<? super T, ? extends R> mapper) {
         this.upstream = adv;
         this.mapper = mapper;
     }
 
     @Override
-    public boolean hasNext() {
-        return upstream.hasNext();
-    }
-
-    @Override
-    public R next() {
-        return mapper.apply(upstream.next());
-    }
-
-    @Override
     public void traverse(Yield<? super R> yield) {
         upstream.traverse(e -> yield.ret(mapper.apply(e)));
+    }
+
+    @Override
+    public boolean tryAdvance(Yield<? super R> yield) {
+        return upstream.tryAdvance(item -> yield.ret(mapper.apply(item)));
     }
 }

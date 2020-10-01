@@ -148,7 +148,7 @@ public class LongQuery {
      *         LongFunction used to map the elements of this LongQuery
      */
     public <U> Query<U> mapToObj(LongFunction<? extends U> function) {
-        return new Query<>(new LongAdvancerMapToObj<>(adv, function));
+        return new Query<>(new LongAdvancerMapToObj<>(adv, function), trav);
     }
 
     /**
@@ -508,7 +508,7 @@ public class LongQuery {
      * each boxed to an Long.
      */
     public Query<Long> boxed() {
-        return new Query<>(adv);
+        return new Query<>(adv, trav);
     }
 
     public LongStream toStream() {

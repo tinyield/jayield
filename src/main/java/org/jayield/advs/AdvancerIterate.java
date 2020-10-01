@@ -16,13 +16,13 @@
 
 package org.jayield.advs;
 
-import java.util.NoSuchElementException;
-import java.util.function.UnaryOperator;
-
 import org.jayield.Advancer;
+import org.jayield.Traverser;
 import org.jayield.Yield;
 
-public class AdvancerIterate<U> implements Advancer<U> {
+import java.util.function.UnaryOperator;
+
+public class AdvancerIterate<U> implements Advancer<U>, Traverser<U> {
     private final UnaryOperator<U> f;
     private U prev;
 
@@ -32,27 +32,16 @@ public class AdvancerIterate<U> implements Advancer<U> {
     }
 
     @Override
-    public boolean hasNext() {
-        return true;
+    public void traverse(Yield<? super U> yield) {
+        for(U curr = prev; true; prev = f.apply(prev))
+            yield.ret(curr);
     }
 
     @Override
-    public U next() {
-        if(!hasNext()) throw new NoSuchElementException("No more elements available on iteration!");
+    public boolean tryAdvance(Yield<? super U> yield) {
         U curr = prev;
         prev = f.apply(prev);
-        return curr;
-    }
-
-    /**
-     * Continues from the point where tryAdvance or next left the
-     * internal iteration.
-     * @param yield
-     */
-    @Override
-    public void traverse(Yield<? super U> yield) {
-        for(U i = prev; true; i = f.apply(i)){
-            yield.ret(i);
-        }
+        yield.ret(curr);
+        return true;
     }
 }

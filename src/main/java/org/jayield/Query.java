@@ -16,6 +16,31 @@
 
 package org.jayield;
 
+import org.jayield.advs.AdvancerArray;
+import org.jayield.advs.AdvancerConcat;
+import org.jayield.advs.AdvancerDistinct;
+import org.jayield.advs.AdvancerDropWhile;
+import org.jayield.advs.AdvancerFilter;
+import org.jayield.advs.AdvancerFlatMap;
+import org.jayield.advs.AdvancerGenerate;
+import org.jayield.advs.AdvancerIterate;
+import org.jayield.advs.AdvancerLimit;
+import org.jayield.advs.AdvancerList;
+import org.jayield.advs.AdvancerMap;
+import org.jayield.advs.AdvancerPeek;
+import org.jayield.advs.AdvancerSkip;
+import org.jayield.advs.AdvancerStream;
+import org.jayield.advs.AdvancerTakeWhile;
+import org.jayield.advs.AdvancerZip;
+import org.jayield.boxes.BoolBox;
+import org.jayield.boxes.Box;
+import org.jayield.primitives.dbl.DoubleAdvancer;
+import org.jayield.primitives.dbl.DoubleQuery;
+import org.jayield.primitives.intgr.IntAdvancer;
+import org.jayield.primitives.intgr.IntQuery;
+import org.jayield.primitives.lng.LongAdvancer;
+import org.jayield.primitives.lng.LongQuery;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
@@ -40,32 +65,6 @@ import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import org.jayield.advs.AdvancerArray;
-import org.jayield.advs.AdvancerConcat;
-import org.jayield.advs.AdvancerDistinct;
-import org.jayield.advs.AdvancerDropWhile;
-import org.jayield.advs.AdvancerFilter;
-import org.jayield.advs.AdvancerFlatMap;
-import org.jayield.advs.AdvancerGenerate;
-import org.jayield.advs.AdvancerIterate;
-import org.jayield.advs.AdvancerLimit;
-import org.jayield.advs.AdvancerList;
-import org.jayield.advs.AdvancerMap;
-import org.jayield.advs.AdvancerPeek;
-import org.jayield.advs.AdvancerSkip;
-import org.jayield.advs.AdvancerStream;
-import org.jayield.advs.AdvancerTakeWhile;
-import org.jayield.advs.AdvancerThen;
-import org.jayield.advs.AdvancerZip;
-import org.jayield.boxes.BoolBox;
-import org.jayield.boxes.Box;
-import org.jayield.primitives.dbl.DoubleAdvancer;
-import org.jayield.primitives.dbl.DoubleQuery;
-import org.jayield.primitives.intgr.IntAdvancer;
-import org.jayield.primitives.intgr.IntQuery;
-import org.jayield.primitives.lng.LongAdvancer;
-import org.jayield.primitives.lng.LongQuery;
-
 /**
  * A sequence of elements supporting sequential operations.
  * Query operations are composed into a pipeline to perform
@@ -77,9 +76,15 @@ import org.jayield.primitives.lng.LongQuery;
 public class Query<T> {
 
     private final Advancer<T> adv;
+    private final Traverser<T> trav;
 
-    public Query(Advancer<T> adv) {
+    public Query(Advancer<T> adv, Traverser<T> trav) {
         this.adv = adv;
+        this.trav = trav;
+    }
+
+    public boolean hasAdvancer() {
+        return adv != null;
     }
 
     /**
@@ -88,22 +93,16 @@ public class Query<T> {
      * exception is thrown.
      */
     public final void traverse(Yield<? super T> yield) {
-        this.adv.traverse(yield);
+        this.trav.traverse(yield);
     }
     /**
-     * Returns {@code true} if the iteration has more elements.
-     * (In other words, returns {@code true} if {@link #next} would
-     * return an element rather than throwing an exception.)
+     * If a remaining element exists, yields that element through
+     * the given action.
      */
-    public final boolean hasNext() {
-        return this.adv.hasNext();
+    public boolean tryAdvance(Yield<? super T> action) {
+        return this.adv.tryAdvance(action);
     }
-    /**
-     * Returns the next element in the iteration.
-     */
-    public final T next() {
-        return this.adv.next();
-    }
+
 
     /**
      * Yields elements sequentially in the current thread,
@@ -112,7 +111,7 @@ public class Query<T> {
      */
     public final void shortCircuit(Yield<T> yield) {
         try{
-            this.adv.traverse(yield);
+            this.trav.traverse(yield);
         }catch(TraversableFinishError e){
             /* Proceed */
         }
@@ -123,7 +122,8 @@ public class Query<T> {
      * are the specified values in data parameter.
      */
     public static <U> Query<U> of(U...data) {
-        return new Query<>(new AdvancerArray<>(data));
+        AdvancerArray<U> adv = new AdvancerArray<>(data);
+        return new Query<>(adv, adv);
     }
 
     /**
@@ -131,7 +131,8 @@ public class Query<T> {
      * from the provided List data.
      */
     public static <U> Query<U> fromList(List<U> data) {
-        return new Query<>(new AdvancerList<>(data));
+        AdvancerList<U> adv = new AdvancerList<>(data);
+        return new Query<>(adv, adv);
     }
 
     /**
@@ -139,7 +140,8 @@ public class Query<T> {
      * from the provided stream data.
      */
     public static <U> Query<U> fromStream(Stream<U> data) {
-        return new Query<>(new AdvancerStream<>(data));
+        AdvancerStream<U> adv = new AdvancerStream<>(data);
+        return new Query<>(adv, adv);
     }
 
     /**
@@ -150,7 +152,8 @@ public class Query<T> {
      *
     */
     public static <U> Query<U> iterate(U seed, UnaryOperator<U> f) {
-        return new Query<>(new AdvancerIterate<>(seed, f));
+        AdvancerIterate<U> iter = new AdvancerIterate<>(seed, f);
+        return new Query<>(iter, iter);
     }
 
     /**
@@ -158,7 +161,8 @@ public class Query<T> {
      * function to the elements of this query.
      */
     public final <R> Query<R> map(Function<? super T,? extends R> mapper) {
-        return new Query<>(new AdvancerMap<>(adv, mapper));
+        AdvancerMap<T, R> map = new AdvancerMap<>(this, mapper);
+        return new Query<>(map, map);
     }
 
     /**
@@ -166,7 +170,8 @@ public class Query<T> {
      * sequences, producing a sequence of the results.
      */
     public final <U, R> Query<R> zip(Query<U> other, BiFunction<? super T, ? super U, ? extends R> zipper) {
-        return new Query<>(new AdvancerZip<>(this.adv, other.adv, zipper));
+        AdvancerZip<T, U, R> zip = new AdvancerZip<>(this, other, zipper);
+        return new Query<>(zip, zip);
     }
 
     /**
@@ -207,7 +212,8 @@ public class Query<T> {
      * the given predicate.
      */
     public final Query<T> filter(Predicate<? super T> p) {
-        return new Query<>(new AdvancerFilter<>(adv, p));
+        AdvancerFilter<T> filter = new AdvancerFilter<>(this, p);
+        return new Query<>(filter, filter);
     }
 
     /**
@@ -215,7 +221,8 @@ public class Query<T> {
      * after discarding the first {@code n} elements of the query.
      */
     public final Query<T> skip(int n){
-        return new Query<>(new AdvancerSkip<>(adv, n));
+        AdvancerSkip<T> skip = new AdvancerSkip<>(this, n);
+        return new Query<>(skip, skip);
     }
 
     /**
@@ -223,7 +230,8 @@ public class Query<T> {
      * to be no longer than {@code n} in length.
      */
     public final Query<T> limit(int n){
-        return new Query<>(new AdvancerLimit<>(this, n));
+        AdvancerLimit<T> limit = new AdvancerLimit<>(this, n);
+        return new Query<>(limit, limit);
     }
 
     /**
@@ -231,7 +239,8 @@ public class Query<T> {
      * {@link Object#equals(Object)}) of this query.
      */
     public final Query<T> distinct(){
-        return new Query<>(new AdvancerDistinct<>(adv));
+        AdvancerDistinct<T> adv = new AdvancerDistinct<>(this);
+        return new Query<>(adv, adv);
     }
 
     /**
@@ -240,7 +249,8 @@ public class Query<T> {
      * the provided mapping function to each element.
      */
     public final <R> Query<R> flatMap(Function<? super T,? extends Query<? extends R>> mapper){
-        return new Query<>(new AdvancerFlatMap<>(this, mapper));
+        AdvancerFlatMap<T, R> adv = new AdvancerFlatMap<>(this, mapper);
+        return new Query<>(adv, adv);
     }
 
     /**
@@ -249,7 +259,8 @@ public class Query<T> {
      * from the resulting query.
      */
     public final Query<T> peek(Consumer<? super T> action) {
-        return new Query<>(new AdvancerPeek<>(adv, action));
+        AdvancerPeek<T> peek = new AdvancerPeek<>(this, action);
+        return new Query<>(peek, peek);
     }
 
     /**
@@ -257,7 +268,8 @@ public class Query<T> {
      * this query that match the given predicate.
      */
     public final Query<T> takeWhile(Predicate<? super T> predicate){
-        return new Query<>(new AdvancerTakeWhile<>(this, predicate));
+        AdvancerTakeWhile<T> adv = new AdvancerTakeWhile<>(this, predicate);
+        return new Query<>(adv, adv);
     }
 
     /**
@@ -267,7 +279,7 @@ public class Query<T> {
      * {@code Traverser} object that is encapsulated in the resulting query.
      */
     public final <R> Query<R> then(Function<Query<T>, Traverser<R>> next) {
-        return new Query<>(new AdvancerThen<>(this, next));
+        return new Query<>(null, next.apply(this));
     }
 
     /**
@@ -290,14 +302,12 @@ public class Query<T> {
         Spliterator<T> iter = new AbstractSpliterator<T>(Long.MAX_VALUE, Spliterator.ORDERED) {
             @Override
             public boolean tryAdvance(Consumer<? super T> action) {
-                if(!adv.hasNext()) return false;
-                action.accept(adv.next());
-                return true;
+                return adv.tryAdvance(action::accept);
             }
 
             @Override
             public void forEachRemaining(Consumer<? super T> action) {
-                adv.traverse(action::accept);
+                trav.traverse(action::accept);
             }
         };
         return StreamSupport.stream(iter, false);
@@ -382,18 +392,6 @@ public class Query<T> {
     }
 
     /**
-     * Returns an optional with the resulting reduction of the elements of this query,
-     * if a reduction can be made, using the provided accumulator.
-     */
-    public Optional<T> reduce(BinaryOperator<T> accumulator) {
-        if (this.hasNext()) {
-            return Optional.ofNullable(this.reduce(this.next(), accumulator));
-        } else {
-            return Optional.empty();
-        }
-    }
-
-    /**
      * Returns the result of the reduction of the elements of this query,
      * using the provided identity value and accumulator.
      */
@@ -469,7 +467,8 @@ public class Query<T> {
      * where each element is generated by the provided Supplier.
      */
     public static <U> Query<U> generate(Supplier<U> s) {
-        return new Query<>(new AdvancerGenerate<>(s));
+        AdvancerGenerate<U> gen = new AdvancerGenerate<>(s);
+        return new Query<>(gen, gen);
     }
 
     /**
@@ -489,7 +488,7 @@ public class Query<T> {
      * elements of the other {@code Query}.
      */
     public final Query<T> concat(Query<T> other) {
-        return new Query<>(new AdvancerConcat<>(this, other));
+        return new Query<>(new AdvancerConcat<>(this, other), trav);
     }
 
     /**
@@ -501,7 +500,7 @@ public class Query<T> {
     public final Query<T> sorted(Comparator<T> comparator) {
         T[] state = (T[]) this.toArray();
         Arrays.sort(state, comparator);
-        return new Query<>(new AdvancerArray<>(state));
+        return new Query<>(new AdvancerArray<>(state), trav);
     }
 
     /**
@@ -509,7 +508,7 @@ public class Query<T> {
      * after discarding the first sequence of elements that match the given Predicate.
      */
     public final Query<T> dropWhile(Predicate<T> predicate) {
-        return new Query<>(new AdvancerDropWhile<>(this, predicate));
+        return new Query<>(new AdvancerDropWhile<>(this, predicate), trav);
     }
 
 }

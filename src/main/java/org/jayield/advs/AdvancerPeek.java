@@ -16,35 +16,33 @@
 
 package org.jayield.advs;
 
-import java.util.function.Consumer;
-
 import org.jayield.Advancer;
+import org.jayield.Query;
+import org.jayield.Traverser;
 import org.jayield.Yield;
 
-public class AdvancerPeek<T> implements Advancer<T> {
-    private final Advancer<T> upstream;
+import java.util.function.Consumer;
+
+public class AdvancerPeek<T> implements Advancer<T>, Traverser<T> {
+    private final Query<T> upstream;
     private final Consumer<? super T> action;
 
-    public AdvancerPeek(Advancer<T> adv, Consumer<? super T> action) {
+    public AdvancerPeek(Query<T> adv, Consumer<? super T> action) {
         this.upstream = adv;
         this.action = action;
     }
 
     @Override
-    public boolean hasNext() {
-        return upstream.hasNext();
-    }
-
-    @Override
-    public T next() {
-        T curr = upstream.next();
-        action.accept(curr);
-        return curr;
-    }
-
-    @Override
     public void traverse(Yield<? super T> yield) {
         upstream.traverse(item -> {
+            action.accept(item);
+            yield.ret(item);
+        });
+    }
+
+    @Override
+    public boolean tryAdvance(Yield<? super T> yield) {
+        return upstream.tryAdvance(item -> {
             action.accept(item);
             yield.ret(item);
         });

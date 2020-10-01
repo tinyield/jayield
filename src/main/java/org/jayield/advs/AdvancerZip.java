@@ -16,37 +16,49 @@
 
 package org.jayield.advs;
 
+import org.jayield.Advancer;
+import org.jayield.Query;
+import org.jayield.Traverser;
+import org.jayield.Yield;
+import org.jayield.boxes.BoolBox;
+
 import java.util.function.BiFunction;
 
-import org.jayield.Advancer;
-import org.jayield.Yield;
-
-public class AdvancerZip<T, U, R> implements Advancer<R> {
-    private final Advancer<T> upstream;
-    private final Advancer<U> other;
+public class AdvancerZip<T, U, R> implements Advancer<R>, Traverser<R> {
+    private final Query<T> upstream;
+    private final Query<U> other;
     private final BiFunction<? super T, ? super U, ? extends R> zipper;
 
-    public AdvancerZip(Advancer<T> upstream, Advancer<U> other, BiFunction<? super T, ? super U, ? extends R> zipper) {
+    public AdvancerZip(Query<T> upstream, Query<U> other, BiFunction<? super T, ? super U, ? extends R> zipper) {
         this.upstream = upstream;
         this.other = other;
         this.zipper = zipper;
     }
 
     @Override
-    public boolean hasNext() {
-        return upstream.hasNext() && other.hasNext();
+    public boolean tryAdvance(Yield<? super R> yield) {
+        BoolBox consumed = new BoolBox();
+        upstream.tryAdvance(e1 -> other.tryAdvance(e2 -> {
+            yield.ret(zipper.apply(e1, e2));
+            consumed.set();
+        }));
+        return consumed.isTrue();
     }
 
-    @Override
-    public R next() {
-        return zipper.apply(upstream.next(), other.next());
-    }
 
     @Override
     public void traverse(Yield<? super R> yield) {
-        upstream.traverse(e -> {
-            if (!other.hasNext()) return;
-            yield.ret(zipper.apply(e, other.next()));
-        });
+        if(other.hasAdvancer())
+            upstream.shortCircuit(e1 -> {
+                if(!other.tryAdvance(e2 -> yield.ret(zipper.apply(e1, e2))))
+                    Yield.bye();
+            });
+        else if(upstream.hasAdvancer())
+            other.shortCircuit(e2 -> {
+                if(!upstream.tryAdvance(e1 -> yield.ret(zipper.apply(e1, e2))))
+                    Yield.bye();
+            });
+        else
+            throw new UnsupportedOperationException("None of the queries provides a tryAdvance implementation!");
     }
 }

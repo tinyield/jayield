@@ -148,7 +148,7 @@ public class IntQuery {
      *         IntFunction used to map the elements of this IntQuery
      */
     public <U> Query<U> mapToObj(IntFunction<? extends U> function) {
-        return new Query<>(new IntAdvancerMapToObj<>(adv, function));
+        return new Query<>(new IntAdvancerMapToObj<>(adv, function), trav);
     }
 
     /**
@@ -508,7 +508,7 @@ public class IntQuery {
      * each boxed to an Integer.
      */
     public Query<Integer> boxed() {
-        return new Query<>(adv);
+        return new Query<>(adv, trav);
     }
 
     public IntStream toStream() {

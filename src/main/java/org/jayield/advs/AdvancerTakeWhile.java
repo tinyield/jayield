@@ -16,38 +16,60 @@
 
 package org.jayield.advs;
 
-import java.util.function.Predicate;
-
+import org.jayield.Advancer;
 import org.jayield.Query;
+import org.jayield.Traverser;
 import org.jayield.Yield;
 
-public class AdvancerTakeWhile<T> extends AbstractAdvancer<T> {
+import java.util.function.Predicate;
+
+public class AdvancerTakeWhile<T> implements Advancer<T>, Traverser<T> {
     private final Query<T> upstream;
     private final Predicate<? super T> predicate;
+    private boolean hasNext;
 
     public AdvancerTakeWhile(Query<T> upstream, Predicate<? super T> predicate) {
         this.upstream = upstream;
         this.predicate = predicate;
+        this.hasNext = true;
     }
 
-    /**
-     * Returns true if it moves successfully. Otherwise returns false
-     * signaling it has finished.
-     */
-    public boolean move() {
-        if(upstream.hasNext()) {
-            curr = upstream.next();
-            if(predicate.test(curr)) {
-                return true;
+    @Override
+    public boolean tryAdvance(Yield<? super T> yield) {
+        if(!hasNext) return false; // Once predicate is false it finishes the iteration
+        Yield<T> takeWhile = item -> {
+            if(predicate.test(item)){
+                yield.ret(item);
+            } else {
+                hasNext = false;
             }
-        }
-        return false;
+        };
+        return upstream.tryAdvance(takeWhile) && hasNext;
     }
 
     @Override
     public void traverse(Yield<? super T> yield) {
+        if(!hasNext)
+            throw new IllegalStateException("Traverser has already been operated on or closed!");
+        if(upstream.hasAdvancer())
+            traverseWithAdvancer(yield);
+        else
+            traverseInBulk(yield);
+    }
+    public void traverseWithAdvancer(Yield<? super T> yield) {
+        while(hasNext && upstream.tryAdvance(item -> {
+            if(!predicate.test(item))
+                hasNext = false;
+            else
+                yield.ret(item);
+        })) {}
+    }
+    public void traverseInBulk(Yield<? super T> yield) {
         upstream.shortCircuit(item -> {
-            if(!predicate.test(item)) Yield.bye();
+            if(!predicate.test(item)) {
+                hasNext = false;
+                Yield.bye();
+            }
             yield.ret(item);
         });
     }

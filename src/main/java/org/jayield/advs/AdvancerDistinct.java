@@ -16,30 +16,20 @@
 
 package org.jayield.advs;
 
+import org.jayield.Advancer;
+import org.jayield.Query;
+import org.jayield.Traverser;
+import org.jayield.Yield;
+import org.jayield.boxes.BoolBox;
+
 import java.util.HashSet;
 
-import org.jayield.Advancer;
-import org.jayield.Yield;
-
-public class AdvancerDistinct<T> extends AbstractAdvancer<T> {
-    private final Advancer<T> upstream;
+public class AdvancerDistinct<T> implements Advancer<T>, Traverser<T> {
+    private final Query<T> upstream;
     final HashSet<T> mem = new HashSet<>();
 
-    public AdvancerDistinct(Advancer<T> adv) {
+    public AdvancerDistinct(Query<T> adv) {
         this.upstream = adv;
-    }
-
-    /**
-     * Returns true if it moves successfully. Otherwise returns false
-     * signaling it has finished.
-     */
-    public boolean move() {
-        while(upstream.hasNext()) {
-            curr = upstream.next();
-            if(mem.add(curr))
-                return true;
-        }
-        return false;
     }
 
     @Override
@@ -47,5 +37,17 @@ public class AdvancerDistinct<T> extends AbstractAdvancer<T> {
         upstream.traverse(item -> {
             if(mem.add(item)) yield.ret(item);
         });
+    }
+
+    @Override
+    public boolean tryAdvance(Yield<? super T> yield) {
+        final BoolBox found = new BoolBox();
+        while(found.isFalse() && upstream.tryAdvance(item -> {
+            if(mem.add(item)) {
+                yield.ret(item);
+                found.set();
+            }
+        }));
+        return found.isTrue();
     }
 }

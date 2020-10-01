@@ -147,7 +147,7 @@ public class DoubleQuery {
      *         DoubleFunction used to map the elements of this DoubleQuery
      */
     public <U> Query<U> mapToObj(DoubleFunction<? extends U> function) {
-        return new Query<>(new DoubleAdvancerMapToObj<>(adv, function));
+        return new Query<>(new DoubleAdvancerMapToObj<>(adv, function), trav);
     }
 
     /**
@@ -505,7 +505,7 @@ public class DoubleQuery {
      * each boxed to an Double.
      */
     public Query<Double> boxed() {
-        return new Query<>(adv);
+        return new Query<>(adv, trav);
     }
 
     public DoubleStream toStream() {
