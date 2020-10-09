@@ -17,32 +17,19 @@
 package org.jayield.primitives.dbl.advs;
 
 import org.jayield.primitives.dbl.DoubleAdvancer;
+import org.jayield.primitives.dbl.DoubleQuery;
+import org.jayield.primitives.dbl.DoubleTraverser;
 import org.jayield.primitives.dbl.DoubleYield;
 
-public class DoubleAdvancerSkip implements DoubleAdvancer {
-    private final DoubleAdvancer upstream;
+public class DoubleAdvancerSkip implements DoubleAdvancer, DoubleTraverser {
+    private final DoubleQuery upstream;
     private final int n;
     int index;
 
-    public DoubleAdvancerSkip(DoubleAdvancer adv, int n) {
+    public DoubleAdvancerSkip(DoubleQuery adv, int n) {
         this.upstream = adv;
         this.n = n;
         index = 0;
-    }
-
-    @Override
-    public double nextDouble() {
-        if (!hasNext()) {
-            throw new IndexOutOfBoundsException("No such elements on iteration!");
-        }
-        return upstream.nextDouble();
-    }
-
-    @Override
-    public boolean hasNext() {
-        for (; upstream.hasNext() && index < n; index++)
-            upstream.nextDouble();
-        return upstream.hasNext();
     }
 
     /**
@@ -58,5 +45,12 @@ public class DoubleAdvancerSkip implements DoubleAdvancer {
                 yield.ret(item);
             }
         });
+    }
+
+    @Override
+    public boolean tryAdvance(DoubleYield yield) {
+        for (; index < n; index++)
+            upstream.tryAdvance(item -> {});
+        return upstream.tryAdvance(yield);
     }
 }

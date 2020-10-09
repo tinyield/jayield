@@ -16,38 +16,30 @@
 
 package org.jayield.primitives.intgr.advs;
 
-import java.util.NoSuchElementException;
+import org.jayield.Advancer;
+import org.jayield.Traverser;
+import org.jayield.Yield;
+import org.jayield.primitives.intgr.IntQuery;
+
 import java.util.function.IntFunction;
 
-import org.jayield.Advancer;
-import org.jayield.Yield;
-import org.jayield.primitives.intgr.IntAdvancer;
+public class IntAdvancerMapToObj<T> implements Advancer<T>, Traverser<T> {
 
-public class IntAdvancerMapToObj<T> implements Advancer<T> {
-
-    private final IntAdvancer upstream;
+    private final IntQuery upstream;
     private final IntFunction<? extends T> mapper;
 
-    public IntAdvancerMapToObj(IntAdvancer adv, IntFunction<? extends T> mapper) {
+    public IntAdvancerMapToObj(IntQuery adv, IntFunction<? extends T> mapper) {
         this.upstream = adv;
         this.mapper = mapper;
     }
 
     @Override
-    public boolean hasNext() {
-        return upstream.hasNext();
-    }
-
-    @Override
-    public T next() {
-        if (!hasNext()) {
-            throw new NoSuchElementException("No more elements available on iteration!");
-        }
-        return mapper.apply(upstream.nextInt());
-    }
-
-    @Override
     public void traverse(Yield<? super T> yield) {
         upstream.traverse(e -> yield.ret(mapper.apply(e)));
+    }
+
+    @Override
+    public boolean tryAdvance(Yield<? super T> yield) {
+        return upstream.tryAdvance(item -> yield.ret(mapper.apply(item)));
     }
 }

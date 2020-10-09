@@ -36,10 +36,13 @@ import org.jayield.boxes.BoolBox;
 import org.jayield.boxes.Box;
 import org.jayield.primitives.dbl.DoubleAdvancer;
 import org.jayield.primitives.dbl.DoubleQuery;
+import org.jayield.primitives.dbl.DoubleTraverser;
 import org.jayield.primitives.intgr.IntAdvancer;
 import org.jayield.primitives.intgr.IntQuery;
+import org.jayield.primitives.intgr.IntTraverser;
 import org.jayield.primitives.lng.LongAdvancer;
 import org.jayield.primitives.lng.LongQuery;
+import org.jayield.primitives.lng.LongTraverser;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -182,7 +185,7 @@ public class Query<T> {
      *         ToIntFunction used to map elements of this {@code Query} to int
      */
     public final IntQuery mapToInt(ToIntFunction<? super T> mapper) {
-        return new IntQuery(IntAdvancer.from(adv, mapper));
+        return new IntQuery(IntAdvancer.from(adv, mapper), IntTraverser.from(trav, mapper));
     }
 
     /**
@@ -193,7 +196,7 @@ public class Query<T> {
      *         ToLongFunction used to map elements of this {@code Query} to long
      */
     public final LongQuery mapToLong(ToLongFunction<? super T> mapper) {
-        return new LongQuery(LongAdvancer.from(adv, mapper));
+        return new LongQuery(LongAdvancer.from(adv, mapper), LongTraverser.from(trav, mapper));
     }
 
     /**
@@ -204,7 +207,7 @@ public class Query<T> {
      *         ToLongFunction used to map elements of this {@code Query} to double
      */
     public final DoubleQuery mapToDouble(ToDoubleFunction<? super T> mapper) {
-        return new DoubleQuery(DoubleAdvancer.from(adv, mapper));
+        return new DoubleQuery(DoubleAdvancer.from(adv, mapper), DoubleTraverser.from(trav, mapper));
     }
 
     /**
@@ -277,9 +280,23 @@ public class Query<T> {
      * chain into a function.
      * That function {@code next} is applied to this query to produce a new
      * {@code Traverser} object that is encapsulated in the resulting query.
+     * On the other hand, the {@code nextAdv} is applied to this query to produce a new
+     * {@code Advancer} object that is encapsulated in the resulting query.
+     */
+    public final <R> Query<R> then(Function<Query<T>, Advancer<R>> nextAdv, Function<Query<T>, Traverser<R>> next) {
+        return new Query<>(nextAdv.apply(this), next.apply(this));
+    }
+    /**
+     * The {@code then} operator lets you encapsulate a piece of an operator
+     * chain into a function.
+     * That function {@code next} is applied to this query to produce a new
+     * {@code Traverser} object that is encapsulated in the resulting query.
      */
     public final <R> Query<R> then(Function<Query<T>, Traverser<R>> next) {
-        return new Query<>(null, next.apply(this));
+        Advancer<R> adv = item -> { throw new UnsupportedOperationException(
+            "Missing tryAdvance() implementation! Use the overloaded then() providing both Advancer and Traverser!");
+        };
+        return new Query<>(adv, next.apply(this));
     }
 
     /**
@@ -333,11 +350,15 @@ public class Query<T> {
      * {@code Comparator}.  This is a special case of a reduction.
      */
     public final Optional<T> max(Comparator<? super T> cmp){
-        Box<T> b = new Box<>();
-        this.traverse(e -> {
-            if(!b.isPresent()) b.turnPresent(e);
-            else if(cmp.compare(e, b.getValue()) > 0) b.setValue(e);
-        });
+        class BoxMax extends Box<T> implements Yield<T> {
+            @Override
+            public final void ret(T item) {
+                if(!isPresent()) turnPresent(item);
+                else if(cmp.compare(item, value) > 0) value = item;
+            }
+        }
+        BoxMax b = new BoxMax();
+        this.traverse(b);
         return b.isPresent() ? Optional.of(b.getValue()) : Optional.empty();
     }
 
@@ -380,7 +401,6 @@ public class Query<T> {
     public final long count() {
         class Counter implements Yield<T> {
             long n = 0;
-
             @Override
             public void ret(T item) {
                 ++n;
@@ -392,14 +412,35 @@ public class Query<T> {
     }
 
     /**
+     * Returns an {@link Optional} with the resulting reduction of the elements of this {@code Query},
+     * if a reduction can be made, using the provided accumulator.
+     */
+    public Optional<T> reduce(BinaryOperator<T> accumulator) {
+        Box<T> box = new Box<>();
+        if(this.tryAdvance(box::setValue)) {
+            return Optional.of(this.reduce(box.getValue(), accumulator));
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    /**
      * Returns the result of the reduction of the elements of this query,
      * using the provided identity value and accumulator.
      */
     public T reduce(T identity, BinaryOperator<T> accumulator) {
-        Box<T> result = new Box<>();
-        result.setValue(identity);
-        this.traverse(elem -> result.setValue(accumulator.apply(result.getValue(), elem)));
-        return result.getValue();
+        class BoxAccumulator extends Box<T> implements Yield<T> {
+            public BoxAccumulator(T identity) {
+                super(identity);
+            }
+            @Override
+            public final void ret(T item) {
+                this.value = accumulator.apply(value, item);
+            }
+        }
+        BoxAccumulator box = new BoxAccumulator(identity);
+        this.traverse(box);
+        return box.getValue();
     }
 
     /**
@@ -488,7 +529,8 @@ public class Query<T> {
      * elements of the other {@code Query}.
      */
     public final Query<T> concat(Query<T> other) {
-        return new Query<>(new AdvancerConcat<>(this, other), trav);
+        AdvancerConcat<T> con = new AdvancerConcat<>(this, other);
+        return new Query<>(con, con);
     }
 
     /**
@@ -500,7 +542,8 @@ public class Query<T> {
     public final Query<T> sorted(Comparator<T> comparator) {
         T[] state = (T[]) this.toArray();
         Arrays.sort(state, comparator);
-        return new Query<>(new AdvancerArray<>(state), trav);
+        AdvancerArray<T> sorted = new AdvancerArray<>(state);
+        return new Query<>(sorted, sorted);
     }
 
     /**
@@ -508,7 +551,8 @@ public class Query<T> {
      * after discarding the first sequence of elements that match the given Predicate.
      */
     public final Query<T> dropWhile(Predicate<T> predicate) {
-        return new Query<>(new AdvancerDropWhile<>(this, predicate), trav);
+        AdvancerDropWhile<T> drop = new AdvancerDropWhile<>(this, predicate);
+        return new Query<>(drop, drop);
     }
 
 }

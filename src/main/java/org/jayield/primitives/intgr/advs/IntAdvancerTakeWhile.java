@@ -16,42 +16,46 @@
 
 package org.jayield.primitives.intgr.advs;
 
-import java.util.function.IntPredicate;
-
 import org.jayield.Yield;
+import org.jayield.primitives.intgr.IntAdvancer;
 import org.jayield.primitives.intgr.IntQuery;
+import org.jayield.primitives.intgr.IntTraverser;
 import org.jayield.primitives.intgr.IntYield;
 
-public class IntAdvancerTakeWhile extends AbstractIntAdvancer {
+import java.util.function.IntPredicate;
+
+public class IntAdvancerTakeWhile implements IntAdvancer, IntTraverser {
     private final IntQuery upstream;
     private final IntPredicate predicate;
+    private boolean hasNext;
 
     public IntAdvancerTakeWhile(IntQuery upstream, IntPredicate predicate) {
         this.upstream = upstream;
         this.predicate = predicate;
-    }
-
-    /**
-     * Returns true if it moves successfully. Otherwise returns false
-     * signaling it has finished.
-     */
-    public boolean move() {
-        if (upstream.hasNext()) {
-            currInt = upstream.next();
-            if (predicate.test(currInt)) {
-                return true;
-            }
-        }
-        return false;
+        this.hasNext = true;
     }
 
     @Override
     public void traverse(IntYield yield) {
+        // Not consistent with the Generic Version !!!!
         upstream.shortCircuit(item -> {
             if (!predicate.test(item)) {
                 Yield.bye();
             }
             yield.ret(item);
         });
+    }
+
+    @Override
+    public boolean tryAdvance(IntYield yield) {
+        if(!hasNext) return false; // Once predicate is false it finishes the iteration
+        IntYield takeWhile = item -> {
+            if(predicate.test(item)){
+                yield.ret(item);
+            } else {
+                hasNext = false;
+            }
+        };
+        return upstream.tryAdvance(takeWhile) && hasNext;
     }
 }

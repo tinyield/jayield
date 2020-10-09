@@ -40,8 +40,6 @@ public class AdvancerArray<U> implements Advancer<U>, Traverser<U> {
      */
     @Override
     public void traverse(Yield<? super U> yield) {
-        if(!hasNext())
-            throw new IllegalStateException("Traverser has already been operated on or closed!");
         for (int i = current; i < data.length; i++) {
             yield.ret(data[i]);
         }

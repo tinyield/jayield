@@ -17,34 +17,20 @@
 package org.jayield.primitives.intgr.advs;
 
 import org.jayield.primitives.intgr.IntAdvancer;
+import org.jayield.primitives.intgr.IntQuery;
+import org.jayield.primitives.intgr.IntTraverser;
 import org.jayield.primitives.intgr.IntYield;
 
-public class IntAdvancerSkip implements IntAdvancer {
-    private final IntAdvancer upstream;
+public class IntAdvancerSkip implements IntAdvancer, IntTraverser {
+    private final IntQuery upstream;
     private final int n;
     int index;
 
-    public IntAdvancerSkip(IntAdvancer adv, int n) {
+    public IntAdvancerSkip(IntQuery adv, int n) {
         this.upstream = adv;
         this.n = n;
         index = 0;
     }
-
-    @Override
-    public int nextInt() {
-        if (!hasNext()) {
-            throw new IndexOutOfBoundsException("No such elements on iteration!");
-        }
-        return upstream.nextInt();
-    }
-
-    @Override
-    public boolean hasNext() {
-        for (; upstream.hasNext() && index < n; index++)
-            upstream.nextInt();
-        return upstream.hasNext();
-    }
-
     /**
      * Continues from the point where tryAdvance or next left the
      * internal iteration.
@@ -58,5 +44,12 @@ public class IntAdvancerSkip implements IntAdvancer {
                 yield.ret(item);
             }
         });
+    }
+
+    @Override
+    public boolean tryAdvance(IntYield yield) {
+        for (; index < n; index++)
+            upstream.tryAdvance(item -> {});
+        return upstream.tryAdvance(yield);
     }
 }

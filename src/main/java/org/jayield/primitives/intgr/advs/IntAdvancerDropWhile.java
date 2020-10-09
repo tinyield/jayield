@@ -1,48 +1,50 @@
 package org.jayield.primitives.intgr.advs;
 
-import java.util.function.IntPredicate;
-
-import org.jayield.boxes.BoolBox;
+import org.jayield.primitives.intgr.IntAdvancer;
 import org.jayield.primitives.intgr.IntQuery;
+import org.jayield.primitives.intgr.IntTraverser;
 import org.jayield.primitives.intgr.IntYield;
 
-public class IntAdvancerDropWhile extends AbstractIntAdvancer {
+import java.util.function.IntPredicate;
+
+public class IntAdvancerDropWhile  implements IntAdvancer, IntTraverser {
 
     private final IntQuery upstream;
     private final IntPredicate predicate;
-    private final BoolBox dropped;
+    private boolean dropped;
 
     public IntAdvancerDropWhile(IntQuery upstream, IntPredicate predicate) {
         this.upstream = upstream;
         this.predicate = predicate;
-        this.dropped = new BoolBox();
+        this.dropped = false;
     }
 
     @Override
     public void traverse(IntYield yield) {
         upstream.traverse(item -> {
-            if (!dropped.isTrue() && !predicate.test(item)) {
-                dropped.set();
+            if (!dropped && !predicate.test(item)) {
+                dropped = true;
             }
-            if (dropped.isTrue()) {
+            if (dropped) {
                 yield.ret(item);
             }
         });
     }
 
     @Override
-    protected boolean move() {
-        while (!dropped.isTrue() && this.upstream.hasNext()) {
-            currInt = upstream.next();
-            if (!predicate.test(currInt)) {
-                this.dropped.set();
-                return true;
-            }
+    public boolean tryAdvance(IntYield yield) {
+        if (dropped) {
+            return upstream.tryAdvance(yield);
+        } else {
+            IntYield takeWhile = item -> {
+                if(!predicate.test(item)){
+                    dropped = true;
+                    yield.ret(item);
+                }
+            };
+            while(upstream.tryAdvance(takeWhile) && !dropped) { }
+            return dropped;
         }
-        if (dropped.isTrue() && upstream.hasNext()) {
-            currInt = upstream.next();
-            return true;
-        }
-        return false;
+
     }
 }

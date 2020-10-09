@@ -16,42 +16,46 @@
 
 package org.jayield.primitives.lng.advs;
 
-import java.util.function.LongPredicate;
-
 import org.jayield.Yield;
+import org.jayield.primitives.lng.LongAdvancer;
 import org.jayield.primitives.lng.LongQuery;
+import org.jayield.primitives.lng.LongTraverser;
 import org.jayield.primitives.lng.LongYield;
 
-public class LongAdvancerTakeWhile extends AbstractLongAdvancer {
+import java.util.function.LongPredicate;
+
+public class LongAdvancerTakeWhile implements LongAdvancer, LongTraverser {
     private final LongQuery upstream;
     private final LongPredicate predicate;
+    private boolean hasNext;
 
     public LongAdvancerTakeWhile(LongQuery upstream, LongPredicate predicate) {
         this.upstream = upstream;
         this.predicate = predicate;
-    }
-
-    /**
-     * Returns true if it moves successfully. Otherwise returns false
-     * signaling it has finished.
-     */
-    public boolean move() {
-        if (upstream.hasNext()) {
-            currLong = upstream.next();
-            if (predicate.test(currLong)) {
-                return true;
-            }
-        }
-        return false;
+        this.hasNext = true;
     }
 
     @Override
     public void traverse(LongYield yield) {
+        // Not consistent with the Generic Version
         upstream.shortCircuit(item -> {
             if (!predicate.test(item)) {
                 Yield.bye();
             }
             yield.ret(item);
         });
+    }
+
+    @Override
+    public boolean tryAdvance(LongYield yield) {
+        if(!hasNext) return false; // Once predicate is false it finishes the iteration
+        LongYield takeWhile = item -> {
+            if(predicate.test(item)){
+                yield.ret(item);
+            } else {
+                hasNext = false;
+            }
+        };
+        return upstream.tryAdvance(takeWhile) && hasNext;
     }
 }

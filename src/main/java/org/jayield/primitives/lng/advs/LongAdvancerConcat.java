@@ -1,12 +1,11 @@
 package org.jayield.primitives.lng.advs;
 
-import java.util.NoSuchElementException;
-
 import org.jayield.primitives.lng.LongAdvancer;
 import org.jayield.primitives.lng.LongQuery;
+import org.jayield.primitives.lng.LongTraverser;
 import org.jayield.primitives.lng.LongYield;
 
-public class LongAdvancerConcat implements LongAdvancer {
+public class LongAdvancerConcat implements LongAdvancer, LongTraverser {
     private final LongQuery first;
     private final LongQuery second;
 
@@ -16,23 +15,13 @@ public class LongAdvancerConcat implements LongAdvancer {
     }
 
     @Override
-    public boolean hasNext() {
-        return first.hasNext() || second.hasNext();
-    }
-
-    @Override
-    public long nextLong() {
-        if (first.hasNext()) {
-            return first.next();
-        } else if (second.hasNext()) {
-            return second.next();
-        }
-        throw new NoSuchElementException("No more elements available on iteration!");
-    }
-
-    @Override
     public void traverse(LongYield yield) {
         this.first.traverse(yield);
         this.second.traverse(yield);
+    }
+
+    @Override
+    public boolean tryAdvance(LongYield yield) {
+        return first.tryAdvance(yield) || second.tryAdvance(yield);
     }
 }

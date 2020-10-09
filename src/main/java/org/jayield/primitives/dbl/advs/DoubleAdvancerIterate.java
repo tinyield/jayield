@@ -16,34 +16,19 @@
 
 package org.jayield.primitives.dbl.advs;
 
-import java.util.NoSuchElementException;
-import java.util.function.DoubleUnaryOperator;
-
 import org.jayield.primitives.dbl.DoubleAdvancer;
+import org.jayield.primitives.dbl.DoubleTraverser;
 import org.jayield.primitives.dbl.DoubleYield;
 
-public class DoubleAdvancerIterate implements DoubleAdvancer {
+import java.util.function.DoubleUnaryOperator;
+
+public class DoubleAdvancerIterate implements DoubleAdvancer, DoubleTraverser {
     private final DoubleUnaryOperator f;
     private double prev;
 
     public DoubleAdvancerIterate(double seed, DoubleUnaryOperator f) {
         this.f = f;
         this.prev = seed;
-    }
-
-    @Override
-    public double nextDouble() {
-        if (!hasNext()) {
-            throw new NoSuchElementException("No more elements available on iteration!");
-        }
-        double curr = prev;
-        prev = f.applyAsDouble(prev);
-        return curr;
-    }
-
-    @Override
-    public boolean hasNext() {
-        return true;
     }
 
     /**
@@ -57,5 +42,13 @@ public class DoubleAdvancerIterate implements DoubleAdvancer {
         for (double i = prev; true; i = f.applyAsDouble(i)) {
             yield.ret(i);
         }
+    }
+
+    @Override
+    public boolean tryAdvance(DoubleYield yield) {
+        double curr = prev;
+        prev = f.applyAsDouble(prev);
+        yield.ret(curr);
+        return true;
     }
 }

@@ -16,15 +16,15 @@
 
 package org.jayield.primitives.dbl;
 
-import static org.jayield.primitives.dbl.DoubleQuery.fromStream;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
+import org.testng.annotations.Test;
 
 import java.util.PrimitiveIterator;
 import java.util.Spliterator;
 import java.util.stream.DoubleStream;
 
-import org.testng.annotations.Test;
+import static org.jayield.primitives.dbl.DoubleQuery.fromStream;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 
 /**
  * @author Miguel Gamboa
@@ -36,8 +36,7 @@ public class DoubleQueryToDoubleStreamTest {
         double[] src = {1, 2, 3, 4, 5, 6, 7, 8, 9};
         PrimitiveIterator.OfDouble expected = DoubleStream.of(src).iterator();
         DoubleQuery nrs = fromStream(DoubleStream.of(src));
-        while (nrs.hasNext()) {
-            assertEquals(nrs.next(), expected.nextDouble());
+        while (nrs.tryAdvance(item -> assertEquals(item, expected.nextDouble()))) {
         }
         assertFalse(expected.hasNext());
     }

@@ -16,6 +16,14 @@
 
 package org.jayield.primitives.lng;
 
+import org.jayield.boxes.IntBox;
+import org.testng.annotations.Test;
+
+import java.util.LongSummaryStatistics;
+import java.util.OptionalLong;
+import java.util.PrimitiveIterator;
+import java.util.stream.LongStream;
+
 import static org.jayield.primitives.lng.LongQuery.fromStream;
 import static org.jayield.primitives.lng.LongQuery.iterate;
 import static org.jayield.primitives.lng.LongQuery.of;
@@ -23,15 +31,6 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.AssertJUnit.assertTrue;
 import static org.testng.internal.junit.ArrayAsserts.assertArrayEquals;
-
-import java.util.LongSummaryStatistics;
-import java.util.OptionalLong;
-import java.util.PrimitiveIterator;
-import java.util.stream.LongStream;
-
-import org.jayield.boxes.IntBox;
-import org.jayield.primitives.intgr.IntQuery;
-import org.testng.annotations.Test;
 
 /**
  * These tests aim to evaluate only the execution of traverse()
@@ -88,15 +87,7 @@ public class LongQueryTraverseTest {
         long[] actual = nrs
                 .filter(n -> n < 7)
                 .map(n -> n - 1)
-                .then(prev -> yield -> {
-                    final boolean[] isOdd = {false};
-                    prev.traverse(item -> {
-                        if (isOdd[0]) {
-                            yield.ret(item);
-                        }
-                        isOdd[0] = !isOdd[0];
-                    });
-                })
+                .then(UserExt::oddTrav)
                 .toArray();
         assertEquals(actual, expected);
     }
@@ -118,15 +109,7 @@ public class LongQueryTraverseTest {
         boolean actual = nrs
                 .filter(n -> n < 7)
                 .map(n -> n - 1)
-                .then(prev -> yield -> {
-                    final boolean[] isOdd = {false};
-                    prev.traverse(item -> {
-                        if (isOdd[0]) {
-                            yield.ret(item);
-                        }
-                        isOdd[0] = !isOdd[0];
-                    });
-                })
+                .then(UserExt::oddTrav)
                 .anyMatch(n -> n == 5);
         assertTrue(actual);
     }

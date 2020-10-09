@@ -16,31 +16,20 @@
 
 package org.jayield.primitives.dbl.advs;
 
-import java.util.HashSet;
-
+import org.jayield.boxes.BoolBox;
 import org.jayield.primitives.dbl.DoubleAdvancer;
+import org.jayield.primitives.dbl.DoubleQuery;
+import org.jayield.primitives.dbl.DoubleTraverser;
 import org.jayield.primitives.dbl.DoubleYield;
 
-public class DoubleAdvancerDistinct extends AbstractDoubleAdvancer {
+import java.util.HashSet;
+
+public class DoubleAdvancerDistinct implements DoubleAdvancer, DoubleTraverser {
     final HashSet<Double> mem = new HashSet<>();
-    private final DoubleAdvancer upstream;
+    private final DoubleQuery upstream;
 
-    public DoubleAdvancerDistinct(DoubleAdvancer adv) {
+    public DoubleAdvancerDistinct(DoubleQuery adv) {
         this.upstream = adv;
-    }
-
-    /**
-     * Returns true if it moves successfully. Otherwise returns false
-     * signaling it has finished.
-     */
-    public boolean move() {
-        while (upstream.hasNext()) {
-            currDouble = upstream.nextDouble();
-            if (mem.add(currDouble)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     @Override
@@ -50,5 +39,17 @@ public class DoubleAdvancerDistinct extends AbstractDoubleAdvancer {
                 yield.ret(item);
             }
         });
+    }
+
+    @Override
+    public boolean tryAdvance(DoubleYield yield) {
+        final BoolBox found = new BoolBox();
+        while(found.isFalse() && upstream.tryAdvance(item -> {
+            if(mem.add(item)) {
+                yield.ret(item);
+                found.set();
+            }
+        }));
+        return found.isTrue();
     }
 }

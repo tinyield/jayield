@@ -16,35 +16,33 @@
 
 package org.jayield.primitives.dbl.advs;
 
-import java.util.function.DoubleConsumer;
-
 import org.jayield.primitives.dbl.DoubleAdvancer;
+import org.jayield.primitives.dbl.DoubleQuery;
+import org.jayield.primitives.dbl.DoubleTraverser;
 import org.jayield.primitives.dbl.DoubleYield;
 
-public class DoubleAdvancerPeek implements DoubleAdvancer {
-    private final DoubleAdvancer upstream;
+import java.util.function.DoubleConsumer;
+
+public class DoubleAdvancerPeek implements DoubleAdvancer, DoubleTraverser {
+    private final DoubleQuery upstream;
     private final DoubleConsumer action;
 
-    public DoubleAdvancerPeek(DoubleAdvancer adv, DoubleConsumer action) {
+    public DoubleAdvancerPeek(DoubleQuery adv, DoubleConsumer action) {
         this.upstream = adv;
         this.action = action;
     }
 
     @Override
-    public boolean hasNext() {
-        return upstream.hasNext();
-    }
-
-    @Override
-    public double nextDouble() {
-        double curr = upstream.nextDouble();
-        action.accept(curr);
-        return curr;
-    }
-
-    @Override
     public void traverse(DoubleYield yield) {
         upstream.traverse(item -> {
+            action.accept(item);
+            yield.ret(item);
+        });
+    }
+
+    @Override
+    public boolean tryAdvance(DoubleYield yield) {
+        return upstream.tryAdvance(item -> {
             action.accept(item);
             yield.ret(item);
         });

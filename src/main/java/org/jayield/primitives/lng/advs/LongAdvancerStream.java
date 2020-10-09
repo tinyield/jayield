@@ -16,42 +16,30 @@
 
 package org.jayield.primitives.lng.advs;
 
-import java.util.stream.LongStream;
-
 import org.jayield.primitives.lng.LongAdvancer;
-import org.jayield.primitives.lng.LongIterator;
+import org.jayield.primitives.lng.LongTraverser;
 import org.jayield.primitives.lng.LongYield;
 
-public class LongAdvancerStream implements LongAdvancer {
-    private final LongStream upstream;
-    private LongIterator current;
-    private boolean operated = false;
+import java.util.Spliterator;
+import java.util.function.LongConsumer;
+import java.util.stream.LongStream;
+
+public class LongAdvancerStream implements LongAdvancer, LongTraverser {
+    private final Spliterator.OfLong upstream;
 
     public LongAdvancerStream(LongStream data) {
-        this.upstream = data;
-    }
-
-    @Override
-    public long nextLong() {
-        return current().nextLong();
-    }
-
-    public LongIterator current() {
-        if (operated) {
-            return current;
-        }
-        operated = true;
-        current = LongIterator.from(upstream.iterator());
-        return current;
-    }
-
-    @Override
-    public boolean hasNext() {
-        return current().hasNext();
+        this.upstream = data.spliterator();
     }
 
     @Override
     public void traverse(LongYield yield) {
-        upstream.forEach(yield::ret);
+        LongConsumer cons = yield::ret;
+        upstream.forEachRemaining(cons);
+    }
+
+    @Override
+    public boolean tryAdvance(LongYield yield) {
+        LongConsumer cons = yield::ret;
+        return upstream.tryAdvance(cons);
     }
 }

@@ -16,42 +16,46 @@
 
 package org.jayield.primitives.dbl.advs;
 
-import java.util.function.DoublePredicate;
-
 import org.jayield.Yield;
+import org.jayield.primitives.dbl.DoubleAdvancer;
 import org.jayield.primitives.dbl.DoubleQuery;
+import org.jayield.primitives.dbl.DoubleTraverser;
 import org.jayield.primitives.dbl.DoubleYield;
 
-public class DoubleAdvancerTakeWhile extends AbstractDoubleAdvancer {
+import java.util.function.DoublePredicate;
+
+public class DoubleAdvancerTakeWhile implements DoubleAdvancer, DoubleTraverser {
     private final DoubleQuery upstream;
     private final DoublePredicate predicate;
+    private boolean hasNext;
 
     public DoubleAdvancerTakeWhile(DoubleQuery upstream, DoublePredicate predicate) {
         this.upstream = upstream;
         this.predicate = predicate;
-    }
-
-    /**
-     * Returns true if it moves successfully. Otherwise returns false
-     * signaling it has finished.
-     */
-    public boolean move() {
-        if (upstream.hasNext()) {
-            currDouble = upstream.next();
-            if (predicate.test(currDouble)) {
-                return true;
-            }
-        }
-        return false;
+        this.hasNext = true;
     }
 
     @Override
     public void traverse(DoubleYield yield) {
+        // Not consistent with the Generic Version
         upstream.shortCircuit(item -> {
             if (!predicate.test(item)) {
                 Yield.bye();
             }
             yield.ret(item);
         });
+    }
+
+    @Override
+    public boolean tryAdvance(DoubleYield yield) {
+        if(!hasNext) return false; // Once predicate is false it finishes the iteration
+        DoubleYield takeWhile = item -> {
+            if(predicate.test(item)){
+                yield.ret(item);
+            } else {
+                hasNext = false;
+            }
+        };
+        return upstream.tryAdvance(takeWhile) && hasNext;
     }
 }

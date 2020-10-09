@@ -18,6 +18,13 @@ package org.jayield.primitives.dbl;
 
 import org.jayield.Traverser;
 import org.jayield.Yield;
+import org.jayield.primitives.intgr.IntTraverser;
+import org.jayield.primitives.lng.LongTraverser;
+
+import java.util.function.DoubleToLongFunction;
+import java.util.function.IntToDoubleFunction;
+import java.util.function.LongToDoubleFunction;
+import java.util.function.ToDoubleFunction;
 
 /**
  * Bulk traversal.
@@ -42,4 +49,45 @@ public interface DoubleTraverser extends Traverser<Double> {
      * exception is thrown.
      */
     void traverse(DoubleYield yield);
+    /**
+     * An DoubleTraverser object without elements.
+     */
+    static DoubleTraverser empty() {
+        return action -> {};
+    }
+    /**
+     * A DoubleTraverser object from a generic {@link Traverser} mapped by a {@link ToDoubleFunction}.
+     *
+     * @param source
+     *         {@link Traverser} with the source elements for this {@code DoubleTraverser}.
+     * @param mapper
+     *         {@link ToDoubleFunction} that specifies how to map the source elements double values.
+     */
+    static <T> DoubleTraverser from(Traverser<T> source, ToDoubleFunction<? super T> mapper) {
+        return yield -> source.traverse(item -> yield.ret(mapper.applyAsDouble(item)));
+    }
+
+    /**
+     * A DoubleTraverser object from a {@link LongTraverser} mapped by a {@link LongToDoubleFunction}.
+     *
+     * @param source
+     *         {@link LongTraverser} with the source elements for this {@code LongTraverser}.
+     * @param mapper
+     *         {@link DoubleToLongFunction} that specifies how to map the source elements into double values.
+     */
+    static DoubleTraverser from(LongTraverser source, LongToDoubleFunction mapper) {
+        return from((Traverser<Long>) source, mapper::applyAsDouble);
+    }
+
+    /**
+     * A DoubleTraverser object from a {@link IntTraverser} mapped by a {@link IntToDoubleFunction}.
+     *
+     * @param source
+     *         {@link IntTraverser} with the source elements for this {@code LongTraverser}.
+     * @param mapper
+     *         {@link IntToDoubleFunction} that specifies how to map the source elements into double values.
+     */
+    static DoubleTraverser from(IntTraverser source, IntToDoubleFunction mapper) {
+        return from((Traverser<Integer>) source, mapper::applyAsDouble);
+    }
 }

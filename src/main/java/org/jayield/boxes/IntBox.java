@@ -21,7 +21,7 @@ package org.jayield.boxes;
  *         created on 06-07-2017
  */
 public class IntBox {
-    private int value;
+    protected int value;
     private boolean isPresent;
 
     public IntBox() {
@@ -32,6 +32,10 @@ public class IntBox {
     public IntBox(int value, boolean isPresent) {
         this.value = value;
         this.isPresent = isPresent;
+    }
+
+    public IntBox(int identity) {
+        this.value = identity;
     }
 
     public int getValue() {

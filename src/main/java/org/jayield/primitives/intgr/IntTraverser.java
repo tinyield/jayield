@@ -16,8 +16,17 @@
 
 package org.jayield.primitives.intgr;
 
+import org.jayield.Advancer;
 import org.jayield.Traverser;
 import org.jayield.Yield;
+import org.jayield.primitives.dbl.DoubleAdvancer;
+import org.jayield.primitives.dbl.DoubleTraverser;
+import org.jayield.primitives.lng.LongAdvancer;
+import org.jayield.primitives.lng.LongTraverser;
+
+import java.util.function.DoubleToIntFunction;
+import java.util.function.LongToIntFunction;
+import java.util.function.ToIntFunction;
 
 /**
  * Bulk traversal.
@@ -27,6 +36,16 @@ import org.jayield.Yield;
  */
 public interface IntTraverser extends Traverser<Integer> {
     /**
+     * Yields elements sequentially in the current thread,
+     * until all elements have been processed or an
+     * exception is thrown.
+     */
+    void traverse(IntYield yield);
+
+    static IntTraverser empty() {
+        return yield -> { };
+    }
+    /**
      * Default traverse implementation that calls the
      * primitive version of it
      */
@@ -35,11 +54,39 @@ public interface IntTraverser extends Traverser<Integer> {
         IntYield yld = yield::ret;
         this.traverse(yld);
     }
+    /**
+     * An IntTraverser object from a generic {@link Traverser} mapped by a {@link ToIntFunction}.
+     *
+     * @param source
+     *         {@link Traverser} with the source elements for this {@code IntTraverser}.
+     * @param mapper
+     *         {@link ToIntFunction} that specifies how to map the source elements into int values.
+     */
+    static <T> IntTraverser from(Traverser<T> source, ToIntFunction<? super T> mapper) {
+        return yield -> source.traverse(item -> yield.ret(mapper.applyAsInt(item)));
+    }
 
     /**
-     * Yields elements sequentially in the current thread,
-     * until all elements have been processed or an
-     * exception is thrown.
+     * An IntTraverser object from a {@link DoubleTraverser} mapped by a {@link DoubleToIntFunction}.
+     *
+     * @param source
+     *         {@link DoubleTraverser} with the source elements for this {@code IntTraverser}.
+     * @param mapper
+     *         {@link DoubleToIntFunction} that specifies how to map the source elements into int values.
      */
-    void traverse(IntYield yield);
+    static IntTraverser from(DoubleTraverser source, DoubleToIntFunction mapper) {
+        return from((Traverser<Double>) source, mapper::applyAsInt);
+    }
+
+    /**
+     * An IntTraverser object from a {@link LongTraverser} mapped by a {@link LongToIntFunction}.
+     *
+     * @param source
+     *         {@link LongTraverser} with the source elements for this {@code DoubleTraverser}.
+     * @param mapper
+     *         {@link LongToIntFunction} that specifies how to map the source elements into int values.
+     */
+    static IntTraverser from(LongTraverser source, LongToIntFunction mapper) {
+        return from((Traverser<Long>) source, mapper::applyAsInt);
+    }
 }

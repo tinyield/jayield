@@ -16,31 +16,20 @@
 
 package org.jayield.primitives.intgr.advs;
 
-import java.util.HashSet;
-
+import org.jayield.boxes.BoolBox;
 import org.jayield.primitives.intgr.IntAdvancer;
+import org.jayield.primitives.intgr.IntQuery;
+import org.jayield.primitives.intgr.IntTraverser;
 import org.jayield.primitives.intgr.IntYield;
 
-public class IntAdvancerDistinct extends AbstractIntAdvancer {
+import java.util.HashSet;
+
+public class IntAdvancerDistinct  implements IntAdvancer, IntTraverser {
     final HashSet<Integer> mem = new HashSet<>();
-    private final IntAdvancer upstream;
+    private final IntQuery upstream;
 
-    public IntAdvancerDistinct(IntAdvancer adv) {
+    public IntAdvancerDistinct(IntQuery adv) {
         this.upstream = adv;
-    }
-
-    /**
-     * Returns true if it moves successfully. Otherwise returns false
-     * signaling it has finished.
-     */
-    public boolean move() {
-        while (upstream.hasNext()) {
-            currInt = upstream.nextInt();
-            if (mem.add(currInt)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     @Override
@@ -50,5 +39,17 @@ public class IntAdvancerDistinct extends AbstractIntAdvancer {
                 yield.ret(item);
             }
         });
+    }
+
+    @Override
+    public boolean tryAdvance(IntYield yield) {
+        final BoolBox found = new BoolBox();
+        while(found.isFalse() && upstream.tryAdvance(item -> {
+            if(mem.add(item)) {
+                yield.ret(item);
+                found.set();
+            }
+        }));
+        return found.isTrue();
     }
 }

@@ -16,31 +16,20 @@
 
 package org.jayield.primitives.lng.advs;
 
-import java.util.HashSet;
-
+import org.jayield.boxes.BoolBox;
 import org.jayield.primitives.lng.LongAdvancer;
+import org.jayield.primitives.lng.LongQuery;
+import org.jayield.primitives.lng.LongTraverser;
 import org.jayield.primitives.lng.LongYield;
 
-public class LongAdvancerDistinct extends AbstractLongAdvancer {
+import java.util.HashSet;
+
+public class LongAdvancerDistinct implements LongAdvancer, LongTraverser {
     final HashSet<Long> mem = new HashSet<>();
-    private final LongAdvancer upstream;
+    private final LongQuery upstream;
 
-    public LongAdvancerDistinct(LongAdvancer adv) {
+    public LongAdvancerDistinct(LongQuery adv) {
         this.upstream = adv;
-    }
-
-    /**
-     * Returns true if it moves successfully. Otherwise returns false
-     * signaling it has finished.
-     */
-    public boolean move() {
-        while (upstream.hasNext()) {
-            currLong = upstream.nextLong();
-            if (mem.add(currLong)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     @Override
@@ -50,5 +39,17 @@ public class LongAdvancerDistinct extends AbstractLongAdvancer {
                 yield.ret(item);
             }
         });
+    }
+
+    @Override
+    public boolean tryAdvance(LongYield yield) {
+        final BoolBox found = new BoolBox();
+        while(found.isFalse() && upstream.tryAdvance(item -> {
+            if(mem.add(item)) {
+                yield.ret(item);
+                found.set();
+            }
+        }));
+        return found.isTrue();
     }
 }

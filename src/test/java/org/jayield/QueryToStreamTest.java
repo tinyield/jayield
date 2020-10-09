@@ -16,15 +16,15 @@
 
 package org.jayield;
 
-import static org.jayield.Query.fromStream;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
+import org.testng.annotations.Test;
 
 import java.util.Iterator;
 import java.util.Spliterator;
 import java.util.stream.Stream;
 
-import org.testng.annotations.Test;
+import static org.jayield.Query.fromStream;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 
 /**
  * @author Miguel Gamboa
@@ -36,8 +36,7 @@ public class QueryToStreamTest {
         Integer[] src = {1, 2, 3, 4, 5, 6, 7, 8, 9};
         Iterator<Integer> expected = Stream.of(src).iterator();
         Query<Integer> nrs = fromStream(Stream.of(1, 2, 3, 4, 5, 6, 7, 8, 9));
-        while(nrs.hasNext()) {
-            assertEquals(nrs.next(), expected.next());
+        while(nrs.tryAdvance(item -> assertEquals(item, expected.next()))) {
         }
         assertFalse(expected.hasNext());
     }

@@ -16,18 +16,51 @@
 
 package org.jayield;
 
+import org.jayield.boxes.BoolBox;
+import org.jayield.boxes.Box;
+
 /**
  * @author Miguel Gamboa
  *         created on 06-07-2017
  */
 public class UserExt {
-    static <U> Traverser<U> collapse(Query<U> src) {
+    static <U> Traverser<U> collapseTrav(Query<U> src) {
         return yield -> {
             final Object[] prev = {null};
             src.traverse(item -> {
                 if (prev[0] == null || !prev[0].equals(item))
                     yield.ret((U) (prev[0] = item));
             });
+        };
+    }
+    static <U> Advancer<U> collapseAdv(Query<U> src) {
+        final Box<U> prev = new Box<>();
+        return yield -> {
+            BoolBox found = new BoolBox();
+            while(found.isFalse() && src.tryAdvance(item -> {
+                if(!item.equals(prev.getValue())) {
+                    found.set();
+                    prev.setValue(item);
+                    yield.ret(item);
+                }
+            })) {}
+            return found.isTrue();
+        };
+    }
+    static <U> Traverser<U> oddTrav(Query<U> src) {
+        return yield -> {
+            final boolean[] isOdd = {false};
+            src.traverse(item -> {
+                if(isOdd[0]) yield.ret(item);
+                isOdd[0] = !isOdd[0];
+            });
+        };
+    }
+    static <U> Advancer<U> oddAdv(Query<U> src) {
+        return yield -> {
+            if(src.tryAdvance(item -> {}))
+                return src.tryAdvance(yield);
+            return false;
         };
     }
 }

@@ -16,6 +16,10 @@
 
 package org.jayield.primitives.lng;
 
+import org.jayield.Advancer;
+import org.jayield.Query;
+import org.jayield.boxes.BoolBox;
+import org.jayield.boxes.Box;
 import org.jayield.boxes.LongBox;
 
 /**
@@ -32,6 +36,41 @@ public class UserExt {
                     yield.ret(item);
                 }
             });
+        };
+    }
+
+    static LongTraverser oddTrav(LongQuery src) {
+        return yield -> {
+                final boolean[] isOdd = {false};
+                src.traverse(item -> {
+                    if (isOdd[0]) {
+                        yield.ret(item);
+                    }
+                    isOdd[0] = !isOdd[0];
+                });
+            };
+    }
+
+    static LongAdvancer collapseAdv(LongQuery src) {
+        final LongBox prev = new LongBox();
+        return yield -> {
+            BoolBox found = new BoolBox();
+            while(found.isFalse() && src.tryAdvance(item -> {
+                if(item != prev.getValue()) {
+                    found.set();
+                    prev.setValue(item);
+                    yield.ret(item);
+                }
+            })) {}
+            return found.isTrue();
+        };
+    }
+
+    static LongAdvancer oddAdv(LongQuery src) {
+        return yield -> {
+            if(src.tryAdvance(item -> {}))
+                return src.tryAdvance(yield);
+            return false;
         };
     }
 }

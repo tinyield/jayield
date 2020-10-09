@@ -16,13 +16,14 @@
 
 package org.jayield.primitives.intgr.advs;
 
-import java.util.function.IntFunction;
-
 import org.jayield.primitives.intgr.IntAdvancer;
 import org.jayield.primitives.intgr.IntQuery;
+import org.jayield.primitives.intgr.IntTraverser;
 import org.jayield.primitives.intgr.IntYield;
 
-public class IntAdvancerFlatMap extends AbstractIntAdvancer {
+import java.util.function.IntFunction;
+
+public class IntAdvancerFlatMap implements IntAdvancer, IntTraverser {
     private final IntQuery upstream;
     private final IntFunction<? extends IntQuery> mapper;
     IntQuery src;
@@ -30,27 +31,20 @@ public class IntAdvancerFlatMap extends AbstractIntAdvancer {
     public IntAdvancerFlatMap(IntQuery query, IntFunction<? extends IntQuery> mapper) {
         this.upstream = query;
         this.mapper = mapper;
-        src = new IntQuery(IntAdvancer.empty());
-    }
-
-    /**
-     * Returns true if it moves successfully. Otherwise returns false
-     * signaling it has finished.
-     */
-    public boolean move() {
-        while (!src.hasNext()) {
-            if (!upstream.hasNext()) {
-                return false;
-            }
-            src = mapper.apply(upstream.next());
-        }
-        currInt = src.next();
-        return true;
+        src = new IntQuery(IntAdvancer.empty(), IntTraverser.empty());
     }
 
     @Override
     public void traverse(IntYield yield) {
         upstream.traverse(elem -> mapper.apply(elem).traverse(yield));
+    }
 
+    @Override
+    public boolean tryAdvance(IntYield yield) {
+        while (!src.tryAdvance(yield)) {
+            if(!upstream.tryAdvance((t) -> src = mapper.apply(t)))
+                return false;
+        }
+        return true;
     }
 }

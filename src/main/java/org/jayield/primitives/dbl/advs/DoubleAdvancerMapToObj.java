@@ -16,38 +16,30 @@
 
 package org.jayield.primitives.dbl.advs;
 
-import java.util.NoSuchElementException;
+import org.jayield.Advancer;
+import org.jayield.Traverser;
+import org.jayield.Yield;
+import org.jayield.primitives.dbl.DoubleQuery;
+
 import java.util.function.DoubleFunction;
 
-import org.jayield.Advancer;
-import org.jayield.Yield;
-import org.jayield.primitives.dbl.DoubleAdvancer;
+public class DoubleAdvancerMapToObj<T> implements Advancer<T>, Traverser<T> {
 
-public class DoubleAdvancerMapToObj<T> implements Advancer<T> {
-
-    private final DoubleAdvancer upstream;
+    private final DoubleQuery upstream;
     private final DoubleFunction<? extends T> mapper;
 
-    public DoubleAdvancerMapToObj(DoubleAdvancer adv, DoubleFunction<? extends T> mapper) {
+    public DoubleAdvancerMapToObj(DoubleQuery adv, DoubleFunction<? extends T> mapper) {
         this.upstream = adv;
         this.mapper = mapper;
     }
 
     @Override
-    public boolean hasNext() {
-        return upstream.hasNext();
-    }
-
-    @Override
-    public T next() {
-        if (!hasNext()) {
-            throw new NoSuchElementException("No more elements available on iteration!");
-        }
-        return mapper.apply(upstream.nextDouble());
-    }
-
-    @Override
     public void traverse(Yield<? super T> yield) {
         upstream.traverse(e -> yield.ret(mapper.apply(e)));
+    }
+
+    @Override
+    public boolean tryAdvance(Yield<? super T> yield) {
+        return upstream.tryAdvance(item -> yield.ret(mapper.apply(item)));
     }
 }

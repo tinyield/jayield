@@ -48,17 +48,9 @@ public class AdvancerZip<T, U, R> implements Advancer<R>, Traverser<R> {
 
     @Override
     public void traverse(Yield<? super R> yield) {
-        if(other.hasAdvancer())
-            upstream.shortCircuit(e1 -> {
-                if(!other.tryAdvance(e2 -> yield.ret(zipper.apply(e1, e2))))
-                    Yield.bye();
-            });
-        else if(upstream.hasAdvancer())
-            other.shortCircuit(e2 -> {
-                if(!upstream.tryAdvance(e1 -> yield.ret(zipper.apply(e1, e2))))
-                    Yield.bye();
-            });
-        else
-            throw new UnsupportedOperationException("None of the queries provides a tryAdvance implementation!");
+        upstream.shortCircuit(e1 -> {
+            if(!other.tryAdvance(e2 -> yield.ret(zipper.apply(e1, e2))))
+                Yield.bye();
+        });
     }
 }

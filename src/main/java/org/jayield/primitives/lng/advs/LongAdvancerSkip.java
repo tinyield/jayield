@@ -17,32 +17,19 @@
 package org.jayield.primitives.lng.advs;
 
 import org.jayield.primitives.lng.LongAdvancer;
+import org.jayield.primitives.lng.LongQuery;
+import org.jayield.primitives.lng.LongTraverser;
 import org.jayield.primitives.lng.LongYield;
 
-public class LongAdvancerSkip implements LongAdvancer {
-    private final LongAdvancer upstream;
+public class LongAdvancerSkip implements LongAdvancer, LongTraverser {
+    private final LongQuery upstream;
     private final int n;
     int index;
 
-    public LongAdvancerSkip(LongAdvancer adv, int n) {
+    public LongAdvancerSkip(LongQuery adv, int n) {
         this.upstream = adv;
         this.n = n;
         index = 0;
-    }
-
-    @Override
-    public long nextLong() {
-        if (!hasNext()) {
-            throw new IndexOutOfBoundsException("No such elements on iteration!");
-        }
-        return upstream.nextLong();
-    }
-
-    @Override
-    public boolean hasNext() {
-        for (; upstream.hasNext() && index < n; index++)
-            upstream.nextLong();
-        return upstream.hasNext();
     }
 
     /**
@@ -58,5 +45,12 @@ public class LongAdvancerSkip implements LongAdvancer {
                 yield.ret(item);
             }
         });
+    }
+
+    @Override
+    public boolean tryAdvance(LongYield yield) {
+        for (; index < n; index++)
+            upstream.tryAdvance(item -> {});
+        return upstream.tryAdvance(yield);
     }
 }

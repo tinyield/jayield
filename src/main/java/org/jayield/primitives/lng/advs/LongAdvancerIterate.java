@@ -16,34 +16,19 @@
 
 package org.jayield.primitives.lng.advs;
 
-import java.util.NoSuchElementException;
-import java.util.function.LongUnaryOperator;
-
 import org.jayield.primitives.lng.LongAdvancer;
+import org.jayield.primitives.lng.LongTraverser;
 import org.jayield.primitives.lng.LongYield;
 
-public class LongAdvancerIterate implements LongAdvancer {
+import java.util.function.LongUnaryOperator;
+
+public class LongAdvancerIterate implements LongAdvancer, LongTraverser {
     private final LongUnaryOperator f;
     private long prev;
 
     public LongAdvancerIterate(long seed, LongUnaryOperator f) {
         this.f = f;
         this.prev = seed;
-    }
-
-    @Override
-    public long nextLong() {
-        if (!hasNext()) {
-            throw new NoSuchElementException("No more elements available on iteration!");
-        }
-        long curr = prev;
-        prev = f.applyAsLong(prev);
-        return curr;
-    }
-
-    @Override
-    public boolean hasNext() {
-        return true;
     }
 
     /**
@@ -57,5 +42,13 @@ public class LongAdvancerIterate implements LongAdvancer {
         for (long i = prev; true; i = f.applyAsLong(i)) {
             yield.ret(i);
         }
+    }
+
+    @Override
+    public boolean tryAdvance(LongYield yield) {
+        long curr = prev;
+        prev = f.applyAsLong(prev);
+        yield.ret(curr);
+        return true;
     }
 }

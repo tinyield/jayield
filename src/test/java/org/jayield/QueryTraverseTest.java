@@ -16,14 +16,7 @@
 
 package org.jayield;
 
-import static java.util.Arrays.asList;
-import static org.jayield.Query.fromStream;
-import static org.jayield.Query.iterate;
-import static org.jayield.Query.of;
-import static org.jayield.UserExt.collapse;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import org.testng.annotations.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,7 +25,13 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import org.testng.annotations.Test;
+import static java.util.Arrays.asList;
+import static org.jayield.Query.fromStream;
+import static org.jayield.Query.iterate;
+import static org.jayield.Query.of;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 /**
  * These tests aim to evaluate only the execution of traverse()
@@ -90,13 +89,7 @@ public class QueryTraverseTest {
         Object[] actual = nrs
                 .filter(n -> n%2 != 0)
                 .map(Object::toString)
-                .then(prev -> yield -> {
-                    final boolean[] isOdd = {false};
-                    prev.traverse(item -> {
-                        if(isOdd[0]) yield.ret(item);
-                        isOdd[0] = !isOdd[0];
-                    });
-                })
+                .then(UserExt::oddTrav)
                 .toArray();
         assertEquals(actual, expected);
     }
@@ -106,7 +99,7 @@ public class QueryTraverseTest {
         Integer[] expected= {7, 8, 9, 11, 7};
         Integer[] arrange = {7, 7, 8, 9, 9, 11, 11, 7};
         Object[] actual = of(arrange)
-                .then(n -> collapse(n))
+                .then(UserExt::collapseTrav)
                 .toArray();
         assertEquals(actual, expected);
     }
@@ -119,13 +112,7 @@ public class QueryTraverseTest {
         boolean actual = nrs
                 .filter(n -> n%2 != 0)
                 .map(Object::toString)
-                .then(prev -> (yield) -> {
-                    final boolean[] isOdd = {false};
-                    prev.traverse(item -> {
-                        if(isOdd[0]) yield.ret(item);
-                        isOdd[0] = !isOdd[0];
-                    });
-                })
+                .then(UserExt::oddTrav)
                 .anyMatch(n ->
                         n.equals("7"));
         assertTrue(actual);

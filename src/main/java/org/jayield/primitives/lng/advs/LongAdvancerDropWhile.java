@@ -1,48 +1,49 @@
 package org.jayield.primitives.lng.advs;
 
-import java.util.function.LongPredicate;
-
-import org.jayield.boxes.BoolBox;
+import org.jayield.primitives.lng.LongAdvancer;
 import org.jayield.primitives.lng.LongQuery;
+import org.jayield.primitives.lng.LongTraverser;
 import org.jayield.primitives.lng.LongYield;
 
-public class LongAdvancerDropWhile extends AbstractLongAdvancer {
+import java.util.function.LongPredicate;
+
+public class LongAdvancerDropWhile implements LongAdvancer, LongTraverser {
 
     private final LongQuery upstream;
     private final LongPredicate predicate;
-    private final BoolBox dropped;
+    private boolean dropped;
 
     public LongAdvancerDropWhile(LongQuery upstream, LongPredicate predicate) {
         this.upstream = upstream;
         this.predicate = predicate;
-        this.dropped = new BoolBox();
+        this.dropped = false;
     }
 
     @Override
     public void traverse(LongYield yield) {
         upstream.traverse(item -> {
-            if (!dropped.isTrue() && !predicate.test(item)) {
-                dropped.set();
+            if (!dropped && !predicate.test(item)) {
+                dropped = true;
             }
-            if (dropped.isTrue()) {
+            if (dropped) {
                 yield.ret(item);
             }
         });
     }
 
     @Override
-    protected boolean move() {
-        while (!dropped.isTrue() && this.upstream.hasNext()) {
-            currLong = upstream.next();
-            if (!predicate.test(currLong)) {
-                this.dropped.set();
-                return true;
-            }
+    public boolean tryAdvance(LongYield yield) {
+        if (dropped) {
+            return upstream.tryAdvance(yield);
+        } else {
+            LongYield takeWhile = item -> {
+                if(!predicate.test(item)){
+                    dropped = true;
+                    yield.ret(item);
+                }
+            };
+            while(upstream.tryAdvance(takeWhile) && !dropped) { }
+            return dropped;
         }
-        if (dropped.isTrue() && upstream.hasNext()) {
-            currLong = upstream.next();
-            return true;
-        }
-        return false;
     }
 }
