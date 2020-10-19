@@ -16,32 +16,21 @@
 
 package org.jayield.primitives.intgr.advs;
 
-import java.util.function.IntPredicate;
-
+import org.jayield.boxes.BoolBox;
 import org.jayield.primitives.intgr.IntAdvancer;
+import org.jayield.primitives.intgr.IntQuery;
+import org.jayield.primitives.intgr.IntTraverser;
 import org.jayield.primitives.intgr.IntYield;
 
-public class IntAdvancerFilter extends AbstractIntAdvancer {
-    private final IntAdvancer upstream;
+import java.util.function.IntPredicate;
+
+public class IntAdvancerFilter implements IntAdvancer, IntTraverser {
+    private final IntQuery upstream;
     private final IntPredicate p;
 
-    public IntAdvancerFilter(IntAdvancer adv, IntPredicate p) {
+    public IntAdvancerFilter(IntQuery adv, IntPredicate p) {
         this.upstream = adv;
         this.p = p;
-    }
-
-    /**
-     * Returns true if it moves successfully. Otherwise returns false
-     * signaling it has finished.
-     */
-    public boolean move() {
-        while (upstream.hasNext()) {
-            currInt = upstream.nextInt();
-            if (p.test(currInt)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     @Override
@@ -51,5 +40,20 @@ public class IntAdvancerFilter extends AbstractIntAdvancer {
                 yield.ret(e);
             }
         });
+    }
+
+    @Override
+    public boolean tryAdvance(IntYield yield) {
+        BoolBox found = new BoolBox();
+        while(found.isFalse()) {
+            boolean hasNext = upstream.tryAdvance(item -> {
+                if(p.test(item)) {
+                    yield.ret(item);
+                    found.set();
+                }
+            });
+            if(!hasNext) break;
+        }
+        return found.isTrue();
     }
 }

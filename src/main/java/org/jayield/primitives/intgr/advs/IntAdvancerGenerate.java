@@ -16,13 +16,13 @@
 
 package org.jayield.primitives.intgr.advs;
 
-import java.util.NoSuchElementException;
-import java.util.function.IntSupplier;
-
 import org.jayield.primitives.intgr.IntAdvancer;
+import org.jayield.primitives.intgr.IntTraverser;
 import org.jayield.primitives.intgr.IntYield;
 
-public class IntAdvancerGenerate implements IntAdvancer {
+import java.util.function.IntSupplier;
+
+public class IntAdvancerGenerate implements IntAdvancer, IntTraverser {
     private final IntSupplier s;
 
     public IntAdvancerGenerate(IntSupplier s) {
@@ -31,23 +31,14 @@ public class IntAdvancerGenerate implements IntAdvancer {
 
     @Override
     public void traverse(IntYield yield) {
-        while (hasNext()) {
+        while (true) {
             yield.ret(s.getAsInt());
         }
     }
 
     @Override
-    public boolean hasNext() {
+    public boolean tryAdvance(IntYield yield) {
+        yield.ret(s.getAsInt());
         return true;
     }
-
-    @Override
-    public int nextInt() {
-        if (!hasNext()) {
-            throw new NoSuchElementException("No more elements available on iteration!");
-        }
-        return s.getAsInt();
-    }
-
-
 }

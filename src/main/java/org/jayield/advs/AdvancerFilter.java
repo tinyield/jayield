@@ -16,31 +16,21 @@
 
 package org.jayield.advs;
 
+import org.jayield.Advancer;
+import org.jayield.Query;
+import org.jayield.Traverser;
+import org.jayield.Yield;
+import org.jayield.boxes.BoolBox;
+
 import java.util.function.Predicate;
 
-import org.jayield.Advancer;
-import org.jayield.Yield;
-
-public class AdvancerFilter<T> extends AbstractAdvancer<T> {
-    private final Advancer<T> upstream;
+public class AdvancerFilter<T> implements Advancer<T>, Traverser<T> {
+    private final Query<T> upstream;
     private final Predicate<? super T> p;
 
-    public AdvancerFilter(Advancer<T> adv, Predicate<? super T> p) {
+    public AdvancerFilter(Query<T> adv, Predicate<? super T> p) {
         this.upstream = adv;
         this.p = p;
-    }
-
-    /**
-     * Returns true if it moves successfully. Otherwise returns false
-     * signaling it has finished.
-     */
-    public boolean move() {
-        while(upstream.hasNext()) {
-            curr = upstream.next();
-            if(p.test(curr))
-                return true;
-        }
-        return false;
     }
 
     @Override
@@ -49,5 +39,20 @@ public class AdvancerFilter<T> extends AbstractAdvancer<T> {
             if (p.test(e))
                 yield.ret(e);
         });
+    }
+
+    @Override
+    public boolean tryAdvance(Yield<? super T> yield) {
+        BoolBox found = new BoolBox();
+        while(found.isFalse()) {
+            boolean hasNext = upstream.tryAdvance(item -> {
+                if(p.test(item)) {
+                    yield.ret(item);
+                    found.set();
+                }
+            });
+            if(!hasNext) break;
+        }
+        return found.isTrue();
     }
 }

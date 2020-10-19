@@ -16,42 +16,30 @@
 
 package org.jayield.primitives.dbl.advs;
 
-import java.util.stream.DoubleStream;
-
 import org.jayield.primitives.dbl.DoubleAdvancer;
-import org.jayield.primitives.dbl.DoubleIterator;
+import org.jayield.primitives.dbl.DoubleTraverser;
 import org.jayield.primitives.dbl.DoubleYield;
 
-public class DoubleAdvancerStream implements DoubleAdvancer {
-    private final DoubleStream upstream;
-    private DoubleIterator current;
-    private boolean operated = false;
+import java.util.Spliterator;
+import java.util.function.DoubleConsumer;
+import java.util.stream.DoubleStream;
+
+public class DoubleAdvancerStream implements DoubleAdvancer, DoubleTraverser {
+    private final Spliterator.OfDouble upstream;
 
     public DoubleAdvancerStream(DoubleStream data) {
-        this.upstream = data;
-    }
-
-    @Override
-    public double nextDouble() {
-        return current().nextDouble();
-    }
-
-    public DoubleIterator current() {
-        if (operated) {
-            return current;
-        }
-        operated = true;
-        current = DoubleIterator.from(upstream.iterator());
-        return current;
-    }
-
-    @Override
-    public boolean hasNext() {
-        return current().hasNext();
+        this.upstream = data.spliterator();
     }
 
     @Override
     public void traverse(DoubleYield yield) {
-        upstream.forEach(yield::ret);
+        DoubleConsumer cons = yield::ret;
+        upstream.forEachRemaining(cons);
+    }
+
+    @Override
+    public boolean tryAdvance(DoubleYield yield) {
+        DoubleConsumer cons = yield::ret;
+        return upstream.tryAdvance(cons);
     }
 }

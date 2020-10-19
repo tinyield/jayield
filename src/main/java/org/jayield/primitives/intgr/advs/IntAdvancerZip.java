@@ -16,37 +16,40 @@
 
 package org.jayield.primitives.intgr.advs;
 
-import java.util.function.IntBinaryOperator;
-
+import org.jayield.Yield;
+import org.jayield.boxes.BoolBox;
 import org.jayield.primitives.intgr.IntAdvancer;
+import org.jayield.primitives.intgr.IntQuery;
+import org.jayield.primitives.intgr.IntTraverser;
 import org.jayield.primitives.intgr.IntYield;
 
-public class IntAdvancerZip implements IntAdvancer {
-    private final IntAdvancer upstream;
-    private final IntAdvancer other;
+import java.util.function.IntBinaryOperator;
+
+public class IntAdvancerZip implements IntAdvancer, IntTraverser {
+    private final IntQuery upstream;
+    private final IntQuery other;
     private final IntBinaryOperator zipper;
 
-    public IntAdvancerZip(IntAdvancer upstream, IntAdvancer other, IntBinaryOperator zipper) {
+    public IntAdvancerZip(IntQuery upstream, IntQuery other, IntBinaryOperator zipper) {
         this.upstream = upstream;
         this.other = other;
         this.zipper = zipper;
     }
-
-    @Override
-    public boolean hasNext() {
-        return upstream.hasNext() && other.hasNext();
-    }
-
-    @Override
-    public int nextInt() {
-        return zipper.applyAsInt(upstream.next(), other.next());
-    }
-
     @Override
     public void traverse(IntYield yield) {
-        upstream.traverse(e -> {
-            if (!other.hasNext()) return;
-            yield.ret(zipper.applyAsInt(e, other.next()));
+        upstream.shortCircuit(e1 -> {
+            if(!other.tryAdvance(e2 -> yield.ret(zipper.applyAsInt(e1, e2))))
+                Yield.bye();
         });
+    }
+
+    @Override
+    public boolean tryAdvance(IntYield yield) {
+        BoolBox consumed = new BoolBox();
+        upstream.tryAdvance(e1 -> other.tryAdvance(e2 -> {
+            yield.ret(zipper.applyAsInt(e1, e2));
+            consumed.set();
+        }));
+        return consumed.isTrue();
     }
 }

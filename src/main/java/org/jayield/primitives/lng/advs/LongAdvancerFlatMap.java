@@ -16,13 +16,14 @@
 
 package org.jayield.primitives.lng.advs;
 
-import java.util.function.LongFunction;
-
 import org.jayield.primitives.lng.LongAdvancer;
 import org.jayield.primitives.lng.LongQuery;
+import org.jayield.primitives.lng.LongTraverser;
 import org.jayield.primitives.lng.LongYield;
 
-public class LongAdvancerFlatMap extends AbstractLongAdvancer {
+import java.util.function.LongFunction;
+
+public class LongAdvancerFlatMap implements LongAdvancer, LongTraverser {
     private final LongQuery upstream;
     private final LongFunction<? extends LongQuery> mapper;
     LongQuery src;
@@ -30,27 +31,21 @@ public class LongAdvancerFlatMap extends AbstractLongAdvancer {
     public LongAdvancerFlatMap(LongQuery query, LongFunction<? extends LongQuery> mapper) {
         this.upstream = query;
         this.mapper = mapper;
-        src = new LongQuery(LongAdvancer.empty());
-    }
-
-    /**
-     * Returns true if it moves successfully. Otherwise returns false
-     * signaling it has finished.
-     */
-    public boolean move() {
-        while (!src.hasNext()) {
-            if (!upstream.hasNext()) {
-                return false;
-            }
-            src = mapper.apply(upstream.next());
-        }
-        currLong = src.next();
-        return true;
+        src = new LongQuery(LongAdvancer.empty(), LongTraverser.empty());
     }
 
     @Override
     public void traverse(LongYield yield) {
         upstream.traverse(elem -> mapper.apply(elem).traverse(yield));
 
+    }
+
+    @Override
+    public boolean tryAdvance(LongYield yield) {
+        while (!src.tryAdvance(yield)) {
+            if(!upstream.tryAdvance(t -> src = mapper.apply(t)))
+                return false;
+        }
+        return true;
     }
 }

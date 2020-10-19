@@ -16,37 +16,41 @@
 
 package org.jayield.primitives.lng.advs;
 
-import java.util.function.LongBinaryOperator;
-
+import org.jayield.Yield;
+import org.jayield.boxes.BoolBox;
 import org.jayield.primitives.lng.LongAdvancer;
+import org.jayield.primitives.lng.LongQuery;
+import org.jayield.primitives.lng.LongTraverser;
 import org.jayield.primitives.lng.LongYield;
 
-public class LongAdvancerZip implements LongAdvancer {
-    private final LongAdvancer upstream;
-    private final LongAdvancer other;
+import java.util.function.LongBinaryOperator;
+
+public class LongAdvancerZip implements LongAdvancer, LongTraverser {
+    private final LongQuery upstream;
+    private final LongQuery other;
     private final LongBinaryOperator zipper;
 
-    public LongAdvancerZip(LongAdvancer upstream, LongAdvancer other, LongBinaryOperator zipper) {
+    public LongAdvancerZip(LongQuery upstream, LongQuery other, LongBinaryOperator zipper) {
         this.upstream = upstream;
         this.other = other;
         this.zipper = zipper;
     }
 
     @Override
-    public boolean hasNext() {
-        return upstream.hasNext() && other.hasNext();
-    }
-
-    @Override
-    public long nextLong() {
-        return zipper.applyAsLong(upstream.next(), other.next());
-    }
-
-    @Override
     public void traverse(LongYield yield) {
-        upstream.traverse(e -> {
-            if (!other.hasNext()) return;
-            yield.ret(zipper.applyAsLong(e, other.next()));
+        upstream.shortCircuit(e1 -> {
+            if(!other.tryAdvance(e2 -> yield.ret(zipper.applyAsLong(e1, e2))))
+                Yield.bye();
         });
+    }
+
+    @Override
+    public boolean tryAdvance(LongYield yield) {
+        BoolBox consumed = new BoolBox();
+        upstream.tryAdvance(e1 -> other.tryAdvance(e2 -> {
+            yield.ret(zipper.applyAsLong(e1, e2));
+            consumed.set();
+        }));
+        return consumed.isTrue();
     }
 }

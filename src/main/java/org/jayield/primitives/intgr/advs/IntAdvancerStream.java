@@ -16,42 +16,30 @@
 
 package org.jayield.primitives.intgr.advs;
 
-import java.util.stream.IntStream;
-
 import org.jayield.primitives.intgr.IntAdvancer;
-import org.jayield.primitives.intgr.IntIterator;
+import org.jayield.primitives.intgr.IntTraverser;
 import org.jayield.primitives.intgr.IntYield;
 
-public class IntAdvancerStream implements IntAdvancer {
-    private final IntStream upstream;
-    private IntIterator current;
-    private boolean operated = false;
+import java.util.Spliterator;
+import java.util.function.IntConsumer;
+import java.util.stream.IntStream;
+
+public class IntAdvancerStream implements IntAdvancer, IntTraverser {
+    private final Spliterator.OfInt upstream;
 
     public IntAdvancerStream(IntStream data) {
-        this.upstream = data;
-    }
-
-    @Override
-    public int nextInt() {
-        return current().nextInt();
-    }
-
-    public IntIterator current() {
-        if (operated) {
-            return current;
-        }
-        operated = true;
-        current = IntIterator.from(upstream.iterator());
-        return current;
-    }
-
-    @Override
-    public boolean hasNext() {
-        return current().hasNext();
+        this.upstream = data.spliterator();
     }
 
     @Override
     public void traverse(IntYield yield) {
-        upstream.forEach(yield::ret);
+        IntConsumer cons = yield::ret;
+        upstream.forEachRemaining(cons);
+    }
+
+    @Override
+    public boolean tryAdvance(IntYield yield) {
+        IntConsumer cons = yield::ret;
+        return upstream.tryAdvance(cons);
     }
 }

@@ -16,13 +16,12 @@
 
 package org.jayield.advs;
 
-import java.util.NoSuchElementException;
-
 import org.jayield.Advancer;
 import org.jayield.Query;
+import org.jayield.Traverser;
 import org.jayield.Yield;
 
-public class AdvancerLimit<T> implements Advancer<T> {
+public class AdvancerLimit<T> implements Advancer<T>, Traverser<T> {
     private final Query<T> upstream;
     private final int n;
     int count;
@@ -34,23 +33,19 @@ public class AdvancerLimit<T> implements Advancer<T> {
     }
 
     @Override
-    public boolean hasNext() {
-        return count < n && upstream.hasNext();
-    }
-
-    @Override
-    public T next() {
-        if(count >= n) throw new NoSuchElementException("Nor more elements available!");
+    public boolean tryAdvance(Yield<? super T> yield) {
+        if(count >= n) return false;
         count++;
-        return upstream.next();
+        return upstream.tryAdvance(yield);
+
     }
 
     @Override
     public void traverse(Yield<? super T> yield) {
-        upstream.shortCircuit(item -> {
-            if(count >= n) Yield.bye();
-            count++;
-            yield.ret(item);
-        });
+        if(count >= n)
+            throw new IllegalStateException("Traverser has already been operated on or closed!");
+        while(this.tryAdvance(yield)) {
+            // Intentionally empty. Action specified on yield statement of tryAdvance().
+        }
     }
 }

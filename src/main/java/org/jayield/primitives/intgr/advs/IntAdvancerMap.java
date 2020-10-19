@@ -16,33 +16,30 @@
 
 package org.jayield.primitives.intgr.advs;
 
-import java.util.function.IntUnaryOperator;
-
 import org.jayield.primitives.intgr.IntAdvancer;
+import org.jayield.primitives.intgr.IntQuery;
+import org.jayield.primitives.intgr.IntTraverser;
 import org.jayield.primitives.intgr.IntYield;
 
-public class IntAdvancerMap implements IntAdvancer {
+import java.util.function.IntUnaryOperator;
 
-    private final IntAdvancer upstream;
+public class IntAdvancerMap implements IntAdvancer, IntTraverser {
+
+    private final IntQuery upstream;
     private final IntUnaryOperator mapper;
 
-    public IntAdvancerMap(IntAdvancer adv, IntUnaryOperator mapper) {
+    public IntAdvancerMap(IntQuery adv, IntUnaryOperator mapper) {
         this.upstream = adv;
         this.mapper = mapper;
     }
 
     @Override
-    public boolean hasNext() {
-        return upstream.hasNext();
-    }
-
-    @Override
-    public int nextInt() {
-        return mapper.applyAsInt(upstream.nextInt());
-    }
-
-    @Override
     public void traverse(IntYield yield) {
         upstream.traverse(e -> yield.ret(mapper.applyAsInt(e)));
+    }
+
+    @Override
+    public boolean tryAdvance(IntYield yield) {
+        return upstream.tryAdvance(item -> yield.ret(mapper.applyAsInt(item)));
     }
 }

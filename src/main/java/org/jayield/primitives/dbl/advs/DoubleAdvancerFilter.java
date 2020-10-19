@@ -16,32 +16,21 @@
 
 package org.jayield.primitives.dbl.advs;
 
-import java.util.function.DoublePredicate;
-
+import org.jayield.boxes.BoolBox;
 import org.jayield.primitives.dbl.DoubleAdvancer;
+import org.jayield.primitives.dbl.DoubleQuery;
+import org.jayield.primitives.dbl.DoubleTraverser;
 import org.jayield.primitives.dbl.DoubleYield;
 
-public class DoubleAdvancerFilter extends AbstractDoubleAdvancer {
-    private final DoubleAdvancer upstream;
+import java.util.function.DoublePredicate;
+
+public class DoubleAdvancerFilter implements DoubleAdvancer, DoubleTraverser {
+    private final DoubleQuery upstream;
     private final DoublePredicate p;
 
-    public DoubleAdvancerFilter(DoubleAdvancer adv, DoublePredicate p) {
+    public DoubleAdvancerFilter(DoubleQuery adv, DoublePredicate p) {
         this.upstream = adv;
         this.p = p;
-    }
-
-    /**
-     * Returns true if it moves successfully. Otherwise returns false
-     * signaling it has finished.
-     */
-    public boolean move() {
-        while (upstream.hasNext()) {
-            currDouble = upstream.nextDouble();
-            if (p.test(currDouble)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     @Override
@@ -51,5 +40,20 @@ public class DoubleAdvancerFilter extends AbstractDoubleAdvancer {
                 yield.ret(e);
             }
         });
+    }
+
+    @Override
+    public boolean tryAdvance(DoubleYield yield) {
+        BoolBox found = new BoolBox();
+        while(found.isFalse()) {
+            boolean hasNext = upstream.tryAdvance(item -> {
+                if(p.test(item)) {
+                    yield.ret(item);
+                    found.set();
+                }
+            });
+            if(!hasNext) break;
+        }
+        return found.isTrue();
     }
 }

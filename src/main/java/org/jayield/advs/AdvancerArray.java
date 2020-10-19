@@ -16,12 +16,11 @@
 
 package org.jayield.advs;
 
-import java.util.NoSuchElementException;
-
 import org.jayield.Advancer;
+import org.jayield.Traverser;
 import org.jayield.Yield;
 
-public class AdvancerArray<U> implements Advancer<U> {
+public class AdvancerArray<U> implements Advancer<U>, Traverser<U> {
     private final U[] data;
     private int current;
 
@@ -30,13 +29,6 @@ public class AdvancerArray<U> implements Advancer<U> {
         this.current = 0;
     }
 
-    @Override
-    public U next() {
-        if(!hasNext()) throw new NoSuchElementException("No more elements available on iteration!");
-        return data[current++];
-    }
-
-    @Override
     public boolean hasNext() {
         return current < data.length;
     }
@@ -51,5 +43,12 @@ public class AdvancerArray<U> implements Advancer<U> {
         for (int i = current; i < data.length; i++) {
             yield.ret(data[i]);
         }
+    }
+
+    @Override
+    public boolean tryAdvance(Yield<? super U> yield) {
+        if(!hasNext()) return false;
+        yield.ret(data[current++]);
+        return true;
     }
 }

@@ -1,48 +1,49 @@
 package org.jayield.advs;
 
+import org.jayield.Advancer;
+import org.jayield.Query;
+import org.jayield.Traverser;
+import org.jayield.Yield;
+
 import java.util.function.Predicate;
 
-import org.jayield.Query;
-import org.jayield.Yield;
-import org.jayield.boxes.BoolBox;
-
-public class AdvancerDropWhile<T> extends AbstractAdvancer<T> {
+public class AdvancerDropWhile<T> implements Advancer<T>, Traverser<T> {
 
     private final Query<T> upstream;
     private final Predicate<T> predicate;
-    private final BoolBox dropped;
+    private boolean dropped;
 
     public AdvancerDropWhile(Query<T> upstream, Predicate<T> predicate) {
         this.upstream = upstream;
         this.predicate = predicate;
-        this.dropped = new BoolBox();
     }
 
     @Override
     public void traverse(Yield<? super T> yield) {
         upstream.traverse(item -> {
-            if (!dropped.isTrue() && !predicate.test(item)) {
-                dropped.set();
+            if (!dropped && !predicate.test(item)) {
+                dropped = true;
             }
-            if (dropped.isTrue()) {
+            if (dropped) {
                 yield.ret(item);
             }
         });
     }
 
     @Override
-    protected boolean move() {
-        while (!dropped.isTrue() && this.upstream.hasNext()) {
-            curr = upstream.next();
-            if (!predicate.test(curr)) {
-                this.dropped.set();
-                return true;
+    public boolean tryAdvance(Yield<? super T> yield) {
+        if (dropped) {
+            return upstream.tryAdvance(yield);
+        } else {
+            while(!dropped && upstream.tryAdvance(item -> {
+                if(!predicate.test(item)){
+                    dropped = true;
+                    yield.ret(item);
+                }
+            })) {
+                // Intentionally empty. Action specified on yield statement of tryAdvance().
             }
+            return dropped;
         }
-        if (dropped.isTrue() && upstream.hasNext()) {
-            curr = upstream.next();
-            return true;
-        }
-        return false;
     }
 }

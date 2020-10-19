@@ -16,13 +16,13 @@
 
 package org.jayield.primitives.dbl.advs;
 
-import java.util.NoSuchElementException;
-import java.util.function.DoubleSupplier;
-
 import org.jayield.primitives.dbl.DoubleAdvancer;
+import org.jayield.primitives.dbl.DoubleTraverser;
 import org.jayield.primitives.dbl.DoubleYield;
 
-public class DoubleAdvancerGenerate implements DoubleAdvancer {
+import java.util.function.DoubleSupplier;
+
+public class DoubleAdvancerGenerate  implements DoubleAdvancer, DoubleTraverser {
     private final DoubleSupplier s;
 
     public DoubleAdvancerGenerate(DoubleSupplier s) {
@@ -31,23 +31,15 @@ public class DoubleAdvancerGenerate implements DoubleAdvancer {
 
     @Override
     public void traverse(DoubleYield yield) {
-        while (hasNext()) {
+        while (true) {
             yield.ret(s.getAsDouble());
         }
     }
 
+
     @Override
-    public boolean hasNext() {
+    public boolean tryAdvance(DoubleYield yield) {
+        yield.ret(s.getAsDouble());
         return true;
     }
-
-    @Override
-    public double nextDouble() {
-        if (!hasNext()) {
-            throw new NoSuchElementException("No more elements available on iteration!");
-        }
-        return s.getAsDouble();
-    }
-
-
 }

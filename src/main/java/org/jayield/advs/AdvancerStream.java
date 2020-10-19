@@ -16,40 +16,28 @@
 
 package org.jayield.advs;
 
-import java.util.Iterator;
-import java.util.stream.Stream;
-
 import org.jayield.Advancer;
+import org.jayield.Traverser;
 import org.jayield.Yield;
 
-public class AdvancerStream<U> implements Advancer<U> {
-    private final Stream<U> upstream;
-    private Iterator<U> current;
-    private boolean operated = false;
+import java.util.Spliterator;
+import java.util.stream.Stream;
+
+public class AdvancerStream<U> implements Advancer<U>, Traverser<U> {
+    private final Spliterator<U> upstream;
 
     public AdvancerStream(Stream<U> data) {
-        this.upstream = data;
+        this.upstream = data.spliterator();
     }
 
-    public Iterator<U> current() {
-        if(operated) return current;
-        operated = true;
-        current = upstream.iterator();
-        return current;
-    }
-
-    @Override
-    public U next() {
-        return current().next();
-    }
-
-    @Override
-    public boolean hasNext() {
-        return current().hasNext();
-    }
 
     @Override
     public void traverse(Yield<? super U> yield) {
-        upstream.forEach(yield::ret);
+        upstream.forEachRemaining(yield::ret);
+    }
+
+    @Override
+    public boolean tryAdvance(Yield<? super U> yield) {
+        return upstream.tryAdvance(yield::ret);
     }
 }

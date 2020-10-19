@@ -16,33 +16,30 @@
 
 package org.jayield.primitives.lng.advs;
 
-import java.util.function.LongUnaryOperator;
-
 import org.jayield.primitives.lng.LongAdvancer;
+import org.jayield.primitives.lng.LongQuery;
+import org.jayield.primitives.lng.LongTraverser;
 import org.jayield.primitives.lng.LongYield;
 
-public class LongAdvancerMap implements LongAdvancer {
+import java.util.function.LongUnaryOperator;
 
-    private final LongAdvancer upstream;
+public class LongAdvancerMap implements LongAdvancer, LongTraverser {
+
+    private final LongQuery upstream;
     private final LongUnaryOperator mapper;
 
-    public LongAdvancerMap(LongAdvancer adv, LongUnaryOperator mapper) {
+    public LongAdvancerMap(LongQuery adv, LongUnaryOperator mapper) {
         this.upstream = adv;
         this.mapper = mapper;
     }
 
     @Override
-    public boolean hasNext() {
-        return upstream.hasNext();
-    }
-
-    @Override
-    public long nextLong() {
-        return mapper.applyAsLong(upstream.nextLong());
-    }
-
-    @Override
     public void traverse(LongYield yield) {
         upstream.traverse(e -> yield.ret(mapper.applyAsLong(e)));
+    }
+
+    @Override
+    public boolean tryAdvance(LongYield yield) {
+        return upstream.tryAdvance(item -> yield.ret(mapper.applyAsLong(item)));
     }
 }

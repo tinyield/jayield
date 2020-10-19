@@ -16,14 +16,12 @@
 
 package org.jayield.primitives.intgr.advs;
 
-import java.util.NoSuchElementException;
-
-import org.jayield.Yield;
 import org.jayield.primitives.intgr.IntAdvancer;
 import org.jayield.primitives.intgr.IntQuery;
+import org.jayield.primitives.intgr.IntTraverser;
 import org.jayield.primitives.intgr.IntYield;
 
-public class IntAdvancerLimit implements IntAdvancer {
+public class IntAdvancerLimit implements IntAdvancer, IntTraverser {
     private final IntQuery upstream;
     private final int n;
     int count;
@@ -35,27 +33,18 @@ public class IntAdvancerLimit implements IntAdvancer {
     }
 
     @Override
-    public boolean hasNext() {
-        return count < n && upstream.hasNext();
-    }
-
-    @Override
-    public int nextInt() {
-        if (count >= n) {
-            throw new NoSuchElementException("Nor more elements available!");
-        }
-        count++;
-        return upstream.next();
-    }
-
-    @Override
     public void traverse(IntYield yield) {
-        upstream.shortCircuit(item -> {
-            if (count >= n) {
-                Yield.bye();
-            }
-            count++;
-            yield.ret(item);
-        });
+        if(count >= n)
+            throw new IllegalStateException("Traverser has already been operated on or closed!");
+        while(this.tryAdvance(yield)) {
+            // Intentionally empty. Action specified on yield statement of tryAdvance().
+        }
+    }
+
+    @Override
+    public boolean tryAdvance(IntYield yield) {
+        if(count >= n) return false;
+        count++;
+        return upstream.tryAdvance(yield);
     }
 }

@@ -29,4 +29,12 @@ public interface Traverser<T> {
      * exception is thrown.
      */
     void traverse(Yield<? super T> yield);
+
+    /**
+     * A Traverser object without elements.
+     */
+    static <R> Traverser<R> empty() {
+        return action -> { };
+    }
+
 }

@@ -16,12 +16,11 @@
 
 package org.jayield.primitives.intgr.advs;
 
-import java.util.NoSuchElementException;
-
 import org.jayield.primitives.intgr.IntAdvancer;
+import org.jayield.primitives.intgr.IntTraverser;
 import org.jayield.primitives.intgr.IntYield;
 
-public class IntAdvancerArray implements IntAdvancer {
+public class IntAdvancerArray implements IntAdvancer, IntTraverser {
     private final int[] data;
     private int current;
 
@@ -30,15 +29,6 @@ public class IntAdvancerArray implements IntAdvancer {
         this.current = 0;
     }
 
-
-    public int nextInt() {
-        if (!hasNext()) {
-            throw new NoSuchElementException("No more elements available on iteration!");
-        }
-        return data[current++];
-    }
-
-    @Override
     public boolean hasNext() {
         return current < data.length;
     }
@@ -54,5 +44,12 @@ public class IntAdvancerArray implements IntAdvancer {
         for (int i = current; i < data.length; i++) {
             yield.ret(data[i]);
         }
+    }
+
+    @Override
+    public boolean tryAdvance(IntYield yield) {
+        if(!hasNext()) return false;
+        yield.ret(data[current++]);
+        return true;
     }
 }

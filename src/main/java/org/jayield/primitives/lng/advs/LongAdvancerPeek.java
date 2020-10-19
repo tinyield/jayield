@@ -16,35 +16,33 @@
 
 package org.jayield.primitives.lng.advs;
 
-import java.util.function.LongConsumer;
-
 import org.jayield.primitives.lng.LongAdvancer;
+import org.jayield.primitives.lng.LongQuery;
+import org.jayield.primitives.lng.LongTraverser;
 import org.jayield.primitives.lng.LongYield;
 
-public class LongAdvancerPeek implements LongAdvancer {
-    private final LongAdvancer upstream;
+import java.util.function.LongConsumer;
+
+public class LongAdvancerPeek implements LongAdvancer, LongTraverser {
+    private final LongQuery upstream;
     private final LongConsumer action;
 
-    public LongAdvancerPeek(LongAdvancer adv, LongConsumer action) {
+    public LongAdvancerPeek(LongQuery adv, LongConsumer action) {
         this.upstream = adv;
         this.action = action;
     }
 
     @Override
-    public boolean hasNext() {
-        return upstream.hasNext();
-    }
-
-    @Override
-    public long nextLong() {
-        long curr = upstream.nextLong();
-        action.accept(curr);
-        return curr;
-    }
-
-    @Override
     public void traverse(LongYield yield) {
         upstream.traverse(item -> {
+            action.accept(item);
+            yield.ret(item);
+        });
+    }
+
+    @Override
+    public boolean tryAdvance(LongYield yield) {
+        return upstream.tryAdvance(item -> {
             action.accept(item);
             yield.ret(item);
         });

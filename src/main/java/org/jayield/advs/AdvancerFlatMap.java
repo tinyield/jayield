@@ -16,34 +16,22 @@
 
 package org.jayield.advs;
 
-import java.util.function.Function;
-
 import org.jayield.Advancer;
 import org.jayield.Query;
+import org.jayield.Traverser;
 import org.jayield.Yield;
 
-public class AdvancerFlatMap<T, R> extends AbstractAdvancer<R> {
+import java.util.function.Function;
+
+public class AdvancerFlatMap<T, R> implements Advancer<R>, Traverser<R> {
     private final Query<T> upstream;
     private final Function<? super T, ? extends Query<? extends R>> mapper;
-    Query<? extends R> src;
+    private Query<? extends R> src;
 
     public AdvancerFlatMap(Query<T> query, Function<? super T, ? extends Query<? extends R>> mapper) {
         this.upstream = query;
         this.mapper = mapper;
-        src = new Query<>(Advancer.empty());
-    }
-
-    /**
-     * Returns true if it moves successfully. Otherwise returns false
-     * signaling it has finished.
-     */
-    public boolean move() {
-        while(!src.hasNext()) {
-            if(!upstream.hasNext()) return false;
-            src = mapper.apply(upstream.next());
-        }
-        curr = src.next();
-        return true;
+        src = new Query<>(Advancer.empty(), Traverser.empty());
     }
 
     @Override
@@ -51,5 +39,14 @@ public class AdvancerFlatMap<T, R> extends AbstractAdvancer<R> {
         upstream.traverse(elem ->
                 mapper.apply(elem).traverse(yield));
 
+    }
+
+    @Override
+    public boolean tryAdvance(Yield<? super R> yield) {
+        while (!src.tryAdvance(yield)) {
+            if(!upstream.tryAdvance(t -> src = mapper.apply(t)))
+                return false;
+        }
+        return true;
     }
 }

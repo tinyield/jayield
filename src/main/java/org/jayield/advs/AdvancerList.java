@@ -16,13 +16,14 @@
 
 package org.jayield.advs;
 
+import org.jayield.Advancer;
+import org.jayield.Traverser;
+import org.jayield.Yield;
+
 import java.util.Iterator;
 import java.util.List;
 
-import org.jayield.Advancer;
-import org.jayield.Yield;
-
-public class AdvancerList<U> implements Advancer<U> {
+public class AdvancerList<U> implements Advancer<U>, Traverser<U> {
     private final List<U> data;
     private final Iterator<U> current;
 
@@ -32,17 +33,16 @@ public class AdvancerList<U> implements Advancer<U> {
     }
 
     @Override
-    public U next() {
-        return current.next();
-    }
-
-    @Override
-    public boolean hasNext() {
-        return current.hasNext();
-    }
-
-    @Override
     public void traverse(Yield<? super U> yield) {
+        if(!current.hasNext())
+            throw new IllegalStateException("Traverser has already been operated on or closed!");
         data.forEach(yield::ret);
+    }
+
+    @Override
+    public boolean tryAdvance(Yield<? super U> yield) {
+        if(!current.hasNext()) return false;
+        yield.ret(current.next());
+        return true;
     }
 }

@@ -16,15 +16,15 @@
 
 package org.jayield.primitives.lng;
 
-import static org.jayield.primitives.lng.LongQuery.fromStream;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
+import org.testng.annotations.Test;
 
 import java.util.PrimitiveIterator;
 import java.util.Spliterator;
 import java.util.stream.LongStream;
 
-import org.testng.annotations.Test;
+import static org.jayield.primitives.lng.LongQuery.fromStream;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
 
 /**
  * @author Miguel Gamboa
@@ -36,8 +36,7 @@ public class LongQueryToLongStreamTest {
         long[] src = {1, 2, 3, 4, 5, 6, 7, 8, 9};
         PrimitiveIterator.OfLong expected = LongStream.of(src).iterator();
         LongQuery nrs = fromStream(LongStream.of(src));
-        while (nrs.hasNext()) {
-            assertEquals(nrs.next(), expected.nextLong());
+        while (nrs.tryAdvance(item -> assertEquals(item, expected.nextLong()))) {
         }
         assertFalse(expected.hasNext());
     }

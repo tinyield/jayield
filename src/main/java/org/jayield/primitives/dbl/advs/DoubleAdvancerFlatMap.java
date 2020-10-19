@@ -16,13 +16,14 @@
 
 package org.jayield.primitives.dbl.advs;
 
-import java.util.function.DoubleFunction;
-
 import org.jayield.primitives.dbl.DoubleAdvancer;
 import org.jayield.primitives.dbl.DoubleQuery;
+import org.jayield.primitives.dbl.DoubleTraverser;
 import org.jayield.primitives.dbl.DoubleYield;
 
-public class DoubleAdvancerFlatMap extends AbstractDoubleAdvancer {
+import java.util.function.DoubleFunction;
+
+public class DoubleAdvancerFlatMap implements DoubleAdvancer, DoubleTraverser {
     private final DoubleQuery upstream;
     private final DoubleFunction<? extends DoubleQuery> mapper;
     DoubleQuery src;
@@ -30,27 +31,21 @@ public class DoubleAdvancerFlatMap extends AbstractDoubleAdvancer {
     public DoubleAdvancerFlatMap(DoubleQuery query, DoubleFunction<? extends DoubleQuery> mapper) {
         this.upstream = query;
         this.mapper = mapper;
-        src = new DoubleQuery(DoubleAdvancer.empty());
-    }
-
-    /**
-     * Returns true if it moves successfully. Otherwise returns false
-     * signaling it has finished.
-     */
-    public boolean move() {
-        while (!src.hasNext()) {
-            if (!upstream.hasNext()) {
-                return false;
-            }
-            src = mapper.apply(upstream.next());
-        }
-        currDouble = src.next();
-        return true;
+        src = new DoubleQuery(DoubleAdvancer.empty(), DoubleTraverser.empty());
     }
 
     @Override
     public void traverse(DoubleYield yield) {
         upstream.traverse(elem -> mapper.apply(elem).traverse(yield));
 
+    }
+
+    @Override
+    public boolean tryAdvance(DoubleYield yield) {
+        while (!src.tryAdvance(yield)) {
+            if(!upstream.tryAdvance(t -> src = mapper.apply(t)))
+                return false;
+        }
+        return true;
     }
 }

@@ -16,38 +16,30 @@
 
 package org.jayield.primitives.lng.advs;
 
-import java.util.NoSuchElementException;
+import org.jayield.Advancer;
+import org.jayield.Traverser;
+import org.jayield.Yield;
+import org.jayield.primitives.lng.LongQuery;
+
 import java.util.function.LongFunction;
 
-import org.jayield.Advancer;
-import org.jayield.Yield;
-import org.jayield.primitives.lng.LongAdvancer;
+public class LongAdvancerMapToObj<T> implements Advancer<T>, Traverser<T> {
 
-public class LongAdvancerMapToObj<T> implements Advancer<T> {
-
-    private final LongAdvancer upstream;
+    private final LongQuery upstream;
     private final LongFunction<? extends T> mapper;
 
-    public LongAdvancerMapToObj(LongAdvancer adv, LongFunction<? extends T> mapper) {
+    public LongAdvancerMapToObj(LongQuery adv, LongFunction<? extends T> mapper) {
         this.upstream = adv;
         this.mapper = mapper;
     }
 
     @Override
-    public boolean hasNext() {
-        return upstream.hasNext();
-    }
-
-    @Override
-    public T next() {
-        if (!hasNext()) {
-            throw new NoSuchElementException("No more elements available on iteration!");
-        }
-        return mapper.apply(upstream.nextLong());
-    }
-
-    @Override
     public void traverse(Yield<? super T> yield) {
         upstream.traverse(e -> yield.ret(mapper.apply(e)));
+    }
+
+    @Override
+    public boolean tryAdvance(Yield<? super T> yield) {
+        return upstream.tryAdvance(item -> yield.ret(mapper.apply(item)));
     }
 }

@@ -16,33 +16,30 @@
 
 package org.jayield.primitives.dbl.advs;
 
-import java.util.function.DoubleUnaryOperator;
-
 import org.jayield.primitives.dbl.DoubleAdvancer;
+import org.jayield.primitives.dbl.DoubleQuery;
+import org.jayield.primitives.dbl.DoubleTraverser;
 import org.jayield.primitives.dbl.DoubleYield;
 
-public class DoubleAdvancerMap implements DoubleAdvancer {
+import java.util.function.DoubleUnaryOperator;
 
-    private final DoubleAdvancer upstream;
+public class DoubleAdvancerMap implements DoubleAdvancer, DoubleTraverser {
+
+    private final DoubleQuery upstream;
     private final DoubleUnaryOperator mapper;
 
-    public DoubleAdvancerMap(DoubleAdvancer adv, DoubleUnaryOperator mapper) {
+    public DoubleAdvancerMap(DoubleQuery adv, DoubleUnaryOperator mapper) {
         this.upstream = adv;
         this.mapper = mapper;
     }
 
     @Override
-    public boolean hasNext() {
-        return upstream.hasNext();
-    }
-
-    @Override
-    public double nextDouble() {
-        return mapper.applyAsDouble(upstream.nextDouble());
-    }
-
-    @Override
     public void traverse(DoubleYield yield) {
         upstream.traverse(e -> yield.ret(mapper.applyAsDouble(e)));
+    }
+
+    @Override
+    public boolean tryAdvance(DoubleYield yield) {
+        return upstream.tryAdvance(item -> yield.ret(mapper.applyAsDouble(item)));
     }
 }

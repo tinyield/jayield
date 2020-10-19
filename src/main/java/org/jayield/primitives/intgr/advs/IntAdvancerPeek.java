@@ -16,35 +16,33 @@
 
 package org.jayield.primitives.intgr.advs;
 
-import java.util.function.IntConsumer;
-
 import org.jayield.primitives.intgr.IntAdvancer;
+import org.jayield.primitives.intgr.IntQuery;
+import org.jayield.primitives.intgr.IntTraverser;
 import org.jayield.primitives.intgr.IntYield;
 
-public class IntAdvancerPeek implements IntAdvancer {
-    private final IntAdvancer upstream;
+import java.util.function.IntConsumer;
+
+public class IntAdvancerPeek implements IntAdvancer, IntTraverser {
+    private final IntQuery upstream;
     private final IntConsumer action;
 
-    public IntAdvancerPeek(IntAdvancer adv, IntConsumer action) {
+    public IntAdvancerPeek(IntQuery adv, IntConsumer action) {
         this.upstream = adv;
         this.action = action;
     }
 
     @Override
-    public boolean hasNext() {
-        return upstream.hasNext();
-    }
-
-    @Override
-    public int nextInt() {
-        int curr = upstream.nextInt();
-        action.accept(curr);
-        return curr;
-    }
-
-    @Override
     public void traverse(IntYield yield) {
         upstream.traverse(item -> {
+            action.accept(item);
+            yield.ret(item);
+        });
+    }
+
+    @Override
+    public boolean tryAdvance(IntYield yield) {
+        return upstream.tryAdvance(item -> {
             action.accept(item);
             yield.ret(item);
         });

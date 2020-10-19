@@ -1,48 +1,52 @@
 package org.jayield.primitives.dbl.advs;
 
-import java.util.function.DoublePredicate;
-
-import org.jayield.boxes.BoolBox;
+import org.jayield.primitives.dbl.DoubleAdvancer;
 import org.jayield.primitives.dbl.DoubleQuery;
+import org.jayield.primitives.dbl.DoubleTraverser;
 import org.jayield.primitives.dbl.DoubleYield;
 
-public class DoubleAdvancerDropWhile extends AbstractDoubleAdvancer {
+import java.util.function.DoublePredicate;
+
+public class DoubleAdvancerDropWhile implements DoubleAdvancer, DoubleTraverser {
 
     private final DoubleQuery upstream;
     private final DoublePredicate predicate;
-    private final BoolBox dropped;
+    private boolean dropped;
 
     public DoubleAdvancerDropWhile(DoubleQuery upstream, DoublePredicate predicate) {
         this.upstream = upstream;
         this.predicate = predicate;
-        this.dropped = new BoolBox();
+        this.dropped = false;
     }
 
     @Override
     public void traverse(DoubleYield yield) {
         upstream.traverse(item -> {
-            if (!dropped.isTrue() && !predicate.test(item)) {
-                dropped.set();
+            if (!dropped && !predicate.test(item)) {
+                dropped = true;
             }
-            if (dropped.isTrue()) {
+            if (dropped) {
                 yield.ret(item);
             }
         });
     }
 
     @Override
-    protected boolean move() {
-        while (!dropped.isTrue() && this.upstream.hasNext()) {
-            currDouble = upstream.next();
-            if (!predicate.test(currDouble)) {
-                this.dropped.set();
-                return true;
+    public boolean tryAdvance(DoubleYield yield) {
+        if (dropped) {
+            return upstream.tryAdvance(yield);
+        } else {
+            DoubleYield takeWhile = item -> {
+                if(!predicate.test(item)){
+                    dropped = true;
+                    yield.ret(item);
+                }
+            };
+            while(upstream.tryAdvance(takeWhile) && !dropped) {
+                // Intentionally empty. Action specified on yield statement of tryAdvance().
             }
+            return dropped;
         }
-        if (dropped.isTrue() && upstream.hasNext()) {
-            currDouble = upstream.next();
-            return true;
-        }
-        return false;
+
     }
 }

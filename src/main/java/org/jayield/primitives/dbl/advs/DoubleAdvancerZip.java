@@ -16,37 +16,41 @@
 
 package org.jayield.primitives.dbl.advs;
 
-import java.util.function.DoubleBinaryOperator;
-
+import org.jayield.Yield;
+import org.jayield.boxes.BoolBox;
 import org.jayield.primitives.dbl.DoubleAdvancer;
+import org.jayield.primitives.dbl.DoubleQuery;
+import org.jayield.primitives.dbl.DoubleTraverser;
 import org.jayield.primitives.dbl.DoubleYield;
 
-public class DoubleAdvancerZip implements DoubleAdvancer {
-    private final DoubleAdvancer upstream;
-    private final DoubleAdvancer other;
+import java.util.function.DoubleBinaryOperator;
+
+public class DoubleAdvancerZip implements DoubleAdvancer, DoubleTraverser {
+    private final DoubleQuery upstream;
+    private final DoubleQuery other;
     private final DoubleBinaryOperator zipper;
 
-    public DoubleAdvancerZip(DoubleAdvancer upstream, DoubleAdvancer other, DoubleBinaryOperator zipper) {
+    public DoubleAdvancerZip(DoubleQuery upstream, DoubleQuery other, DoubleBinaryOperator zipper) {
         this.upstream = upstream;
         this.other = other;
         this.zipper = zipper;
     }
 
     @Override
-    public boolean hasNext() {
-        return upstream.hasNext() && other.hasNext();
-    }
-
-    @Override
-    public double nextDouble() {
-        return zipper.applyAsDouble(upstream.next(), other.next());
-    }
-
-    @Override
     public void traverse(DoubleYield yield) {
-        upstream.traverse(e -> {
-            if (!other.hasNext()) return;
-            yield.ret(zipper.applyAsDouble(e, other.next()));
+        upstream.shortCircuit(e1 -> {
+            if(!other.tryAdvance(e2 -> yield.ret(zipper.applyAsDouble(e1, e2))))
+                Yield.bye();
         });
+    }
+
+    @Override
+    public boolean tryAdvance(DoubleYield yield) {
+        BoolBox consumed = new BoolBox();
+        upstream.tryAdvance(e1 -> other.tryAdvance(e2 -> {
+            yield.ret(zipper.applyAsDouble(e1, e2));
+            consumed.set();
+        }));
+        return consumed.isTrue();
     }
 }

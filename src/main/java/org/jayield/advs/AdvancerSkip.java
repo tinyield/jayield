@@ -17,30 +17,21 @@
 package org.jayield.advs;
 
 import org.jayield.Advancer;
+import org.jayield.Query;
+import org.jayield.Traverser;
 import org.jayield.Yield;
 
-public class AdvancerSkip<T> implements Advancer<T> {
-    private final Advancer<T> upstream;
+public class AdvancerSkip<T> implements Advancer<T>, Traverser<T> {
+    private final Query<T> upstream;
     private final int n;
     int index;
 
-    public AdvancerSkip(Advancer<T> adv, int n) {
+    public AdvancerSkip(Query<T> adv, int n) {
         this.upstream = adv;
         this.n = n;
         index = 0;
     }
 
-    @Override
-    public boolean hasNext() {
-        for (; upstream.hasNext() && index < n; index++) upstream.next();
-        return upstream.hasNext();
-    }
-
-    @Override
-    public T next() {
-        if(!hasNext()) throw new IndexOutOfBoundsException("No such elements on iteration!");
-        return upstream.next();
-    }
     /**
      * Continues from the point where tryAdvance or next left the
      * internal iteration.
@@ -52,5 +43,12 @@ public class AdvancerSkip<T> implements Advancer<T> {
             if(index++ >= n)
                 yield.ret(item);
         });
+    }
+
+    @Override
+    public boolean tryAdvance(Yield<? super T> yield) {
+        for (; index < n; index++)
+            upstream.tryAdvance(item -> {});
+        return upstream.tryAdvance(yield);
     }
 }

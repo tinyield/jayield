@@ -1,39 +1,37 @@
 package org.jayield.primitives.intgr;
 
-import java.util.NoSuchElementException;
+import org.jayield.Advancer;
+import org.jayield.Yield;
+import org.jayield.primitives.dbl.DoubleAdvancer;
+import org.jayield.primitives.lng.LongAdvancer;
+
 import java.util.function.DoubleToIntFunction;
 import java.util.function.LongToIntFunction;
 import java.util.function.ToIntFunction;
 
-import org.jayield.Advancer;
-import org.jayield.primitives.dbl.DoubleAdvancer;
-import org.jayield.primitives.lng.LongAdvancer;
-
 /**
  * Sequential traverser with both internal and external iteration approach.
  */
-public interface IntAdvancer extends Advancer<Integer>, IntIterator, IntTraverser {
+public interface IntAdvancer extends Advancer<Integer> {
 
     /**
-     * An IntAdvancer object without elements.
+     * If a remaining element exists, yields that element through
+     * the given action.
      */
+    boolean tryAdvance(IntYield yield);
+
+    /**
+     * Default advancer implementation that calls the
+     * primitive version of it
+     */
+    @Override
+    default boolean tryAdvance(Yield<? super Integer> yield) {
+        IntYield yld = yield::ret;
+        return this.tryAdvance(yld);
+    }
+
     static IntAdvancer empty() {
-        return new IntAdvancer() {
-            @Override
-            public boolean hasNext() {
-                return false;
-            }
-
-            @Override
-            public int nextInt() {
-                throw new NoSuchElementException("No such elements available for iteration!");
-            }
-
-            @Override
-            public void traverse(IntYield yield) {
-                /* Do nothing. Since there are no elements, thus there is nothing to do. */
-            }
-        };
+        return yield -> false;
     }
 
     /**
@@ -45,25 +43,7 @@ public interface IntAdvancer extends Advancer<Integer>, IntIterator, IntTraverse
      *         {@link ToIntFunction} that specifies how to map the source elements into int values.
      */
     static <T> IntAdvancer from(Advancer<T> source, ToIntFunction<? super T> mapper) {
-        return new IntAdvancer() {
-            @Override
-            public int nextInt() {
-                if (!this.hasNext()) {
-                    throw new NoSuchElementException("No such elements available for iteration!");
-                }
-                return mapper.applyAsInt(source.next());
-            }
-
-            @Override
-            public boolean hasNext() {
-                return source.hasNext();
-            }
-
-            @Override
-            public void traverse(IntYield yield) {
-                source.traverse(item -> yield.ret(mapper.applyAsInt(item)));
-            }
-        };
+        return yield -> source.tryAdvance(item -> yield.ret(mapper.applyAsInt(item)));
     }
 
     /**
@@ -88,13 +68,5 @@ public interface IntAdvancer extends Advancer<Integer>, IntIterator, IntTraverse
      */
     static IntAdvancer from(LongAdvancer source, LongToIntFunction mapper) {
         return from((Advancer<Long>) source, mapper::applyAsInt);
-    }
-
-    @Override
-    default Integer next() {
-        if (!hasNext()) {
-            throw new NoSuchElementException("No more elements available on iteration!");
-        }
-        return this.nextInt();
     }
 }

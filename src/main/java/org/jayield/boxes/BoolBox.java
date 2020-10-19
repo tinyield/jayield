@@ -28,11 +28,17 @@ public class BoolBox {
     }
 
     public BoolBox() {
+        this(false);
     }
 
     public boolean isTrue() {
         return value;
     }
+
+    public boolean isFalse() {
+        return !value;
+    }
+
     public void set() {
         value = true;
     }

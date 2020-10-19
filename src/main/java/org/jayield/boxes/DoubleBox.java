@@ -17,7 +17,7 @@
 package org.jayield.boxes;
 
 public class DoubleBox {
-    private double value;
+    protected double value;
     private boolean isPresent;
 
     public DoubleBox() {
@@ -28,6 +28,11 @@ public class DoubleBox {
     public DoubleBox(double value, boolean isPresent) {
         this.value = value;
         this.isPresent = isPresent;
+    }
+
+    public DoubleBox(double identity) {
+        this.value = identity;
+        this.isPresent = true;
     }
 
     public double getValue() {

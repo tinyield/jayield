@@ -16,13 +16,13 @@
 
 package org.jayield.primitives.lng.advs;
 
-import java.util.NoSuchElementException;
-import java.util.function.LongSupplier;
-
 import org.jayield.primitives.lng.LongAdvancer;
+import org.jayield.primitives.lng.LongTraverser;
 import org.jayield.primitives.lng.LongYield;
 
-public class LongAdvancerGenerate implements LongAdvancer {
+import java.util.function.LongSupplier;
+
+public class LongAdvancerGenerate implements LongAdvancer, LongTraverser {
     private final LongSupplier s;
 
     public LongAdvancerGenerate(LongSupplier s) {
@@ -31,23 +31,14 @@ public class LongAdvancerGenerate implements LongAdvancer {
 
     @Override
     public void traverse(LongYield yield) {
-        while (hasNext()) {
+        while (true) {
             yield.ret(s.getAsLong());
         }
     }
 
     @Override
-    public boolean hasNext() {
+    public boolean tryAdvance(LongYield yield) {
+        yield.ret(s.getAsLong());
         return true;
     }
-
-    @Override
-    public long nextLong() {
-        if (!hasNext()) {
-            throw new NoSuchElementException("No more elements available on iteration!");
-        }
-        return s.getAsLong();
-    }
-
-
 }

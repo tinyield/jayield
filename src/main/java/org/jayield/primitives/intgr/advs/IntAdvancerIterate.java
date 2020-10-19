@@ -16,34 +16,19 @@
 
 package org.jayield.primitives.intgr.advs;
 
-import java.util.NoSuchElementException;
-import java.util.function.IntUnaryOperator;
-
 import org.jayield.primitives.intgr.IntAdvancer;
+import org.jayield.primitives.intgr.IntTraverser;
 import org.jayield.primitives.intgr.IntYield;
 
-public class IntAdvancerIterate implements IntAdvancer {
+import java.util.function.IntUnaryOperator;
+
+public class IntAdvancerIterate implements IntAdvancer, IntTraverser {
     private final IntUnaryOperator f;
     private int prev;
 
     public IntAdvancerIterate(int seed, IntUnaryOperator f) {
         this.f = f;
         this.prev = seed;
-    }
-
-    @Override
-    public int nextInt() {
-        if (!hasNext()) {
-            throw new NoSuchElementException("No more elements available on iteration!");
-        }
-        int curr = prev;
-        prev = f.applyAsInt(prev);
-        return curr;
-    }
-
-    @Override
-    public boolean hasNext() {
-        return true;
     }
 
     /**
@@ -57,5 +42,13 @@ public class IntAdvancerIterate implements IntAdvancer {
         for (int i = prev; true; i = f.applyAsInt(i)) {
             yield.ret(i);
         }
+    }
+
+    @Override
+    public boolean tryAdvance(IntYield yield) {
+        int curr = prev;
+        prev = f.applyAsInt(prev);
+        yield.ret(curr);
+        return true;
     }
 }

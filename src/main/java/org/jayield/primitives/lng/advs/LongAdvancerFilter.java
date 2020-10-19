@@ -16,32 +16,21 @@
 
 package org.jayield.primitives.lng.advs;
 
-import java.util.function.LongPredicate;
-
+import org.jayield.boxes.BoolBox;
 import org.jayield.primitives.lng.LongAdvancer;
+import org.jayield.primitives.lng.LongQuery;
+import org.jayield.primitives.lng.LongTraverser;
 import org.jayield.primitives.lng.LongYield;
 
-public class LongAdvancerFilter extends AbstractLongAdvancer {
-    private final LongAdvancer upstream;
+import java.util.function.LongPredicate;
+
+public class LongAdvancerFilter implements LongAdvancer, LongTraverser {
+    private final LongQuery upstream;
     private final LongPredicate p;
 
-    public LongAdvancerFilter(LongAdvancer adv, LongPredicate p) {
+    public LongAdvancerFilter(LongQuery adv, LongPredicate p) {
         this.upstream = adv;
         this.p = p;
-    }
-
-    /**
-     * Returns true if it moves successfully. Otherwise returns false
-     * signaling it has finished.
-     */
-    public boolean move() {
-        while (upstream.hasNext()) {
-            currLong = upstream.nextLong();
-            if (p.test(currLong)) {
-                return true;
-            }
-        }
-        return false;
     }
 
     @Override
@@ -51,5 +40,20 @@ public class LongAdvancerFilter extends AbstractLongAdvancer {
                 yield.ret(e);
             }
         });
+    }
+
+    @Override
+    public boolean tryAdvance(LongYield yield) {
+        BoolBox found = new BoolBox();
+        while(found.isFalse()) {
+            boolean hasNext = upstream.tryAdvance(item -> {
+                if(p.test(item)) {
+                    yield.ret(item);
+                    found.set();
+                }
+            });
+            if(!hasNext) break;
+        }
+        return found.isTrue();
     }
 }

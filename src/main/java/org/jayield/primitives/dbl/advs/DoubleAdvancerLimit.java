@@ -16,14 +16,12 @@
 
 package org.jayield.primitives.dbl.advs;
 
-import java.util.NoSuchElementException;
-
-import org.jayield.Yield;
 import org.jayield.primitives.dbl.DoubleAdvancer;
 import org.jayield.primitives.dbl.DoubleQuery;
+import org.jayield.primitives.dbl.DoubleTraverser;
 import org.jayield.primitives.dbl.DoubleYield;
 
-public class DoubleAdvancerLimit implements DoubleAdvancer {
+public class DoubleAdvancerLimit implements DoubleAdvancer, DoubleTraverser {
     private final DoubleQuery upstream;
     private final int n;
     int count;
@@ -35,27 +33,18 @@ public class DoubleAdvancerLimit implements DoubleAdvancer {
     }
 
     @Override
-    public boolean hasNext() {
-        return count < n && upstream.hasNext();
-    }
-
-    @Override
-    public double nextDouble() {
-        if (count >= n) {
-            throw new NoSuchElementException("Nor more elements available!");
-        }
-        count++;
-        return upstream.next();
-    }
-
-    @Override
     public void traverse(DoubleYield yield) {
-        upstream.shortCircuit(item -> {
-            if (count >= n) {
-                Yield.bye();
-            }
-            count++;
-            yield.ret(item);
-        });
+        if(count >= n)
+            throw new IllegalStateException("Traverser has already been operated on or closed!");
+        while(this.tryAdvance(yield)) {
+            // Intentionally empty. Action specified on yield statement of tryAdvance().
+        }
+    }
+
+    @Override
+    public boolean tryAdvance(DoubleYield yield) {
+        if(count >= n) return false;
+        count++;
+        return upstream.tryAdvance(yield);
     }
 }

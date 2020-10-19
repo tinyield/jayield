@@ -16,14 +16,12 @@
 
 package org.jayield.primitives.lng.advs;
 
-import java.util.NoSuchElementException;
-
-import org.jayield.Yield;
 import org.jayield.primitives.lng.LongAdvancer;
 import org.jayield.primitives.lng.LongQuery;
+import org.jayield.primitives.lng.LongTraverser;
 import org.jayield.primitives.lng.LongYield;
 
-public class LongAdvancerLimit implements LongAdvancer {
+public class LongAdvancerLimit implements LongAdvancer, LongTraverser {
     private final LongQuery upstream;
     private final int n;
     int count;
@@ -35,27 +33,16 @@ public class LongAdvancerLimit implements LongAdvancer {
     }
 
     @Override
-    public boolean hasNext() {
-        return count < n && upstream.hasNext();
-    }
-
-    @Override
-    public long nextLong() {
-        if (count >= n) {
-            throw new NoSuchElementException("Nor more elements available!");
-        }
-        count++;
-        return upstream.next();
-    }
-
-    @Override
     public void traverse(LongYield yield) {
-        upstream.shortCircuit(item -> {
-            if (count >= n) {
-                Yield.bye();
-            }
-            count++;
-            yield.ret(item);
-        });
+        if(count >= n)
+            throw new IllegalStateException("Traverser has already been operated on or closed!");
+        while(this.tryAdvance(yield)) { }
+    }
+
+    @Override
+    public boolean tryAdvance(LongYield yield) {
+        if(count >= n) return false;
+        count++;
+        return upstream.tryAdvance(yield);
     }
 }

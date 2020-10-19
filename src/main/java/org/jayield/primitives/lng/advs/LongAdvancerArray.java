@@ -16,12 +16,11 @@
 
 package org.jayield.primitives.lng.advs;
 
-import java.util.NoSuchElementException;
-
 import org.jayield.primitives.lng.LongAdvancer;
+import org.jayield.primitives.lng.LongTraverser;
 import org.jayield.primitives.lng.LongYield;
 
-public class LongAdvancerArray implements LongAdvancer {
+public class LongAdvancerArray implements LongAdvancer, LongTraverser {
     private final long[] data;
     private int current;
 
@@ -30,15 +29,6 @@ public class LongAdvancerArray implements LongAdvancer {
         this.current = 0;
     }
 
-
-    public long nextLong() {
-        if (!hasNext()) {
-            throw new NoSuchElementException("No more elements available on iteration!");
-        }
-        return data[current++];
-    }
-
-    @Override
     public boolean hasNext() {
         return current < data.length;
     }
@@ -54,5 +44,12 @@ public class LongAdvancerArray implements LongAdvancer {
         for (int i = current; i < data.length; i++) {
             yield.ret(data[i]);
         }
+    }
+
+    @Override
+    public boolean tryAdvance(LongYield yield) {
+        if(!hasNext()) return false;
+        yield.ret(data[current++]);
+        return true;
     }
 }
