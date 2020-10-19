@@ -86,10 +86,6 @@ public class Query<T> {
         this.trav = trav;
     }
 
-    public boolean hasAdvancer() {
-        return adv != null;
-    }
-
     /**
      * Yields elements sequentially in the current thread,
      * until all elements have been processed or an
@@ -242,8 +238,8 @@ public class Query<T> {
      * {@link Object#equals(Object)}) of this query.
      */
     public final Query<T> distinct(){
-        AdvancerDistinct<T> adv = new AdvancerDistinct<>(this);
-        return new Query<>(adv, adv);
+        AdvancerDistinct<T> dis = new AdvancerDistinct<>(this);
+        return new Query<>(dis, dis);
     }
 
     /**
@@ -252,8 +248,8 @@ public class Query<T> {
      * the provided mapping function to each element.
      */
     public final <R> Query<R> flatMap(Function<? super T,? extends Query<? extends R>> mapper){
-        AdvancerFlatMap<T, R> adv = new AdvancerFlatMap<>(this, mapper);
-        return new Query<>(adv, adv);
+        AdvancerFlatMap<T, R> map = new AdvancerFlatMap<>(this, mapper);
+        return new Query<>(map, map);
     }
 
     /**
@@ -271,8 +267,8 @@ public class Query<T> {
      * this query that match the given predicate.
      */
     public final Query<T> takeWhile(Predicate<? super T> predicate){
-        AdvancerTakeWhile<T> adv = new AdvancerTakeWhile<>(this, predicate);
-        return new Query<>(adv, adv);
+        AdvancerTakeWhile<T> take = new AdvancerTakeWhile<>(this, predicate);
+        return new Query<>(take, take);
     }
 
     /**
@@ -293,10 +289,10 @@ public class Query<T> {
      * {@code Traverser} object that is encapsulated in the resulting query.
      */
     public final <R> Query<R> then(Function<Query<T>, Traverser<R>> next) {
-        Advancer<R> adv = item -> { throw new UnsupportedOperationException(
+        Advancer<R> nextAdv = item -> { throw new UnsupportedOperationException(
             "Missing tryAdvance() implementation! Use the overloaded then() providing both Advancer and Traverser!");
         };
-        return new Query<>(adv, next.apply(this));
+        return new Query<>(nextAdv, next.apply(this));
     }
 
     /**
@@ -336,10 +332,7 @@ public class Query<T> {
      */
     public final Optional<T> findFirst(){
         Box<T> box = new Box<>();
-        this.shortCircuit(item -> {
-            box.turnPresent(item);
-            Yield.bye();
-        });
+        this.tryAdvance(box::turnPresent);
         return box.isPresent()
                 ? Optional.of(box.getValue())
                 : Optional.empty();

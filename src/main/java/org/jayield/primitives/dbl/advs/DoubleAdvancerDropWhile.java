@@ -42,7 +42,9 @@ public class DoubleAdvancerDropWhile implements DoubleAdvancer, DoubleTraverser 
                     yield.ret(item);
                 }
             };
-            while(upstream.tryAdvance(takeWhile) && !dropped) { }
+            while(upstream.tryAdvance(takeWhile) && !dropped) {
+                // Intentionally empty. Action specified on yield statement of tryAdvance().
+            }
             return dropped;
         }
 

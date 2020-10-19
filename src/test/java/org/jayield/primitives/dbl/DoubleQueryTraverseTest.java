@@ -212,6 +212,15 @@ public class DoubleQueryTraverseTest {
         assertEquals(actual, expected);
     }
 
+    @Test
+    public void testBulkIterateTakeWhileMax() {
+        double expected = 13;
+        double actual = iterate(1, n -> n + 2)
+                .takeWhile(n -> n < 14)
+                .max()
+                .orElseThrow();
+        assertEquals(actual, expected);
+    }
 
     @Test
     public void testBulkPeekCount() {

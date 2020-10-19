@@ -79,10 +79,6 @@ public class DoubleQuery {
         this.trav = trav;
     }
 
-    public boolean hasAdvancer() {
-        return adv != null;
-    }
-
     /**
      * Returns a sequential ordered {@code DoubleQuery} with elements
      * from the provided {@link DoubleStream} data.
@@ -262,8 +258,6 @@ public class DoubleQuery {
      * if a reduction can be made, using the provided accumulator.
      */
     public OptionalDouble reduce(DoubleBinaryOperator accumulator) {
-        if(!hasAdvancer())
-            throw new UnsupportedOperationException("Missing Advancer on then() or provide an identity instead!");
         DoubleBox box = new DoubleBox();
         if(this.tryAdvance(box::setValue)) {
             return OptionalDouble.of(this.reduce(box.getValue(), accumulator));
@@ -472,10 +466,7 @@ public class DoubleQuery {
      */
     public OptionalDouble findFirst() {
         DoubleBox box = new DoubleBox();
-        this.shortCircuit(item -> {
-            box.turnPresent(item);
-            Yield.bye();
-        });
+        this.tryAdvance(box::turnPresent);
         return box.isPresent()
                 ? OptionalDouble.of(box.getValue())
                 : OptionalDouble.empty();
@@ -567,10 +558,10 @@ public class DoubleQuery {
      * {@code DoubleTraverser} object that is encapsulated in the resulting {@code DoubleQuery}.
      */
     public final DoubleQuery then(Function<DoubleQuery, DoubleTraverser> next) {
-        DoubleAdvancer adv = item -> { throw new UnsupportedOperationException(
+        DoubleAdvancer nextAdv = item -> { throw new UnsupportedOperationException(
             "Missing tryAdvance() implementation! Use the overloaded then() providing both Advancer and Traverser!");
         };
-        return new DoubleQuery(adv, next.apply(this));
+        return new DoubleQuery(nextAdv, next.apply(this));
     }
 
     /**

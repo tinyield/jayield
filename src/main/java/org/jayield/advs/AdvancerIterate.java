@@ -33,7 +33,7 @@ public class AdvancerIterate<U> implements Advancer<U>, Traverser<U> {
 
     @Override
     public void traverse(Yield<? super U> yield) {
-        for(U curr = prev; true; prev = f.apply(prev))
+        for(U curr = prev; true; curr = f.apply(curr))
             yield.ret(curr);
     }
 

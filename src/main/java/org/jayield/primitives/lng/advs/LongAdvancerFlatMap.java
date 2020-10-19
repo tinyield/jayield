@@ -43,7 +43,7 @@ public class LongAdvancerFlatMap implements LongAdvancer, LongTraverser {
     @Override
     public boolean tryAdvance(LongYield yield) {
         while (!src.tryAdvance(yield)) {
-            if(!upstream.tryAdvance((t) -> src = mapper.apply(t)))
+            if(!upstream.tryAdvance(t -> src = mapper.apply(t)))
                 return false;
         }
         return true;

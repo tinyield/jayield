@@ -16,7 +16,6 @@
 
 package org.jayield.primitives.dbl.advs;
 
-import org.jayield.Yield;
 import org.jayield.primitives.dbl.DoubleAdvancer;
 import org.jayield.primitives.dbl.DoubleQuery;
 import org.jayield.primitives.dbl.DoubleTraverser;
@@ -35,13 +34,11 @@ public class DoubleAdvancerLimit implements DoubleAdvancer, DoubleTraverser {
 
     @Override
     public void traverse(DoubleYield yield) {
-        upstream.shortCircuit(item -> {
-            if (count >= n) {
-                Yield.bye();
-            }
-            count++;
-            yield.ret(item);
-        });
+        if(count >= n)
+            throw new IllegalStateException("Traverser has already been operated on or closed!");
+        while(this.tryAdvance(yield)) {
+            // Intentionally empty. Action specified on yield statement of tryAdvance().
+        }
     }
 
     @Override

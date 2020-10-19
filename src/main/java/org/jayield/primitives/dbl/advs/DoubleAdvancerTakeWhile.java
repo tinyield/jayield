@@ -37,7 +37,6 @@ public class DoubleAdvancerTakeWhile implements DoubleAdvancer, DoubleTraverser 
 
     @Override
     public void traverse(DoubleYield yield) {
-        // Not consistent with the Generic Version
         upstream.shortCircuit(item -> {
             if (!predicate.test(item)) {
                 Yield.bye();

@@ -195,6 +195,16 @@ public class LongQueryTraverseTest {
     }
 
     @Test
+    public void testBulkIterateTakeWhileMax() {
+        long expected = 13;
+        long actual = iterate(1, n -> n + 2)
+                .takeWhile(n -> n < 14)
+                .max()
+                .orElseThrow();
+        assertEquals(actual, expected);
+    }
+
+    @Test
     public void testBulkIterateLimitMax() {
         long expected = 13;
         long actual = iterate(1, n -> n + 2)

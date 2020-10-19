@@ -26,7 +26,6 @@ import java.util.stream.DoubleStream;
 
 public class DoubleAdvancerStream implements DoubleAdvancer, DoubleTraverser {
     private final Spliterator.OfDouble upstream;
-    private boolean operated = false;
 
     public DoubleAdvancerStream(DoubleStream data) {
         this.upstream = data.spliterator();

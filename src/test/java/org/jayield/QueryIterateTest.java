@@ -168,7 +168,7 @@ public class QueryIterateTest {
         int [] count = {0};
         while (pipe.tryAdvance(ignore -> count[0]++)) {
         }
-        assertEquals(10, count[0]);
+        assertEquals(count[0], 10);
     }
 
     @Test
@@ -179,7 +179,7 @@ public class QueryIterateTest {
         int [] last = {-1};
         while (pipe.tryAdvance(item -> last[0] = item)) {
         }
-        assertEquals(13, last[0]);
+        assertEquals(last[0], 13);
     }
 
 
@@ -220,7 +220,7 @@ public class QueryIterateTest {
         int expected = 9;
         Query<Integer> pipe = Query
                 .generate(() -> 2 + n[0]++)
-                .limit(7);
+                .takeWhile(nr -> nr < 10);
         int [] last = {-1};
         while (pipe.tryAdvance(item -> last[0] = item)) {
         }

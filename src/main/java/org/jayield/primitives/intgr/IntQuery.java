@@ -80,10 +80,6 @@ public class IntQuery {
         this.trav = trav;
     }
 
-    public boolean hasAdvancer() {
-        return adv != null;
-    }
-
     /**
      * Returns a sequential ordered {@code IntQuery} with elements
      * from the provided {@link IntStream} data.
@@ -264,8 +260,6 @@ public class IntQuery {
      * if a reduction can be made, using the provided accumulator.
      */
     public OptionalInt reduce(IntBinaryOperator accumulator) {
-        if(!hasAdvancer())
-            throw new UnsupportedOperationException("Missing Advancer on then() or provide an identity instead!");
         IntBox box = new IntBox();
         if(this.tryAdvance(box::setValue)) {
             return OptionalInt.of(this.reduce(box.getValue(), accumulator));
@@ -475,10 +469,7 @@ public class IntQuery {
      */
     public OptionalInt findFirst() {
         IntBox box = new IntBox();
-        this.shortCircuit(item -> {
-            box.turnPresent(item);
-            Yield.bye();
-        });
+        this.tryAdvance(box::turnPresent);
         return box.isPresent()
                 ? OptionalInt.of(box.getValue())
                 : OptionalInt.empty();
@@ -572,10 +563,10 @@ public class IntQuery {
      * {@code IntTraverser} object that is encapsulated in the resulting {@code IntQuery}.
      */
     public final IntQuery then(Function<IntQuery, IntTraverser> next) {
-        IntAdvancer adv = item -> { throw new UnsupportedOperationException(
+        IntAdvancer nextAdv = item -> { throw new UnsupportedOperationException(
             "Missing tryAdvance() implementation! Use the overloaded then() providing both Advancer and Traverser!");
         };
-        return new IntQuery(adv, next.apply(this));
+        return new IntQuery(nextAdv, next.apply(this));
     }
 
     /**

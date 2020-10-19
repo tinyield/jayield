@@ -80,10 +80,6 @@ public class LongQuery {
         this.trav = trav;
     }
 
-    public boolean hasAdvancer() {
-        return adv != null;
-    }
-
     /**
      * Returns a sequential ordered {@code LongQuery} with elements
      * from the provided {@link LongStream} data.
@@ -264,8 +260,6 @@ public class LongQuery {
      * if a reduction can be made, using the provided accumulator.
      */
     public OptionalLong reduce(LongBinaryOperator accumulator) {
-        if(!hasAdvancer())
-            throw new UnsupportedOperationException("Missing Advancer on then() or provide an identity instead!");
         LongBox box = new LongBox();
         if(this.tryAdvance(box::setValue)) {
             return OptionalLong.of(this.reduce(box.getValue(), accumulator));
@@ -475,10 +469,7 @@ public class LongQuery {
      */
     public OptionalLong findFirst() {
         LongBox box = new LongBox();
-        this.shortCircuit(item -> {
-            box.turnPresent(item);
-            Yield.bye();
-        });
+        this.tryAdvance(box::turnPresent);
         return box.isPresent()
                 ? OptionalLong.of(box.getValue())
                 : OptionalLong.empty();
@@ -571,10 +562,10 @@ public class LongQuery {
      * {@code LongTraverser} object that is encapsulated in the resulting {@code LongQuery}.
      */
     public final LongQuery then(Function<LongQuery, LongTraverser> next) {
-        LongAdvancer adv = item -> { throw new UnsupportedOperationException(
+        LongAdvancer nextAdv = item -> { throw new UnsupportedOperationException(
             "Missing tryAdvance() implementation! Use the overloaded then() providing both Advancer and Traverser!");
         };
-        return new LongQuery(adv, next.apply(this));
+        return new LongQuery(nextAdv, next.apply(this));
     }
 
     /**

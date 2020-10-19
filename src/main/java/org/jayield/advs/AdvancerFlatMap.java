@@ -44,7 +44,7 @@ public class AdvancerFlatMap<T, R> implements Advancer<R>, Traverser<R> {
     @Override
     public boolean tryAdvance(Yield<? super R> yield) {
         while (!src.tryAdvance(yield)) {
-            if(!upstream.tryAdvance((t) -> src = mapper.apply(t)))
+            if(!upstream.tryAdvance(t -> src = mapper.apply(t)))
                 return false;
         }
         return true;

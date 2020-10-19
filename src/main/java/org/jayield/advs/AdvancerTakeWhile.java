@@ -49,13 +49,9 @@ public class AdvancerTakeWhile<T> implements Advancer<T>, Traverser<T> {
 
     @Override
     public void traverse(Yield<? super T> yield) {
-        if(!hasNext)
-            throw new IllegalStateException("Traverser has already been operated on or closed!");
-        while(hasNext && upstream.tryAdvance(item -> {
-            if(!predicate.test(item))
-                hasNext = false;
-            else
-                yield.ret(item);
-        })) {}
+        upstream.shortCircuit(item -> {
+            if(!predicate.test(item)) Yield.bye();
+            yield.ret(item);
+        });
     }
 }

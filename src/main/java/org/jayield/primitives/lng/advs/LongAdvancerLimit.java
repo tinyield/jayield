@@ -16,7 +16,6 @@
 
 package org.jayield.primitives.lng.advs;
 
-import org.jayield.Yield;
 import org.jayield.primitives.lng.LongAdvancer;
 import org.jayield.primitives.lng.LongQuery;
 import org.jayield.primitives.lng.LongTraverser;
@@ -35,13 +34,9 @@ public class LongAdvancerLimit implements LongAdvancer, LongTraverser {
 
     @Override
     public void traverse(LongYield yield) {
-        upstream.shortCircuit(item -> {
-            if (count >= n) {
-                Yield.bye();
-            }
-            count++;
-            yield.ret(item);
-        });
+        if(count >= n)
+            throw new IllegalStateException("Traverser has already been operated on or closed!");
+        while(this.tryAdvance(yield)) { }
     }
 
     @Override

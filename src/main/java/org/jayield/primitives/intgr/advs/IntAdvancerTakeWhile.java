@@ -37,7 +37,6 @@ public class IntAdvancerTakeWhile implements IntAdvancer, IntTraverser {
 
     @Override
     public void traverse(IntYield yield) {
-        // Not consistent with the Generic Version !!!!
         upstream.shortCircuit(item -> {
             if (!predicate.test(item)) {
                 Yield.bye();

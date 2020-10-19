@@ -26,6 +26,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 import static java.util.Arrays.asList;
+import static org.jayield.Query.fromList;
 import static org.jayield.Query.fromStream;
 import static org.jayield.Query.iterate;
 import static org.jayield.Query.of;
@@ -121,15 +122,15 @@ public class QueryTraverseTest {
     public void testAllMatchForAllElements() {
         Integer[] arrange = {2, 4, 6, 8, 10, 12};
         boolean actual = of(arrange).allMatch(nr -> nr % 2 == 0);
-        assertEquals(true, actual);
+        assertEquals(actual, true);
     }
     @Test
     public void testAllMatchFailOnIntruder() {
         Integer[] arrange = {2, 4, 6, 7, 10, 12};
         int[] count = {0};
         boolean actual = of(arrange).peek(__ -> count[0]++).allMatch(nr -> nr % 2 == 0);
-        assertEquals(false, actual);
-        assertEquals(4, count[0]);
+        assertEquals(actual, false);
+        assertEquals(count[0], 4);
     }
     @Test
     public void testBulkFlatMap() {
@@ -148,7 +149,7 @@ public class QueryTraverseTest {
                 .flatMap(nr -> of(nr - 1, nr, nr + 1))
                 .findFirst()
                 .get();
-        assertEquals(1, actual);
+        assertEquals(actual, 1);
     }
 
     @Test
@@ -166,7 +167,7 @@ public class QueryTraverseTest {
         long total = of(arrange)
                 .distinct()
                 .count();
-        assertEquals(10, total);
+        assertEquals(total, 10);
     }
 
     @Test
@@ -175,7 +176,7 @@ public class QueryTraverseTest {
         String actual = of(arrange)
                 .max(String.CASE_INSENSITIVE_ORDER)
                 .get();
-        assertEquals("y", actual);
+        assertEquals(actual, "y");
     }
 
     @Test
@@ -217,9 +218,17 @@ public class QueryTraverseTest {
                 .limit(7)
                 .max(Integer::compare)
                 .get();
-        assertEquals(13, actual);
+        assertEquals(actual, 13);
     }
 
+    @Test
+    public void testBulkIterateTakeWhileMax() {
+        int actual = iterate(1, n -> n + 2)
+                .takeWhile(n -> n < 14)
+                .max(Integer::compare)
+                .get();
+        assertEquals(actual, 13);
+    }
 
     @Test
     public void testBulkPeekCount() {
@@ -259,8 +268,8 @@ public class QueryTraverseTest {
 
     @Test
     public void testToSet() {
-        String[] input = {"a", "x", "v", "d", "g", "x", "j", "x", "y", "r", "y", "w", "y", "a", "e"};
-        long actual = of(input).toSet().size();
+        List<String> input = asList("a", "x", "v", "d", "g", "x", "j", "x", "y", "r", "y", "w", "y", "a", "e");
+        long actual = fromList(input).toSet().size();
         assertEquals(actual, 10);
     }
 

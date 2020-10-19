@@ -43,7 +43,7 @@ public class DoubleAdvancerFlatMap implements DoubleAdvancer, DoubleTraverser {
     @Override
     public boolean tryAdvance(DoubleYield yield) {
         while (!src.tryAdvance(yield)) {
-            if(!upstream.tryAdvance((t) -> src = mapper.apply(t)))
+            if(!upstream.tryAdvance(t -> src = mapper.apply(t)))
                 return false;
         }
         return true;

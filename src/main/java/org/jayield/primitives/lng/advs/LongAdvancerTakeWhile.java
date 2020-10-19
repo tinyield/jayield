@@ -37,7 +37,6 @@ public class LongAdvancerTakeWhile implements LongAdvancer, LongTraverser {
 
     @Override
     public void traverse(LongYield yield) {
-        // Not consistent with the Generic Version
         upstream.shortCircuit(item -> {
             if (!predicate.test(item)) {
                 Yield.bye();

@@ -16,7 +16,6 @@
 
 package org.jayield.primitives.intgr.advs;
 
-import org.jayield.Yield;
 import org.jayield.primitives.intgr.IntAdvancer;
 import org.jayield.primitives.intgr.IntQuery;
 import org.jayield.primitives.intgr.IntTraverser;
@@ -35,13 +34,11 @@ public class IntAdvancerLimit implements IntAdvancer, IntTraverser {
 
     @Override
     public void traverse(IntYield yield) {
-        upstream.shortCircuit(item -> {
-            if (count >= n) {
-                Yield.bye();
-            }
-            count++;
-            yield.ret(item);
-        });
+        if(count >= n)
+            throw new IllegalStateException("Traverser has already been operated on or closed!");
+        while(this.tryAdvance(yield)) {
+            // Intentionally empty. Action specified on yield statement of tryAdvance().
+        }
     }
 
     @Override

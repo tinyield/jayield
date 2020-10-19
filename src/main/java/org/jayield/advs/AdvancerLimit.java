@@ -44,13 +44,8 @@ public class AdvancerLimit<T> implements Advancer<T>, Traverser<T> {
     public void traverse(Yield<? super T> yield) {
         if(count >= n)
             throw new IllegalStateException("Traverser has already been operated on or closed!");
-        if(upstream.hasAdvancer())
-            while(this.tryAdvance(yield)) { }
-        else
-            upstream.shortCircuit(item -> {
-                if(count >= n) Yield.bye();
-                count++;
-                yield.ret(item);
-            });
+        while(this.tryAdvance(yield)) {
+            // Intentionally empty. Action specified on yield statement of tryAdvance().
+        }
     }
 }

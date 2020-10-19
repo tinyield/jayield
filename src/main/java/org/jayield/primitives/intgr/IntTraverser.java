@@ -16,12 +16,9 @@
 
 package org.jayield.primitives.intgr;
 
-import org.jayield.Advancer;
 import org.jayield.Traverser;
 import org.jayield.Yield;
-import org.jayield.primitives.dbl.DoubleAdvancer;
 import org.jayield.primitives.dbl.DoubleTraverser;
-import org.jayield.primitives.lng.LongAdvancer;
 import org.jayield.primitives.lng.LongTraverser;
 
 import java.util.function.DoubleToIntFunction;

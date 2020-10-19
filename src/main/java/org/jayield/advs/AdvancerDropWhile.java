@@ -35,13 +35,14 @@ public class AdvancerDropWhile<T> implements Advancer<T>, Traverser<T> {
         if (dropped) {
             return upstream.tryAdvance(yield);
         } else {
-            Yield<T> takeWhile = item -> {
+            while(!dropped && upstream.tryAdvance(item -> {
                 if(!predicate.test(item)){
                     dropped = true;
                     yield.ret(item);
                 }
-            };
-            while(upstream.tryAdvance(takeWhile) && !dropped) { }
+            })) {
+                // Intentionally empty. Action specified on yield statement of tryAdvance().
+            }
             return dropped;
         }
     }
