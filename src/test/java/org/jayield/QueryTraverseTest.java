@@ -17,6 +17,7 @@
 package org.jayield;
 
 import static java.util.Arrays.asList;
+import static org.jayield.Query.fromList;
 import static org.jayield.Query.fromStream;
 import static org.jayield.Query.iterate;
 import static org.jayield.Query.of;
@@ -290,6 +291,29 @@ public class QueryTraverseTest {
         String[] input = {"a", "b", "c"};
         String expected = "abc";
         String actual = of(input).reduce((p, c) -> p + c).orElseThrow();
+        assertEquals(actual, expected);
+    }
+
+    @Test
+    public void testFlatMapAndReduce() {
+        List<Query<String>> input = new ArrayList<>();
+        input.add(Query.of("a"));
+        input.add(Query.of("b"));
+        input.add(Query.of("c"));
+        String expected = "abc";
+        String actual = fromList(input).flatMap(s -> s).reduce((p, c) -> p + c).orElseThrow();
+        assertEquals(actual, expected);
+    }
+
+
+    @Test
+    public void testFromListFlatMapAndReduce() {
+        List<Query<String>> input = new ArrayList<>();
+        input.add(fromList(List.of("a")));
+        input.add(fromList(List.of("b")));
+        input.add(fromList(List.of("c")));
+        String expected = "abc";
+        String actual = fromList(input).flatMap(s -> s).reduce((p, c) -> p + c).orElseThrow();
         assertEquals(actual, expected);
     }
 

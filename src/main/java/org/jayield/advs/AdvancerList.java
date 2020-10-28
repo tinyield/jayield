@@ -25,14 +25,17 @@ import org.jayield.Yield;
 public class AdvancerList<U> implements Advancer<U> {
     private final List<U> data;
     private final Iterator<U> current;
+    private int index;
 
     public AdvancerList(List<U> data) {
         this.data = data;
         this.current = data.iterator();
+        index = 0;
     }
 
     @Override
     public U next() {
+        index++;
         return current.next();
     }
 
@@ -43,6 +46,8 @@ public class AdvancerList<U> implements Advancer<U> {
 
     @Override
     public void traverse(Yield<? super U> yield) {
-        data.forEach(yield::ret);
+        for (int i = index; i < data.size(); i++) {
+            yield.ret(data.get(i));
+        }
     }
 }
