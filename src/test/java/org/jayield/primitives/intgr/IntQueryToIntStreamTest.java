@@ -36,8 +36,7 @@ public class IntQueryToIntStreamTest {
         int[] src = {1, 2, 3, 4, 5, 6, 7, 8, 9};
         PrimitiveIterator.OfInt expected = IntStream.of(src).iterator();
         IntQuery nrs = fromStream(IntStream.of(src));
-        while (nrs.hasNext()) {
-            assertEquals(nrs.next(), expected.nextInt());
+        while (nrs.tryAdvance(item -> assertEquals(item, expected.nextInt()))) {
         }
         assertFalse(expected.hasNext());
     }

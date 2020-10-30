@@ -16,6 +16,14 @@
 
 package org.jayield.primitives.intgr;
 
+import org.jayield.boxes.IntBox;
+import org.testng.annotations.Test;
+
+import java.util.IntSummaryStatistics;
+import java.util.OptionalInt;
+import java.util.PrimitiveIterator;
+import java.util.stream.IntStream;
+
 import static org.jayield.primitives.intgr.IntQuery.fromStream;
 import static org.jayield.primitives.intgr.IntQuery.iterate;
 import static org.jayield.primitives.intgr.IntQuery.of;
@@ -23,15 +31,6 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.AssertJUnit.assertTrue;
 import static org.testng.internal.junit.ArrayAsserts.assertArrayEquals;
-
-import java.util.IntSummaryStatistics;
-import java.util.OptionalInt;
-import java.util.PrimitiveIterator;
-import java.util.stream.IntStream;
-
-import org.jayield.boxes.IntBox;
-import org.jayield.primitives.dbl.DoubleQuery;
-import org.testng.annotations.Test;
 
 /**
  * These tests aim to evaluate only the execution of traverse()
@@ -118,15 +117,7 @@ public class IntQueryTraverseTest {
         boolean actual = nrs
                 .filter(n -> n < 7)
                 .map(n -> n - 1)
-                .then(prev -> yield -> {
-                    final boolean[] isOdd = {false};
-                    prev.traverse(item -> {
-                        if (isOdd[0]) {
-                            yield.ret(item);
-                        }
-                        isOdd[0] = !isOdd[0];
-                    });
-                })
+                .then(UserExt::oddTrav)
                 .anyMatch(n -> n == 5);
         assertTrue(actual);
     }
@@ -222,6 +213,15 @@ public class IntQueryTraverseTest {
         assertEquals(actual, expected);
     }
 
+    @Test
+    public void testBulkIterateTakeWhileMax() {
+        int expected = 13;
+        int actual = iterate(1, n -> n + 2)
+                .takeWhile(n -> n < 14)
+                .max()
+                .orElseThrow();
+        assertEquals(actual, expected);
+    }
 
     @Test
     public void testBulkPeekCount() {

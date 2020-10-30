@@ -16,6 +16,14 @@
 
 package org.jayield.primitives.dbl;
 
+import org.jayield.boxes.IntBox;
+import org.testng.annotations.Test;
+
+import java.util.DoubleSummaryStatistics;
+import java.util.OptionalDouble;
+import java.util.PrimitiveIterator;
+import java.util.stream.DoubleStream;
+
 import static org.jayield.primitives.dbl.DoubleQuery.fromStream;
 import static org.jayield.primitives.dbl.DoubleQuery.iterate;
 import static org.jayield.primitives.dbl.DoubleQuery.of;
@@ -23,14 +31,6 @@ import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.AssertJUnit.assertTrue;
 import static org.testng.internal.junit.ArrayAsserts.assertArrayEquals;
-
-import java.util.DoubleSummaryStatistics;
-import java.util.OptionalDouble;
-import java.util.PrimitiveIterator;
-import java.util.stream.DoubleStream;
-
-import org.jayield.boxes.IntBox;
-import org.testng.annotations.Test;
 
 /**
  * These tests aim to evaluate only the execution of traverse()
@@ -117,15 +117,7 @@ public class DoubleQueryTraverseTest {
         boolean actual = nrs
                 .filter(n -> n < 7)
                 .map(n -> n - 1)
-                .then(prev -> yield -> {
-                    final boolean[] isOdd = {false};
-                    prev.traverse(item -> {
-                        if (isOdd[0]) {
-                            yield.ret(item);
-                        }
-                        isOdd[0] = !isOdd[0];
-                    });
-                })
+                .then(UserExt::oddTrav)
                 .anyMatch(n -> n == 5);
         assertTrue(actual);
     }
@@ -220,6 +212,15 @@ public class DoubleQueryTraverseTest {
         assertEquals(actual, expected);
     }
 
+    @Test
+    public void testBulkIterateTakeWhileMax() {
+        double expected = 13;
+        double actual = iterate(1, n -> n + 2)
+                .takeWhile(n -> n < 14)
+                .max()
+                .orElseThrow();
+        assertEquals(actual, expected);
+    }
 
     @Test
     public void testBulkPeekCount() {

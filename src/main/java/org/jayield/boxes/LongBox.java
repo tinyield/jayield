@@ -17,7 +17,7 @@
 package org.jayield.boxes;
 
 public class LongBox {
-    private long value;
+    protected long value;
     private boolean isPresent;
 
     public LongBox() {
@@ -28,6 +28,10 @@ public class LongBox {
     public LongBox(long value, boolean isPresent) {
         this.value = value;
         this.isPresent = isPresent;
+    }
+
+    public LongBox(long identity) {
+        this.value = identity;
     }
 
     public long getValue() {

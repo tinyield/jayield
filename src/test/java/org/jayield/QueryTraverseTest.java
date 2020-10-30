@@ -16,14 +16,7 @@
 
 package org.jayield;
 
-import static java.util.Arrays.asList;
-import static org.jayield.Query.fromStream;
-import static org.jayield.Query.iterate;
-import static org.jayield.Query.of;
-import static org.jayield.UserExt.collapse;
-import static org.testng.Assert.assertEquals;
-import static org.testng.Assert.assertFalse;
-import static org.testng.Assert.assertTrue;
+import org.testng.annotations.Test;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -32,7 +25,14 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-import org.testng.annotations.Test;
+import static java.util.Arrays.asList;
+import static org.jayield.Query.fromList;
+import static org.jayield.Query.fromStream;
+import static org.jayield.Query.iterate;
+import static org.jayield.Query.of;
+import static org.testng.Assert.assertEquals;
+import static org.testng.Assert.assertFalse;
+import static org.testng.Assert.assertTrue;
 
 /**
  * These tests aim to evaluate only the execution of traverse()
@@ -90,13 +90,7 @@ public class QueryTraverseTest {
         Object[] actual = nrs
                 .filter(n -> n%2 != 0)
                 .map(Object::toString)
-                .then(prev -> yield -> {
-                    final boolean[] isOdd = {false};
-                    prev.traverse(item -> {
-                        if(isOdd[0]) yield.ret(item);
-                        isOdd[0] = !isOdd[0];
-                    });
-                })
+                .then(UserExt::oddTrav)
                 .toArray();
         assertEquals(actual, expected);
     }
@@ -106,7 +100,7 @@ public class QueryTraverseTest {
         Integer[] expected= {7, 8, 9, 11, 7};
         Integer[] arrange = {7, 7, 8, 9, 9, 11, 11, 7};
         Object[] actual = of(arrange)
-                .then(n -> collapse(n))
+                .then(UserExt::collapseTrav)
                 .toArray();
         assertEquals(actual, expected);
     }
@@ -119,13 +113,7 @@ public class QueryTraverseTest {
         boolean actual = nrs
                 .filter(n -> n%2 != 0)
                 .map(Object::toString)
-                .then(prev -> (yield) -> {
-                    final boolean[] isOdd = {false};
-                    prev.traverse(item -> {
-                        if(isOdd[0]) yield.ret(item);
-                        isOdd[0] = !isOdd[0];
-                    });
-                })
+                .then(UserExt::oddTrav)
                 .anyMatch(n ->
                         n.equals("7"));
         assertTrue(actual);
@@ -134,15 +122,15 @@ public class QueryTraverseTest {
     public void testAllMatchForAllElements() {
         Integer[] arrange = {2, 4, 6, 8, 10, 12};
         boolean actual = of(arrange).allMatch(nr -> nr % 2 == 0);
-        assertEquals(true, actual);
+        assertEquals(actual, true);
     }
     @Test
     public void testAllMatchFailOnIntruder() {
         Integer[] arrange = {2, 4, 6, 7, 10, 12};
         int[] count = {0};
         boolean actual = of(arrange).peek(__ -> count[0]++).allMatch(nr -> nr % 2 == 0);
-        assertEquals(false, actual);
-        assertEquals(4, count[0]);
+        assertEquals(actual, false);
+        assertEquals(count[0], 4);
     }
     @Test
     public void testBulkFlatMap() {
@@ -161,7 +149,7 @@ public class QueryTraverseTest {
                 .flatMap(nr -> of(nr - 1, nr, nr + 1))
                 .findFirst()
                 .get();
-        assertEquals(1, actual);
+        assertEquals(actual, 1);
     }
 
     @Test
@@ -179,7 +167,7 @@ public class QueryTraverseTest {
         long total = of(arrange)
                 .distinct()
                 .count();
-        assertEquals(10, total);
+        assertEquals(total, 10);
     }
 
     @Test
@@ -188,7 +176,7 @@ public class QueryTraverseTest {
         String actual = of(arrange)
                 .max(String.CASE_INSENSITIVE_ORDER)
                 .get();
-        assertEquals("y", actual);
+        assertEquals(actual, "y");
     }
 
     @Test
@@ -230,9 +218,17 @@ public class QueryTraverseTest {
                 .limit(7)
                 .max(Integer::compare)
                 .get();
-        assertEquals(13, actual);
+        assertEquals(actual, 13);
     }
 
+    @Test
+    public void testBulkIterateTakeWhileMax() {
+        int actual = iterate(1, n -> n + 2)
+                .takeWhile(n -> n < 14)
+                .max(Integer::compare)
+                .get();
+        assertEquals(actual, 13);
+    }
 
     @Test
     public void testBulkPeekCount() {
@@ -272,8 +268,8 @@ public class QueryTraverseTest {
 
     @Test
     public void testToSet() {
-        String[] input = {"a", "x", "v", "d", "g", "x", "j", "x", "y", "r", "y", "w", "y", "a", "e"};
-        long actual = of(input).toSet().size();
+        List<String> input = asList("a", "x", "v", "d", "g", "x", "j", "x", "y", "r", "y", "w", "y", "a", "e");
+        long actual = fromList(input).toSet().size();
         assertEquals(actual, 10);
     }
 
@@ -290,6 +286,28 @@ public class QueryTraverseTest {
         String[] input = {"a", "b", "c"};
         String expected = "abc";
         String actual = of(input).reduce((p, c) -> p + c).orElseThrow();
+        assertEquals(actual, expected);
+    }
+
+   @Test
+    public void testFlatMapAndReduce() {
+        List<Query<String>> input = new ArrayList<>();
+        input.add(Query.of("a"));
+        input.add(Query.of("b"));
+        input.add(Query.of("c"));
+        String expected = "abc";
+        String actual = fromList(input).flatMap(s -> s).reduce((p, c) -> p + c).orElseThrow();
+        assertEquals(actual, expected);
+    }
+
+    @Test
+    public void testFromListFlatMapAndReduce() {
+        List<Query<String>> input = new ArrayList<>();
+        input.add(fromList(List.of("a")));
+        input.add(fromList(List.of("b")));
+        input.add(fromList(List.of("c")));
+        String expected = "abc";
+        String actual = fromList(input).flatMap(s -> s).reduce((p, c) -> p + c).orElseThrow();
         assertEquals(actual, expected);
     }
 

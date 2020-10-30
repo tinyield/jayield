@@ -21,24 +21,32 @@ package org.jayield.boxes;
  *         created on 06-07-2017
  */
 public class Box<T> {
-    private T value;
+    protected T value;
     private boolean isPresent;
 
+    public Box(T identity) {
+        this.value = identity;
+        this.isPresent = true;
+    }
 
-    public boolean isPresent() {
+    public Box() {
+    }
+
+
+    public final boolean isPresent() {
         return isPresent;
     }
 
-    public T getValue() {
+    public final T getValue() {
         return value;
     }
 
-    public T setValue(T value) {
+    public final T setValue(T value) {
         this.value = value;
         return value;
     }
 
-    public void turnPresent(T e) {
+    public final void turnPresent(T e) {
         this.setValue(e);
         this.isPresent = true;
     }

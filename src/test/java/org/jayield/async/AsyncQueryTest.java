@@ -17,7 +17,6 @@
 package org.jayield.async;
 
 import org.jayield.AsyncQuery;
-import org.jayield.Query;
 import org.testng.annotations.Test;
 
 import java.util.Arrays;
@@ -34,7 +33,7 @@ public class AsyncQueryTest {
 
     @Test
     public void testOfArrayAndBlockingSubscribe() {
-        Query<String> expected = Query.of("a", "b", "c", "d");
+        Iterator<String> expected = Arrays.asList("a", "b", "c", "d").iterator();
         AsyncQuery
             .of("a b c d".split(" "))
             .onNext((item, err) -> {
@@ -60,7 +59,7 @@ public class AsyncQueryTest {
 
     @Test
     public void testSkip() {
-        Query<Integer> expected = Query.of(4, 5, 6, 7);
+        Iterator<Integer> expected = Arrays.asList(4, 5, 6, 7).iterator();
         AsyncQuery
             .fork(1, 2, 3, 4, 5, 6, 7)
             .skip(3)
@@ -74,7 +73,7 @@ public class AsyncQueryTest {
 
     @Test
     public void testFilter() {
-        Query<Integer> expected = Query.of(1, 3, 5, 7, 9);
+        Iterator<Integer> expected = Arrays.asList(1, 3, 5, 7, 9).iterator();
         AsyncQuery
             .fork(1, 2, 3, 4, 5, 6, 7, 8, 9)
             .filter(n -> n % 2 != 0)
@@ -87,7 +86,7 @@ public class AsyncQueryTest {
     }
     @Test
     public void testFilterAndMap() {
-        Query<Integer> expected = Query.of(3, 3, 5);
+        Iterator<Integer> expected = Arrays.asList(3, 3, 5).iterator();
         AsyncQuery
             .fork("abc", "abcd", "ab", "bad", "super", "isel")
             .map(String::length)
@@ -102,8 +101,8 @@ public class AsyncQueryTest {
 
     @Test
     public void testTakeWhile() {
-        Query<Integer> expected1 = Query.of(1, 2, 3, 4, 5);
-        Query<Integer> expected2 = Query.of(1, 2, 3, 4);
+        Iterator<Integer> expected1 = Arrays.asList(1, 2, 3, 4, 5).iterator();
+        Iterator<Integer> expected2 = Arrays.asList(1, 2, 3, 4).iterator();
         AsyncQuery
             .fork(1, 2, 3, 4, 5, 6, 7, 8, 9)
             .onNext((item, err) -> {
@@ -121,7 +120,7 @@ public class AsyncQueryTest {
     }
     @Test
     public void testFlatMapConcat() {
-        Query<Integer> expected = Query.of(1, 2, 3, 4, 5, 6, 7, 8, 9);
+        Iterator<Integer> expected = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9).iterator();
         AsyncQuery
             .fork(2, 5, 8)
             .flatMapConcat(nr -> AsyncQuery.fork(nr - 1, nr, nr + 1))

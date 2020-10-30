@@ -16,34 +16,20 @@
 
 package org.jayield;
 
-import java.util.Iterator;
-import java.util.NoSuchElementException;
-
 /**
- * Sequential traverser with both internal and external iteration approach.
+ * Sequential traverser with internal and individually step approach.
  */
-public interface Advancer<T> extends Iterator<T>, Traverser<T> {
+public interface Advancer<T> {
+    /**
+     * If a remaining element exists, yields that element through
+     * the given action.
+     */
+    boolean tryAdvance(Yield<? super T> yield);
+
     /**
      * An Advancer object without elements.
      */
     static <R> Advancer<R> empty() {
-        return new Advancer<R>() {
-            @Override
-            public boolean hasNext() {
-                return false;
-            }
-
-            @Override
-            public R next() {
-                throw new NoSuchElementException("No such elements available for iteration!");
-            }
-
-            @Override
-            public void traverse(Yield<? super R> yield) {
-                /* Do nothing. Since there are no elements, thus there is nothing to do. */
-            }
-        };
+        return action -> false;
     }
-
-
 }

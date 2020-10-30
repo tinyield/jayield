@@ -1,39 +1,40 @@
 package org.jayield.primitives.lng;
 
-import java.util.NoSuchElementException;
+import org.jayield.Advancer;
+import org.jayield.Yield;
+import org.jayield.primitives.dbl.DoubleAdvancer;
+import org.jayield.primitives.intgr.IntAdvancer;
+
 import java.util.function.DoubleToLongFunction;
 import java.util.function.IntToLongFunction;
 import java.util.function.ToLongFunction;
 
-import org.jayield.Advancer;
-import org.jayield.primitives.dbl.DoubleAdvancer;
-import org.jayield.primitives.intgr.IntAdvancer;
-
 /**
  * Sequential traverser with both longernal and external iteration approach.
  */
-public interface LongAdvancer extends Advancer<Long>, LongIterator, LongTraverser {
+public interface LongAdvancer extends Advancer<Long> {
+
+    /**
+     * If a remaining element exists, yields that element through
+     * the given action.
+     */
+    boolean tryAdvance(LongYield yield);
+
+    /**
+     * Default advance implementation that calls the
+     * primitive version of it
+     */
+    @Override
+    default boolean tryAdvance(Yield<? super Long> yield) {
+        LongYield yld = yield::ret;
+        return this.tryAdvance(yld);
+    }
 
     /**
      * An LongAdvancer object without elements.
      */
     static LongAdvancer empty() {
-        return new LongAdvancer() {
-            @Override
-            public boolean hasNext() {
-                return false;
-            }
-
-            @Override
-            public long nextLong() {
-                throw new NoSuchElementException("No such elements available for iteration!");
-            }
-
-            @Override
-            public void traverse(LongYield yield) {
-                /* Do nothing. Since there are no elements, thus there is nothing to do. */
-            }
-        };
+        return yield -> false;
     }
 
     /**
@@ -45,25 +46,7 @@ public interface LongAdvancer extends Advancer<Long>, LongIterator, LongTraverse
      *         {@link ToLongFunction} that specifies how to map the source elements longo long values.
      */
     static <T> LongAdvancer from(Advancer<T> source, ToLongFunction<? super T> mapper) {
-        return new LongAdvancer() {
-            @Override
-            public long nextLong() {
-                if (!this.hasNext()) {
-                    throw new NoSuchElementException("No such elements available for iteration!");
-                }
-                return mapper.applyAsLong(source.next());
-            }
-
-            @Override
-            public boolean hasNext() {
-                return source.hasNext();
-            }
-
-            @Override
-            public void traverse(LongYield yield) {
-                source.traverse(item -> yield.ret(mapper.applyAsLong(item)));
-            }
-        };
+        return yield -> source.tryAdvance(item -> yield.ret(mapper.applyAsLong(item)));
     }
 
     /**
@@ -88,13 +71,5 @@ public interface LongAdvancer extends Advancer<Long>, LongIterator, LongTraverse
      */
     static LongAdvancer from(IntAdvancer source, IntToLongFunction mapper) {
         return from((Advancer<Integer>) source, mapper::applyAsLong);
-    }
-
-    @Override
-    default Long next() {
-        if (!hasNext()) {
-            throw new NoSuchElementException("No more elements available on iteration!");
-        }
-        return this.nextLong();
     }
 }
