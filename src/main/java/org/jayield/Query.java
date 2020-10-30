@@ -16,22 +16,22 @@
 
 package org.jayield;
 
-import org.jayield.ops.AdvancerArray;
-import org.jayield.ops.AdvancerConcat;
-import org.jayield.ops.AdvancerDistinct;
-import org.jayield.ops.AdvancerDropWhile;
-import org.jayield.ops.AdvancerFilter;
-import org.jayield.ops.AdvancerFlatMap;
-import org.jayield.ops.AdvancerGenerate;
-import org.jayield.ops.AdvancerIterate;
-import org.jayield.ops.AdvancerLimit;
-import org.jayield.ops.AdvancerList;
-import org.jayield.ops.AdvancerMap;
-import org.jayield.ops.AdvancerPeek;
-import org.jayield.ops.AdvancerSkip;
-import org.jayield.ops.AdvancerStream;
-import org.jayield.ops.AdvancerTakeWhile;
-import org.jayield.ops.AdvancerZip;
+import org.jayield.ops.FromArray;
+import org.jayield.ops.Concat;
+import org.jayield.ops.Distinct;
+import org.jayield.ops.DropWhile;
+import org.jayield.ops.Filter;
+import org.jayield.ops.FlatMap;
+import org.jayield.ops.Generate;
+import org.jayield.ops.Iterate;
+import org.jayield.ops.Limit;
+import org.jayield.ops.FromList;
+import org.jayield.ops.Mapping;
+import org.jayield.ops.Peek;
+import org.jayield.ops.Skip;
+import org.jayield.ops.FromStream;
+import org.jayield.ops.TakeWhile;
+import org.jayield.ops.Zip;
 import org.jayield.boxes.BoolBox;
 import org.jayield.boxes.Box;
 import org.jayield.primitives.dbl.DoubleAdvancer;
@@ -121,7 +121,7 @@ public class Query<T> {
      * are the specified values in data parameter.
      */
     public static <U> Query<U> of(U...data) {
-        AdvancerArray<U> adv = new AdvancerArray<>(data);
+        FromArray<U> adv = new FromArray<>(data);
         return new Query<>(adv, adv);
     }
 
@@ -130,7 +130,7 @@ public class Query<T> {
      * from the provided List data.
      */
     public static <U> Query<U> fromList(List<U> data) {
-        AdvancerList<U> adv = new AdvancerList<>(data);
+        FromList<U> adv = new FromList<>(data);
         return new Query<>(adv, adv);
     }
 
@@ -139,7 +139,7 @@ public class Query<T> {
      * from the provided stream data.
      */
     public static <U> Query<U> fromStream(Stream<U> data) {
-        AdvancerStream<U> adv = new AdvancerStream<>(data);
+        FromStream<U> adv = new FromStream<>(data);
         return new Query<>(adv, adv);
     }
 
@@ -151,7 +151,7 @@ public class Query<T> {
      *
     */
     public static <U> Query<U> iterate(U seed, UnaryOperator<U> f) {
-        AdvancerIterate<U> iter = new AdvancerIterate<>(seed, f);
+        Iterate<U> iter = new Iterate<>(seed, f);
         return new Query<>(iter, iter);
     }
 
@@ -160,7 +160,7 @@ public class Query<T> {
      * function to the elements of this query.
      */
     public final <R> Query<R> map(Function<? super T,? extends R> mapper) {
-        AdvancerMap<T, R> map = new AdvancerMap<>(this, mapper);
+        Mapping<T, R> map = new Mapping<>(this, mapper);
         return new Query<>(map, map);
     }
 
@@ -169,7 +169,7 @@ public class Query<T> {
      * sequences, producing a sequence of the results.
      */
     public final <U, R> Query<R> zip(Query<U> other, BiFunction<? super T, ? super U, ? extends R> zipper) {
-        AdvancerZip<T, U, R> zip = new AdvancerZip<>(this, other, zipper);
+        Zip<T, U, R> zip = new Zip<>(this, other, zipper);
         return new Query<>(zip, zip);
     }
 
@@ -211,7 +211,7 @@ public class Query<T> {
      * the given predicate.
      */
     public final Query<T> filter(Predicate<? super T> p) {
-        AdvancerFilter<T> filter = new AdvancerFilter<>(this, p);
+        Filter<T> filter = new Filter<>(this, p);
         return new Query<>(filter, filter);
     }
 
@@ -220,7 +220,7 @@ public class Query<T> {
      * after discarding the first {@code n} elements of the query.
      */
     public final Query<T> skip(int n){
-        AdvancerSkip<T> skip = new AdvancerSkip<>(this, n);
+        Skip<T> skip = new Skip<>(this, n);
         return new Query<>(skip, skip);
     }
 
@@ -229,7 +229,7 @@ public class Query<T> {
      * to be no longer than {@code n} in length.
      */
     public final Query<T> limit(int n){
-        AdvancerLimit<T> limit = new AdvancerLimit<>(this, n);
+        Limit<T> limit = new Limit<>(this, n);
         return new Query<>(limit, limit);
     }
 
@@ -238,7 +238,7 @@ public class Query<T> {
      * {@link Object#equals(Object)}) of this query.
      */
     public final Query<T> distinct(){
-        AdvancerDistinct<T> dis = new AdvancerDistinct<>(this);
+        Distinct<T> dis = new Distinct<>(this);
         return new Query<>(dis, dis);
     }
 
@@ -248,7 +248,7 @@ public class Query<T> {
      * the provided mapping function to each element.
      */
     public final <R> Query<R> flatMap(Function<? super T,? extends Query<? extends R>> mapper){
-        AdvancerFlatMap<T, R> map = new AdvancerFlatMap<>(this, mapper);
+        FlatMap<T, R> map = new FlatMap<>(this, mapper);
         return new Query<>(map, map);
     }
 
@@ -258,7 +258,7 @@ public class Query<T> {
      * from the resulting query.
      */
     public final Query<T> peek(Consumer<? super T> action) {
-        AdvancerPeek<T> peek = new AdvancerPeek<>(this, action);
+        Peek<T> peek = new Peek<>(this, action);
         return new Query<>(peek, peek);
     }
 
@@ -267,7 +267,7 @@ public class Query<T> {
      * this query that match the given predicate.
      */
     public final Query<T> takeWhile(Predicate<? super T> predicate){
-        AdvancerTakeWhile<T> take = new AdvancerTakeWhile<>(this, predicate);
+        TakeWhile<T> take = new TakeWhile<>(this, predicate);
         return new Query<>(take, take);
     }
 
@@ -501,7 +501,7 @@ public class Query<T> {
      * where each element is generated by the provided Supplier.
      */
     public static <U> Query<U> generate(Supplier<U> s) {
-        AdvancerGenerate<U> gen = new AdvancerGenerate<>(s);
+        Generate<U> gen = new Generate<>(s);
         return new Query<>(gen, gen);
     }
 
@@ -522,7 +522,7 @@ public class Query<T> {
      * elements of the other {@code Query}.
      */
     public final Query<T> concat(Query<T> other) {
-        AdvancerConcat<T> con = new AdvancerConcat<>(this, other);
+        Concat<T> con = new Concat<>(this, other);
         return new Query<>(con, con);
     }
 
@@ -535,7 +535,7 @@ public class Query<T> {
     public final Query<T> sorted(Comparator<T> comparator) {
         T[] state = (T[]) this.toArray();
         Arrays.sort(state, comparator);
-        AdvancerArray<T> sorted = new AdvancerArray<>(state);
+        FromArray<T> sorted = new FromArray<>(state);
         return new Query<>(sorted, sorted);
     }
 
@@ -544,7 +544,7 @@ public class Query<T> {
      * after discarding the first sequence of elements that match the given Predicate.
      */
     public final Query<T> dropWhile(Predicate<T> predicate) {
-        AdvancerDropWhile<T> drop = new AdvancerDropWhile<>(this, predicate);
+        DropWhile<T> drop = new DropWhile<>(this, predicate);
         return new Query<>(drop, drop);
     }
 
