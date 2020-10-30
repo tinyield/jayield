@@ -289,6 +289,28 @@ public class QueryTraverseTest {
         assertEquals(actual, expected);
     }
 
+   @Test
+    public void testFlatMapAndReduce() {
+        List<Query<String>> input = new ArrayList<>();
+        input.add(Query.of("a"));
+        input.add(Query.of("b"));
+        input.add(Query.of("c"));
+        String expected = "abc";
+        String actual = fromList(input).flatMap(s -> s).reduce((p, c) -> p + c).orElseThrow();
+        assertEquals(actual, expected);
+    }
+
+    @Test
+    public void testFromListFlatMapAndReduce() {
+        List<Query<String>> input = new ArrayList<>();
+        input.add(fromList(List.of("a")));
+        input.add(fromList(List.of("b")));
+        input.add(fromList(List.of("c")));
+        String expected = "abc";
+        String actual = fromList(input).flatMap(s -> s).reduce((p, c) -> p + c).orElseThrow();
+        assertEquals(actual, expected);
+    }
+
     @Test
     public void testReduceOnEmpty() {
         String[] input = {};
