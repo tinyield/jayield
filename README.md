@@ -103,15 +103,14 @@ new int[]{7, 7, 8, 9, 9, 8, 11, 11, 9, 7}
 
 ## Internals Overview
 
-`Advancer` is the core iterator of `Query` that provides both individually and
-bulk traversal, trough `java.util.Iterator` and `Traverser` interfaces.
-`Traverser` is the primary choice for traversing the `Query` elements and 
+`Traverser` is the primary choice for traversing the `Query` elements in bulk and 
 supports all its methods including _terminal_, _intermediate_ and _short-circuting_
 operations.
 To that end, the traversal's consumer - `Yield` - provides one method to return
 an element (`ret`) and other to finish the iteration (`bye`).
+`Advancer` is the alternative iterator of `Query` that provides individually traversal.
 
-<img src="assets/Query-uml.png" width="600px">
+<img src="assets/jayield-yuml.svg" width="600px">
 
 ## Installation
 
@@ -121,7 +120,7 @@ In order to include it to your Maven project, simply add this dependency:
 <dependency>
     <groupId>com.github.jayield</groupId>
     <artifactId>jayield</artifactId>
-    <version>1.2.0</version>
+    <version>1.4.0</version>
 </dependency>
 ```
 
