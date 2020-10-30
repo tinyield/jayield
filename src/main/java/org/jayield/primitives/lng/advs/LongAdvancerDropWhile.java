@@ -36,16 +36,19 @@ public class LongAdvancerDropWhile implements LongAdvancer, LongTraverser {
         if (dropped) {
             return upstream.tryAdvance(yield);
         } else {
-            LongYield takeWhile = item -> {
-                if(!predicate.test(item)){
-                    dropped = true;
-                    yield.ret(item);
-                }
-            };
-            while(upstream.tryAdvance(takeWhile) && !dropped) {
+            while(!dropped && dropNext(yield)) {
                 // Intentionally empty. Action specified on yield statement of tryAdvance().
             }
             return dropped;
         }
+    }
+
+    private boolean dropNext(LongYield yield) {
+        return upstream.tryAdvance(item -> {
+                if(!predicate.test(item)){
+                    dropped = true;
+                    yield.ret(item);
+                }
+            });
     }
 }

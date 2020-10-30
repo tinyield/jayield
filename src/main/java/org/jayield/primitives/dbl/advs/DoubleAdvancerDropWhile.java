@@ -36,17 +36,20 @@ public class DoubleAdvancerDropWhile implements DoubleAdvancer, DoubleTraverser 
         if (dropped) {
             return upstream.tryAdvance(yield);
         } else {
-            DoubleYield takeWhile = item -> {
-                if(!predicate.test(item)){
-                    dropped = true;
-                    yield.ret(item);
-                }
-            };
-            while(upstream.tryAdvance(takeWhile) && !dropped) {
+            while(!dropped && dropNext(yield)) {
                 // Intentionally empty. Action specified on yield statement of tryAdvance().
             }
             return dropped;
         }
 
+    }
+
+    private boolean dropNext(DoubleYield yield) {
+        return upstream.tryAdvance(item -> {
+                if(!predicate.test(item)){
+                    dropped = true;
+                    yield.ret(item);
+                }
+            });
     }
 }
