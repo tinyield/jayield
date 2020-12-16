@@ -28,8 +28,8 @@ Query.iterate('a', prev -> (char) ++prev).filter(n -> n%2 != 0).map(Object::toSt
 ## Extensibility and chaining
 
 Notice how it looks a JAYield custom `collapse()` method that merges series of adjacent elements.
-It has a similar shape to that one written in any language providing the `yield` operator
-such as C\#.
+It has a similar shape to that one written in any language providing the `yield` feature
+such as Kotlin.
 
 <table class="table">
     <tr class="row">
@@ -52,16 +52,17 @@ class Queries {
 </td>
 <td>
 
-```csharp
-static class Extensions {
-  static IEnumerable <T> Collapse <T>(this IEnumerable <T> src) {
-    IEnumerator <T> iter = src.GetEnumerator();
-    T prev = null;
-    while(iter.MoveNext ()) {
-      if(prev == null || !prev.Equals(iter.Current))
-      yield return prev = iter.Current;
+```kotlin
+fun <T> Sequence<T>.collapse() = sequence {
+    var prev: T? = null
+    val src = this@collapse.iterator()
+    while (src.hasNext()) {
+        val aux = src.next()
+        if (aux != null && aux != prev) {
+            prev = aux
+            yield(aux)
+        }
     }
-  }
 }
 ```
 
@@ -88,13 +89,12 @@ Query
 </td>
 <td>
 
-```csharp
-new int[]{7, 7, 8, 9, 9, 8, 11, 11, 9, 7}
-    .Collapse()
-    .Where(n => n%2 != 0)
-    .Select(n => n.ToString())
-    .ToList()
-    .ForEach(Console.WriteLine);
+```kotlin
+sequenceOf(7, 7, 8, 9, 9, 8, 11, 11, 9, 7)
+    .collapse()
+    .filter { it % 2 != 0 }
+    .map(Int::toString)
+    .forEach(::println)
 ```
 
 </td>
@@ -118,14 +118,14 @@ In order to include it to your Maven project, simply add this dependency:
 
 ```xml
 <dependency>
-    <groupId>com.github.jayield</groupId>
+    <groupId>com.tinyield</groupId>
     <artifactId>jayield</artifactId>
-    <version>1.4.0</version>
+    <version>1.5.0</version>
 </dependency>
 ```
 
 You can also download the artifact directly from [Maven
-Central Repository](http://repo1.maven.org/maven2/com/github/jayield/jayield/)
+Central Repository](https://repo.maven.apache.org/maven2/com/tinyield/jayield/)
 
 
 ## License
