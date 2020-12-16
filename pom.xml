@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
-    <groupId>com.github.jayield</groupId>
+    <groupId>com.tinyield</groupId>
     <artifactId>jayield</artifactId>
-    <version>1.4.1-SNAPSHOT</version>
+    <version>1.5.0-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>
         JAYield - Java library implementation of yield, providing an idiomatic
@@ -15,7 +15,7 @@
         infrastructure (required for parallel execution) delaying its creation
         until needed.
     </description>
-    <url>https://github.com/jayield/jayield</url>
+    <url>https://github.com/tinyield/jayield</url>
     <licenses>
         <license>
             <name>Apache License, Version 2.0</name>
@@ -28,13 +28,17 @@
           <name>Miguel Gamboa</name>
           <email>miguelgamboa@outlook.com</email>
           <organization>CCISEL</organization>
-          <organizationUrl>http://gamboa.pt</organizationUrl>
+          <organizationUrl>http://cc.isel.pt</organizationUrl>
+        </developer>
+        <developer>
+            <name>Diogo Poeira</name>
+            <email>diogopoeira91@gmail.com</email>
         </developer>
     </developers>
     <scm>
-        <connection>scm:git:git@github.com:jayield/jayield.git</connection>
-        <developerConnection>scm:git:git@github.com:jayield/jayield.git</developerConnection>
-        <url>https://github.com/jayield/jayield.git</url>
+        <connection>scm:git:git@github.com:tinyield/jayield.git</connection>
+        <developerConnection>scm:git:git@github.com:tinyield/jayield.git</developerConnection>
+        <url>https://github.com/tinyield/jayield.git</url>
         <tag>HEAD</tag>
     </scm>
     <distributionManagement>
@@ -109,7 +113,7 @@
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
-                <version>0.8.2</version>
+                <version>0.8.6</version>
                 <executions>
                     <execution>
                         <id>default-prepare-agent</id>
