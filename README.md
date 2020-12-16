@@ -2,7 +2,7 @@
 
 [![Build Status](https://sonarcloud.io/api/project_badges/measure?project=com.github.jayield%3Ajayield&metric=alert_status)](https://sonarcloud.io/dashboard?id=com.github.jayield%3Ajayield)
 [![Coverage Status](https://sonarcloud.io/api/project_badges/measure?project=com.github.jayield%3Ajayield&metric=coverage)](https://sonarcloud.io/component_measures?id=com.github.jayield%3Ajayield&metric=Coverage)
-[![Maven Central](https://maven-badges.herokuapp.com/maven-central/com.github.jayield/jayield/badge.svg)](https://maven-badges.herokuapp.com/maven-central/com.github.jayield/jayield)
+[![Maven Central](https://img.shields.io/maven-central/v/com.tinyield/jayield)](https://search.maven.org/search?q=a:jayield)
 
 _Minimalistic_, _extensible_, _non-parallel_ and _lazy_ sequence implementation interoperable with Java
 `Stream` (`toStream` and `fromStream`), which provides an idiomatic `yield` like _generator_.
