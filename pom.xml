@@ -3,7 +3,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>com.tinyield</groupId>
     <artifactId>jayield</artifactId>
-    <version>1.5.0</version>
+    <version>1.5.1-SNAPSHOT</version>
     <packaging>jar</packaging>
     <name>
         JAYield - Java library implementation of yield, providing an idiomatic
@@ -39,7 +39,7 @@
         <connection>scm:git:git@github.com:tinyield/jayield.git</connection>
         <developerConnection>scm:git:git@github.com:tinyield/jayield.git</developerConnection>
         <url>https://github.com/tinyield/jayield.git</url>
-        <tag>jayield-1.5.0</tag>
+        <tag>HEAD</tag>
     </scm>
     <distributionManagement>
         <snapshotRepository>
