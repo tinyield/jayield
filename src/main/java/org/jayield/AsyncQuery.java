@@ -16,6 +16,7 @@
 
 package org.jayield;
 
+import org.jayield.async.AsyncQueryDistinct;
 import org.jayield.async.AsyncQueryFilter;
 import org.jayield.async.AsyncQueryFlatMapConcat;
 import org.jayield.async.AsyncQueryFlatMapMerge;
@@ -94,6 +95,14 @@ public abstract class AsyncQuery<T> implements AsyncTraverser<T>{
      */
     public final <R> AsyncQuery<R> map(Function<? super T,? extends R> mapper) {
         return new AsyncQueryMap<>(this, mapper);
+    }
+
+    /**
+     * Returns a query consisting of the distinct elements (according to
+     * {@link Object#equals(Object)}) of this query.
+     */
+    public final AsyncQuery<T> distinct() {
+        return new AsyncQueryDistinct<>(this);
     }
 
     /**
