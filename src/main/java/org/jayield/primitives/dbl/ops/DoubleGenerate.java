@@ -29,6 +29,7 @@ public class DoubleGenerate implements DoubleAdvancer, DoubleTraverser {
         this.s = s;
     }
 
+    @SuppressWarnings("java:S2189")
     @Override
     public void traverse(DoubleYield yield) {
         while (true) {

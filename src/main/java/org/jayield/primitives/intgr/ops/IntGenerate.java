@@ -29,6 +29,7 @@ public class IntGenerate implements IntAdvancer, IntTraverser {
         this.s = s;
     }
 
+    @SuppressWarnings("java:S2189")
     @Override
     public void traverse(IntYield yield) {
         while (true) {

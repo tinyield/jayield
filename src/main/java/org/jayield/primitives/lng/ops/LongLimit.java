@@ -36,7 +36,9 @@ public class LongLimit implements LongAdvancer, LongTraverser {
     public void traverse(LongYield yield) {
         if(count >= n)
             throw new IllegalStateException("Traverser has already been operated on or closed!");
-        while(this.tryAdvance(yield)) { }
+        while(this.tryAdvance(yield)) {
+            // Intentionally empty. Action specified on yield statement of tryAdvance().
+        }
     }
 
     @Override
