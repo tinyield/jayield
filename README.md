@@ -1,8 +1,8 @@
 # JAYield
 
-[![Build Status](https://sonarcloud.io/api/project_badges/measure?project=com.github.jayield%3Ajayield&metric=alert_status)](https://sonarcloud.io/dashboard?id=com.github.jayield%3Ajayield)
-[![Coverage Status](https://sonarcloud.io/api/project_badges/measure?project=com.github.jayield%3Ajayield&metric=coverage)](https://sonarcloud.io/component_measures?id=com.github.jayield%3Ajayield&metric=Coverage)
-[![Maven Central](https://img.shields.io/maven-central/v/com.tinyield/jayield)](https://search.maven.org/search?q=a:jayield)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=com.tinyield%3Ajayield&metric=alert_status)](https://sonarcloud.io/dashboard?id=com.tinyield%3Ajayield)
+[![Coverage](https://sonarcloud.io/api/project_badges/measure?project=com.tinyield%3Ajayield&metric=coverage)](https://sonarcloud.io/dashboard?id=com.tinyield%3Ajayield)
+[![Maven Central](https://img.shields.io/maven-central/v/com.tinyield/jayield)](https://search.maven.org/artifact/com.tinyield/jayield)
 
 _Minimalistic_, _extensible_, _non-parallel_ and _lazy_ sequence implementation interoperable with Java
 `Stream` (`toStream` and `fromStream`), which provides an idiomatic `yield` like _generator_.
@@ -120,7 +120,7 @@ In order to include it to your Maven project, simply add this dependency:
 <dependency>
     <groupId>com.tinyield</groupId>
     <artifactId>jayield</artifactId>
-    <version>1.5.0</version>
+    <version>1.5.1</version>
 </dependency>
 ```
 
