@@ -29,6 +29,7 @@ public class LongGenerate implements LongAdvancer, LongTraverser {
         this.s = s;
     }
 
+    @SuppressWarnings("java:S2189")
     @Override
     public void traverse(LongYield yield) {
         while (true) {

@@ -29,6 +29,7 @@ public class Generate<U> implements Advancer<U>, Traverser<U> {
         this.s = s;
     }
 
+    @SuppressWarnings("java:S2189")
     @Override
     public void traverse(Yield<? super U> yield) {
         while(true) {

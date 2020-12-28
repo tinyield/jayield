@@ -84,6 +84,7 @@ public class AsyncQueryTest {
             .join();
         assertFalse(expected.hasNext());
     }
+
     @Test
     public void testFilterAndMap() {
         Iterator<Integer> expected = Arrays.asList(3, 3, 5).iterator();
@@ -91,6 +92,20 @@ public class AsyncQueryTest {
             .fork("abc", "abcd", "ab", "bad", "super", "isel")
             .map(String::length)
             .filter(n -> n % 2 != 0)
+            .subscribe((item, err) -> {
+                assertNull(err);
+                assertEquals(expected.next(), item);
+            })
+            .join();
+        assertFalse(expected.hasNext());
+    }
+
+    @Test
+    public void testDistinct() {
+        Iterator<String> expected = Arrays.asList("ana", "jose", "maria", "joana").iterator();
+        AsyncQuery
+            .fork("ana", "jose", "maria", "jose", "maria", "joana", "ana")
+            .distinct()
             .subscribe((item, err) -> {
                 assertNull(err);
                 assertEquals(expected.next(), item);
