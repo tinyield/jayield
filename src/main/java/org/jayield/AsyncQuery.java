@@ -23,12 +23,14 @@ import org.jayield.async.AsyncQueryFlatMapMerge;
 import org.jayield.async.AsyncQueryFork;
 import org.jayield.async.AsyncQueryMap;
 import org.jayield.async.AsyncQueryOf;
+import org.jayield.async.AsyncQueryOfCompletableFuture;
 import org.jayield.async.AsyncQueryOfIterator;
 import org.jayield.async.AsyncQueryOnNext;
 import org.jayield.async.AsyncQuerySkip;
 import org.jayield.async.AsyncQueryTakeWhile;
 
 import java.util.Iterator;
+import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -56,6 +58,13 @@ public abstract class AsyncQuery<T> implements AsyncTraverser<T>{
     public static <U> AsyncQuery<U> of(Iterator<U> iter) {
         return new AsyncQueryOfIterator<>(iter);
     }
+    /**
+     * Creates an AsyncQuery, producing a single value from the provided CompletableFuture.
+     */
+    public static <U> AsyncQuery<U> of(CompletableFuture<U> from) {
+        return new AsyncQueryOfCompletableFuture<>(from);
+    }
+
     /**
      * Returns an asynchronous sequential ordered query whose elements
      * are the specified values in data parameter running on thread pool.

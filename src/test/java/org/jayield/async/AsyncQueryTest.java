@@ -19,11 +19,15 @@ package org.jayield.async;
 import org.jayield.AsyncQuery;
 import org.testng.annotations.Test;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Queue;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import static java.util.Arrays.asList;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
 import static org.testng.Assert.assertNull;
@@ -33,7 +37,7 @@ public class AsyncQueryTest {
 
     @Test
     public void testOfArrayAndBlockingSubscribe() {
-        Iterator<String> expected = Arrays.asList("a", "b", "c", "d").iterator();
+        Iterator<String> expected = asList("a", "b", "c", "d").iterator();
         AsyncQuery
             .of("a b c d".split(" "))
             .onNext((item, err) -> {
@@ -45,7 +49,7 @@ public class AsyncQueryTest {
     }
     @Test
     public void testOfIteratorAndBlockingSubscribe() {
-        Iterable<String> source = Arrays.asList("a", "b", "c", "d");
+        Iterable<String> source = asList("a", "b", "c", "d");
         Iterator<String> expected = source.iterator();
         AsyncQuery
             .of(source.iterator())
@@ -57,9 +61,36 @@ public class AsyncQueryTest {
         assertFalse(expected.hasNext());
     }
 
+    static void sleep(long ms) {
+        try {
+            Thread.sleep(ms);
+        } catch (InterruptedException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    public void testOfCompletableFutureAndBlockingSubscribe() {
+        List<Integer> source = new ArrayList<>(asList(50, 40, 70, 20, 35));
+        AsyncQuery
+            .of(source.iterator())
+            .map(ms -> CompletableFuture.supplyAsync(() -> {
+                sleep(ms);
+                return ms;
+            }))
+            .flatMapMerge(AsyncQuery::of)
+            .onNext((item, err) -> {
+                System.out.println(item);
+                assertNull(err);
+                assertTrue(source.remove(item), "Missing item: " + item);
+            })
+            .blockingSubscribe();
+        assertTrue(source.isEmpty());
+    }
+
     @Test
     public void testSkip() {
-        Iterator<Integer> expected = Arrays.asList(4, 5, 6, 7).iterator();
+        Iterator<Integer> expected = asList(4, 5, 6, 7).iterator();
         AsyncQuery
             .fork(1, 2, 3, 4, 5, 6, 7)
             .skip(3)
@@ -73,7 +104,7 @@ public class AsyncQueryTest {
 
     @Test
     public void testFilter() {
-        Iterator<Integer> expected = Arrays.asList(1, 3, 5, 7, 9).iterator();
+        Iterator<Integer> expected = asList(1, 3, 5, 7, 9).iterator();
         AsyncQuery
             .fork(1, 2, 3, 4, 5, 6, 7, 8, 9)
             .filter(n -> n % 2 != 0)
@@ -87,7 +118,7 @@ public class AsyncQueryTest {
 
     @Test
     public void testFilterAndMap() {
-        Iterator<Integer> expected = Arrays.asList(3, 3, 5).iterator();
+        Iterator<Integer> expected = asList(3, 3, 5).iterator();
         AsyncQuery
             .fork("abc", "abcd", "ab", "bad", "super", "isel")
             .map(String::length)
@@ -102,7 +133,7 @@ public class AsyncQueryTest {
 
     @Test
     public void testDistinct() {
-        Iterator<String> expected = Arrays.asList("ana", "jose", "maria", "joana").iterator();
+        Iterator<String> expected = asList("ana", "jose", "maria", "joana").iterator();
         AsyncQuery
             .fork("ana", "jose", "maria", "jose", "maria", "joana", "ana")
             .distinct()
@@ -116,8 +147,8 @@ public class AsyncQueryTest {
 
     @Test
     public void testTakeWhile() {
-        Iterator<Integer> expected1 = Arrays.asList(1, 2, 3, 4, 5).iterator();
-        Iterator<Integer> expected2 = Arrays.asList(1, 2, 3, 4).iterator();
+        Iterator<Integer> expected1 = asList(1, 2, 3, 4, 5).iterator();
+        Iterator<Integer> expected2 = asList(1, 2, 3, 4).iterator();
         AsyncQuery
             .fork(1, 2, 3, 4, 5, 6, 7, 8, 9)
             .onNext((item, err) -> {
@@ -135,7 +166,7 @@ public class AsyncQueryTest {
     }
     @Test
     public void testFlatMapConcat() {
-        Iterator<Integer> expected = Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9).iterator();
+        Iterator<Integer> expected = asList(1, 2, 3, 4, 5, 6, 7, 8, 9).iterator();
         AsyncQuery
             .fork(2, 5, 8)
             .flatMapConcat(nr -> AsyncQuery.fork(nr - 1, nr, nr + 1))
@@ -150,7 +181,7 @@ public class AsyncQueryTest {
     @Test
     public void testFlatMapMerge() {
         Queue<Integer> expected = new ConcurrentLinkedQueue<>();
-        expected.addAll(Arrays.asList(1, 2, 3, 4, 5, 6, 7, 8, 9));
+        expected.addAll(asList(1, 2, 3, 4, 5, 6, 7, 8, 9));
         AsyncQuery
             .fork(2, 5, 8)
             .flatMapMerge(nr -> AsyncQuery.of(nr - 1, nr, nr + 1))
