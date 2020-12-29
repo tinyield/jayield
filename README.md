@@ -141,10 +141,10 @@ next operations chain:
 
 ```java
 AsyncQuery
-  .of("muse", "cure", "radiohead")                   // AsyncQuery<String>
-  .map(artist -> LastfmWebApi.topTracks(artist, 3))  // AsyncQuery<CF<Track[]>>
-  .flatMapMerge(AsyncQuery::of)                      // AsyncQuery<Track[]>
-  .flatMapMerge(AsyncQuery::of)                      // AsyncQuery<Track>
+  .of("muse", "cure", "radiohead")      // AsyncQuery<String>
+  .map(artist -> topTracks(artist, 3))  // AsyncQuery<CF<Track[]>>
+  .flatMapMerge(AsyncQuery::of)         // AsyncQuery<Track[]>
+  .flatMapMerge(AsyncQuery::of)         // AsyncQuery<Track>
   .subscribe((track, err) -> {
       if(err != null) out.println(err);
       else out.println(track.getName());
