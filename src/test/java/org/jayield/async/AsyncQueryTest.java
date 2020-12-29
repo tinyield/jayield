@@ -17,6 +17,7 @@
 package org.jayield.async;
 
 import org.jayield.AsyncQuery;
+import org.jayield.lastfm.LastfmWebApi;
 import org.testng.annotations.Test;
 
 import java.util.ArrayList;
@@ -27,6 +28,7 @@ import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentLinkedQueue;
 
+import static java.lang.System.out;
 import static java.util.Arrays.asList;
 import static org.testng.Assert.assertEquals;
 import static org.testng.Assert.assertFalse;
@@ -34,6 +36,19 @@ import static org.testng.Assert.assertNull;
 import static org.testng.Assert.assertTrue;
 
 public class AsyncQueryTest {
+
+    public void exampleForReadme() {
+        AsyncQuery
+            .of("muse", "cure", "radiohead")
+            .map(artist -> LastfmWebApi.topTracks(artist, 3))
+            .flatMapMerge(AsyncQuery::of)
+            .flatMapMerge(AsyncQuery::of)
+            .onNext((track, err) -> {
+                if(err != null) out.println(err);
+                else out.println(track.getName());
+            })
+            .blockingSubscribe();
+    }
 
     @Test
     public void testOfArrayAndBlockingSubscribe() {
@@ -80,7 +95,7 @@ public class AsyncQueryTest {
             }))
             .flatMapMerge(AsyncQuery::of)
             .onNext((item, err) -> {
-                System.out.println(item);
+                out.println(item);
                 assertNull(err);
                 assertTrue(source.remove(item), "Missing item: " + item);
             })
