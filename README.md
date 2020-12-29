@@ -112,6 +112,63 @@ an element (`ret`) and other to finish the iteration (`bye`).
 
 <img src="assets/jayield-yuml.svg" width="600px">
 
+It also supports asynchronous processing through its counterpart `AsyncQuery` and 
+corresponding `AsyncTraverser`.
+An `AsyncTraverser` is subscribed with a `BiConsumer<T, Throwable>` that receives items or
+error on failure.
+We may track the traversal completion through the `CompletableFuture<Void>` returned by the
+`subscribe()` method.
+
+<img src="assets/jayield-yuml-async.svg" width="800px">
+
+For instance, getting the 3 top tracks for the following artists (i.e. _Muse_,
+_Cure_ and _Radiohead_) with a non-blocking approach may be achieved with the
+next operations chain:
+
+<table>
+    <tr>
+        <td align="center">
+          In <a href="https://github.com/tinyield/jayield/blob/development/src/test/java/org/jayield/async/AsyncQueryTest.java#L40">
+            AsyncQueryTest.java
+          </a>
+        </td>
+        <td align="center">
+          Output
+        </td>
+    </tr>
+    <tr>
+    <td>
+
+```java
+AsyncQuery
+  .of("muse", "cure", "radiohead")                   // AsyncQuery<String>
+  .map(artist -> LastfmWebApi.topTracks(artist, 3))  // AsyncQuery<CF<Track[]>>
+  .flatMapMerge(AsyncQuery::of)                      // AsyncQuery<Track[]>
+  .flatMapMerge(AsyncQuery::of)                      // AsyncQuery<Track>
+  .subscribe((track, err) -> {
+      if(err != null) out.println(err);
+      else out.println(track.getName());
+  })
+  .join(); // block if you want to wait for completion
+```
+
+</td>
+<td>
+
+> Creep<br>
+> Supermassive Black Hole<br>
+> Starlight<br>
+> Friday I'm in Love<br>
+> Just Like Heaven<br>
+> Time Is Running Out<br>
+> Karma Police<br>
+> Boys Don't Cry<br>
+> Paranoid Android<br>
+
+</td>
+</tr>
+</table>
+
 ## Installation
 
 In order to include it to your Maven project, simply add this dependency:

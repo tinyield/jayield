@@ -37,17 +37,19 @@ import static org.testng.Assert.assertTrue;
 
 public class AsyncQueryTest {
 
+    @Test
     public void exampleForReadme() {
         AsyncQuery
-            .of("muse", "cure", "radiohead")
-            .map(artist -> LastfmWebApi.topTracks(artist, 3))
-            .flatMapMerge(AsyncQuery::of)
-            .flatMapMerge(AsyncQuery::of)
-            .onNext((track, err) -> {
+            .of("muse", "cure", "radiohead")                   // AsyncQuery<String>
+            .map(artist -> LastfmWebApi.topTracks(artist, 3))  // AsyncQuery<CF<Track[]>>
+            .flatMapMerge(AsyncQuery::of)                      // AsyncQuery<Track[]>
+            .flatMapMerge(AsyncQuery::of)                      // AsyncQuery<Track>
+            .subscribe((track, err) -> {
                 if(err != null) out.println(err);
                 else out.println(track.getName());
             })
-            .blockingSubscribe();
+            .join(); // block if you want to wait for completion
+        // Removing former join this unit test will finish before AsyncQuery processing completion.
     }
 
     @Test
