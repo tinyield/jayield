@@ -154,19 +154,19 @@ AsyncQuery
 
 </td>
 <td>
+<blockquote>
 <small>
-
-> Creep<br>
-> Supermassive Black Hole<br>
-> Starlight<br>
-> Friday I'm in Love<br>
-> Just Like Heaven<br>
-> Time Is Running Out<br>
-> Karma Police<br>
-> Boys Don't Cry<br>
-> Paranoid Android<br>
-
+Creep<br>
+Supermassive Black Hole<br>
+Starlight<br>
+Friday I'm in Love<br>
+Just Like Heaven<br>
+Time Is Running Out<br>
+Karma Police<br>
+Boys Don't Cry<br>
+Paranoid Android<br>
 </small>
+</blockquote>
 </td>
 </tr>
 </table>
