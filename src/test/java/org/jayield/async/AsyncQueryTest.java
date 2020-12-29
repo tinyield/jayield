@@ -37,7 +37,6 @@ import static org.testng.Assert.assertTrue;
 
 public class AsyncQueryTest {
 
-    @Test
     public void exampleForReadme() {
         AsyncQuery
             .of("muse", "cure", "radiohead")                   // AsyncQuery<String>
