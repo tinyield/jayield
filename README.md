@@ -128,7 +128,7 @@ next operations chain:
 <table>
     <tr>
         <td align="center">
-          In <a href="https://github.com/tinyield/jayield/blob/development/src/test/java/org/jayield/async/AsyncQueryTest.java#L40">
+          In <a href="https://github.com/tinyield/jayield/blob/development/src/test/java/org/jayield/async/AsyncQueryTest.java#L40" target="_blank">
             AsyncQueryTest.java
           </a>
         </td>
@@ -154,6 +154,7 @@ AsyncQuery
 
 </td>
 <td>
+<small>
 
 > Creep<br>
 > Supermassive Black Hole<br>
@@ -165,6 +166,7 @@ AsyncQuery
 > Boys Don't Cry<br>
 > Paranoid Android<br>
 
+</small>
 </td>
 </tr>
 </table>
